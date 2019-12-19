@@ -1,0 +1,29 @@
+name: IndustryLP.NetFramework.CI
+
+on:
+  push:
+    branches: 
+      - master
+      - develop
+      - release/*
+  pull_request:
+    branches: 
+      - feature/*
+      - hotfix/*
+      - bugfix/*
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Test
+      run: dotnet test --verbosity normal
