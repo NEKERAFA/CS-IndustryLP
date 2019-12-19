@@ -1,0 +1,5 @@
+# IndustryLP for Cities: Skylines®
+
+<p align="center"> <a href="https://dotnet.microsoft.com/download/dotnet-framework/net472"><img alt=".NET Framework" src="https://img.shields.io/badge/.NET%20Framework-v4.7.2-7014e8"></a> <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img alt="Cities: Skyline" src="https://img.shields.io/badge/Game%20Version-1.12.2--f3-00a0ff"></a> <a href="https://github.com/NEKERAFA/CS-IndustryLP/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/NEKERAFA/CS-IndustryLP/IndustryLP.NetFramework.CI?logo=github"></a> <a href="https://github.com/NEKERAFA/CS-IndustryLP/blob/master/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/nekerafa/CS-IndustryLP"></a> </p>
+
+A Industrial Estate Generator Mod for the Videogame Cities: Skylines® using Logic Programming (Answer Set Programming).
