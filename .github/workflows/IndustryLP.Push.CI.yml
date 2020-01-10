@@ -1,4 +1,4 @@
-name: IndustryLP.NetFramework.CI
+name: IndustryLP.Push.CI-Workflow
 
 on:
   push:
@@ -6,11 +6,6 @@ on:
       - master
       - develop
       - release/*
-  pull_request:
-    branches: 
-      - feature/*
-      - hotfix/*
-      - bugfix/*
 
 jobs:
   build:
