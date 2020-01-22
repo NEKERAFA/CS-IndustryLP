@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IndustryLP</RootNamespace>
     <AssemblyName>IndustryLP</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>false</Deterministic>
     <NuGetPackageImportStamp>
@@ -60,17 +60,26 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>..\CS-Assemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IndustryLP.cs" />
+    <Compile Include="Common\ResourceLoader.cs" />
+    <Compile Include="Constants\LibraryConstants.cs" />
+    <Compile Include="Common\DebugLogger.cs" />
+    <Compile Include="Constants\ResourceConstants.cs" />
+    <Compile Include="IndustryLPTool.cs" />
+    <Compile Include="ModInfo.cs" />
+    <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Buttons\UIFactoryButton.cs" />
+    <Compile Include="UI\UIToolWindow.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\Icons\Factory.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
