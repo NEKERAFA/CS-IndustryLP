@@ -13,8 +13,18 @@
         public static readonly string IconPath = $"{ResourcePath}.Icons";
 
         /// <summary>
-        /// The factory icon
+        /// Name of the resource that appears as the background of a button
         /// </summary>
-        public static readonly string FactoryIcon = "Factory";
+        public static readonly string ButtonNormal = "ButtonNormal";
+
+        /// <summary>
+        /// Name of the resource that appears as the background of a button when the cursor is over
+        /// </summary>
+        public static readonly string ButtonHover = "ButtonHover";
+
+        /// <summary>
+        /// Name of area selection resource
+        /// </summary>
+        public static readonly string AreaSelectionIcon = "AreaSelection";
     }
 }

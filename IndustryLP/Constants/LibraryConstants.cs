@@ -21,5 +21,7 @@
         /// The prefix of all IndustryLP Unity UI objects
         /// </summary>
         public static readonly string UIPrefix = $"{ObjectPrefix}_UI";
+
+        public static readonly string AtlasName = $"{LibPrefix}_Atlas";
     }
 }

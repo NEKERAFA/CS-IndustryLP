@@ -27,6 +27,8 @@ namespace IndustryLP
 
         #endregion
 
+        #region User Mod
+
         /// <summary>
         /// Name of the mod extension
         /// </summary>
@@ -36,5 +38,7 @@ namespace IndustryLP
         /// Description of the mod extension
         /// </summary>
         public string Description => "Industrial estate generator that uses Logic Programming";
+
+        #endregion
     }
 }

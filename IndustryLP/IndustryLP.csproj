@@ -74,12 +74,13 @@
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Buttons\UIFactoryButton.cs" />
+    <Compile Include="UI\Buttons\UISelectionButton.cs" />
     <Compile Include="UI\UIToolWindow.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Content Include="Resources\Icons\Factory.png" />
+    <EmbeddedResource Include="Resources\Icons\AreaSelection.png" />
+    <EmbeddedResource Include="Resources\Icons\ButtonHover.png" />
+    <EmbeddedResource Include="Resources\Icons\ButtonNormal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

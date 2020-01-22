@@ -18,8 +18,7 @@ namespace IndustryLP.Common
                     msg.Append(", ");
                 }
             }
-
-
+            
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, $"{LibraryConstants.LibPrefix}: {msg}");
         }
     }

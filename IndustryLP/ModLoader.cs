@@ -5,13 +5,8 @@ namespace IndustryLP
 {
     public class ModLoader : ILoadingExtension
     {
-        #region Properties
 
-        private bool IsGameplayMode = false;
-
-        #endregion
-
-        private IndustryLPTool tool = null;
+        private static IndustryLPTool m_mainTool = null;
 
         #region Loading Extension
 
@@ -21,7 +16,6 @@ namespace IndustryLP
         /// <param name="loading">Status of loading extensions</param>
         public void OnCreated(ILoading loading)
         {
-            IsGameplayMode = loading.currentMode == AppMode.Game;
         }
 
         /// <summary>
@@ -31,15 +25,21 @@ namespace IndustryLP
         public void OnLevelLoaded(LoadMode mode)
         {
             // Checks if we are in gameplay mode
-            if (IsGameplayMode)
+            switch (mode)
             {
-                if (tool == null)
-                {
-                    var obj = new GameObject();
-                    tool = obj.AddComponent<IndustryLPTool>();
-                }
+                case LoadMode.NewGame:
+                case LoadMode.LoadGame:
+                    if (m_mainTool != null)
+                    {
+                        m_mainTool.OnDestroy();
+                        Object.Destroy(m_mainTool.gameObject);
+                    }
 
-                tool.Start();
+                    var obj = new GameObject();
+                    m_mainTool = obj.AddComponent<IndustryLPTool>();
+                    m_mainTool.Start();
+
+                    break;
             }
         }
 
@@ -48,9 +48,11 @@ namespace IndustryLP
         /// </summary>
         public void OnLevelUnloading()
         {
-            if (tool != null)
+            if (m_mainTool != null)
             {
-                Object.Destroy(tool.gameObject);
+                m_mainTool.OnDestroy();
+                Object.Destroy(m_mainTool.gameObject);
+                m_mainTool = null;
             }
         }
 
@@ -59,7 +61,6 @@ namespace IndustryLP
         /// </summary>
         public void OnReleased()
         {
-            
         }
 
         #endregion
