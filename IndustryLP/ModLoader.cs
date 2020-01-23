@@ -6,7 +6,7 @@ namespace IndustryLP
     public class ModLoader : ILoadingExtension
     {
 
-        private static IndustryLPTool m_mainTool = null;
+        private IndustryLPTool m_mainTool = null;
 
         #region Loading Extension
 
@@ -31,14 +31,11 @@ namespace IndustryLP
                 case LoadMode.LoadGame:
                     if (m_mainTool != null)
                     {
-                        m_mainTool.OnDestroy();
                         Object.Destroy(m_mainTool.gameObject);
                     }
 
                     var obj = new GameObject();
                     m_mainTool = obj.AddComponent<IndustryLPTool>();
-                    m_mainTool.Start();
-
                     break;
             }
         }
@@ -50,7 +47,6 @@ namespace IndustryLP
         {
             if (m_mainTool != null)
             {
-                m_mainTool.OnDestroy();
                 Object.Destroy(m_mainTool.gameObject);
                 m_mainTool = null;
             }

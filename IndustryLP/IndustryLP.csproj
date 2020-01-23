@@ -69,6 +69,7 @@
     <Compile Include="Constants\LibraryConstants.cs" />
     <Compile Include="Common\DebugLogger.cs" />
     <Compile Include="Constants\ResourceConstants.cs" />
+    <Compile Include="Enums\ToolType.cs" />
     <Compile Include="IndustryLPTool.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModLoader.cs" />
@@ -77,9 +78,12 @@
     <Compile Include="UI\UIToolWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\AreaSelection.png" />
+    <EmbeddedResource Include="Resources\Icons\ButtonFocused.png" />
     <EmbeddedResource Include="Resources\Icons\ButtonHover.png" />
     <EmbeddedResource Include="Resources\Icons\ButtonNormal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\Selection.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

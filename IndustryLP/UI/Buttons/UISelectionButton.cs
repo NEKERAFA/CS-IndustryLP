@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 using IndustryLP.Constants;
+using IndustryLP.Enums;
 
 namespace IndustryLP.UI.Buttons
 {
@@ -12,6 +13,8 @@ namespace IndustryLP.UI.Buttons
         #region Propeties
 
         public static readonly string ObjectName = $"{LibraryConstants.UIPrefix}_FactoryButton";
+
+        public bool IsPressed { get; private set; }
 
         #endregion
 
@@ -27,7 +30,35 @@ namespace IndustryLP.UI.Buttons
             atlas = IndustryLPTool.CustomAtlas;
             normalBgSprite = ResourceConstants.ButtonNormal;
             hoveredBgSprite = ResourceConstants.ButtonHover;
-            normalFgSprite = ResourceConstants.AreaSelectionIcon;
+            pressedBgSprite = ResourceConstants.ButtonFocused;
+            normalFgSprite = ResourceConstants.SelectionIcon;
+
+            IsPressed = false;
+        }
+
+        protected override void OnClick(UIMouseEventParameter ev)
+        {
+            if (ev.buttons.IsFlagSet(UIMouseButton.Left))
+            {
+                IsPressed = !IsPressed;
+                IndustryLPTool.CurrentTool = ToolType.Selection;
+            }
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+            if (IsPressed)
+            {
+                normalBgSprite = ResourceConstants.ButtonFocused;
+                hoveredBgSprite = ResourceConstants.ButtonFocused;
+            }
+            else
+            {
+                normalBgSprite = ResourceConstants.ButtonNormal;
+                hoveredBgSprite = ResourceConstants.ButtonHover;
+            }
         }
 
         #endregion

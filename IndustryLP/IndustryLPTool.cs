@@ -1,28 +1,32 @@
 ﻿using UnityEngine;
+using ColossalFramework.UI;
 using IndustryLP.Constants;
 using IndustryLP.Common;
 using IndustryLP.UI;
-using ColossalFramework.UI;
+using IndustryLP.Enums;
 
 namespace IndustryLP
 {
-    public class IndustryLPTool : MonoBehaviour
+    public class IndustryLPTool : ToolBase
     {
-        private static UIToolWindow m_mainView = null;
+        private UIToolWindow m_mainView = null;
 
         #region Properties
 
-        public static readonly string ObjectName = LibraryConstants.ObjectPrefix + "_ToolWindow";
-        public static UITextureAtlas CustomAtlas { get; private set; } = null;
+        internal static readonly string ObjectName = LibraryConstants.ObjectPrefix + "_ToolWindow";
+        
+        internal static UITextureAtlas CustomAtlas { get; private set; } = null;
+
+        internal static ToolType CurrentTool = ToolType.None;
 
         #endregion
 
         #region Unity Script
 
         /// <summary>
-        /// Invoked when the instance script is created
+        /// Invoked when the tool is created
         /// </summary>
-        public void Start()
+        protected override void Awake()
         {
             name = ObjectName;
             
@@ -34,6 +38,9 @@ namespace IndustryLP
 
                 var view = UIView.GetAView();
                 m_mainView = view.AddUIComponent(typeof(UIToolWindow)) as UIToolWindow;
+                m_mainView.transform.parent = view.transform;
+                m_mainView.transform.localPosition = Vector3.zero;
+                m_mainView.relativePosition = new Vector3(80f, 10f);
             }
 
             if (CustomAtlas == null)
@@ -42,9 +49,10 @@ namespace IndustryLP
 
                 string[] sprites =
                 {
-                    ResourceConstants.AreaSelectionIcon,
+                    ResourceConstants.SelectionIcon,
                     ResourceConstants.ButtonHover,
-                    ResourceConstants.ButtonNormal
+                    ResourceConstants.ButtonNormal,
+                    ResourceConstants.ButtonFocused
                 };
 
                 CustomAtlas = ResourceLoader.CreateTextureAtlas(LibraryConstants.AtlasName, sprites, ResourceConstants.IconPath);
@@ -54,15 +62,25 @@ namespace IndustryLP
         }
 
         /// <summary>
-        /// Invoked when the GameObject is going to remove of the scene
+        /// Invoked when the tool is going to remove of the scene
         /// </summary>
-        public void OnDestroy()
+        protected override void OnDestroy()
         {
             if (m_mainView != null)
             {
                 Destroy(m_mainView);
                 m_mainView = null;
             }
+
+            base.OnDestroy();
+        }
+
+        /// <summary>
+        /// Invoked when the tool is going to render over the scene
+        /// </summary>
+        /// <param name="cameraInfo"></param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
         }
 
         #endregion

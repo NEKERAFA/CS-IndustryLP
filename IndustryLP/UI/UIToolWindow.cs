@@ -37,11 +37,11 @@ namespace IndustryLP.UI
             SetupTitle();
 
             // Defines a drag handler of the toolbar
-            var dragHandler = AddUIComponent<UIDragHandle>();
-            dragHandler.transform.parent = transform;
-            dragHandler.transform.localPosition = Vector3.zero;
-            dragHandler.target = this;
-            dragHandler.size = size;
+            //var dragHandler = AddUIComponent<UIDragHandle>();
+            //dragHandler.transform.parent = transform;
+            //dragHandler.transform.localPosition = Vector3.zero;
+            //dragHandler.target = this;
+            //dragHandler.size = size;
 
             // set the tool buttons
             SetupTools();
@@ -67,7 +67,7 @@ namespace IndustryLP.UI
             var buttonFactory = AddUIComponent<UISelectionButton>();
             buttonFactory.transform.parent = transform;
             buttonFactory.transform.localPosition = Vector3.zero;
-            buttonFactory.relativePosition = new Vector3(5f, title.height+5f);
+            buttonFactory.relativePosition = new Vector3(5f, title.height+10f);
         }
 
         /// <summary>
@@ -76,7 +76,6 @@ namespace IndustryLP.UI
         public override void OnDestroy()
         {
             base.OnDestroy();
-
             title = null;
         }
 

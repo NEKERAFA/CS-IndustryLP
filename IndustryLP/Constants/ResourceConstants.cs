@@ -1,6 +1,6 @@
 ﻿namespace IndustryLP.Constants
 {
-    internal static class ResourceConstants
+    static class ResourceConstants
     {
         /// <summary>
         /// The resources path in the assembly
@@ -23,8 +23,13 @@
         public static readonly string ButtonHover = "ButtonHover";
 
         /// <summary>
+        /// Name of the resource that appears as the background of a button when the button is pressed
+        /// </summary>
+        public static readonly string ButtonFocused = "ButtonFocused";
+
+        /// <summary>
         /// Name of area selection resource
         /// </summary>
-        public static readonly string AreaSelectionIcon = "AreaSelection";
+        public static readonly string SelectionIcon = "Selection";
     }
 }

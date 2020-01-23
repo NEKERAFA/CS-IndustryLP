@@ -1,6 +1,6 @@
 ﻿namespace IndustryLP.Constants
 {
-    internal static class LibraryConstants
+    static class LibraryConstants
     {
         /// <summary>
         /// The name of the assembly
