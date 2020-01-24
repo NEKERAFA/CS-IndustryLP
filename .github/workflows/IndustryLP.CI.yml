@@ -1,15 +1,9 @@
 name: IndustryLP Workflow
 
 on:
-  push:
-    branches: 
-      - master
-      - develop
-      - release/*
   pull_request:
-    branches: 
-      - master
-      - development
+    branches: [master, develop]
+    types: [opened, synchronize]
 
 jobs:
   build:
@@ -25,12 +19,3 @@ jobs:
           dotnet-version: 3.1.100
       - name: Build
         run: dotnet build
-      - name: Test
-        run: |
-          dotnet test --configuration Debug /p:CollectCoverage=true /p:CoverletOutput=results/ /p:CoverletOutputFormat=lcov
-          powershell -Command "(gc 'tests\ClingoSharp.Tests\results\coverage.info') -replace [regex]::escape('D:\a\ClingoSharp\ClingoSharp\'), [regex]::escape('') | Out-File -encoding ASCII coverage.info"
-      - name: Reporting coverage
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: .\coverage.info
