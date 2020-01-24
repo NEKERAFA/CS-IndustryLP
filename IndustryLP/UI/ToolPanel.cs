@@ -8,7 +8,7 @@ namespace IndustryLP.UI
     /// <summary>
     /// Defines the main toolbar of the mod
     /// </summary>
-    public class UIToolWindow : UIPanel
+    class ToolPanel : UIPanel
     {
         private UILabel title = null;
 
@@ -18,7 +18,7 @@ namespace IndustryLP.UI
 
         #endregion
 
-        #region Panel
+        #region Panel Behaviour
 
         /// <summary>
         /// Invoked when the panel is created
@@ -64,7 +64,7 @@ namespace IndustryLP.UI
         /// </summary>
         private void SetupTools()
         {
-            var buttonFactory = AddUIComponent<UISelectionButton>();
+            var buttonFactory = AddUIComponent<SelectionButton>();
             buttonFactory.transform.parent = transform;
             buttonFactory.transform.localPosition = Vector3.zero;
             buttonFactory.relativePosition = new Vector3(5f, title.height+10f);

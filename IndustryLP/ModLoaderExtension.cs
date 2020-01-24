@@ -1,12 +1,13 @@
 ﻿using ICities;
+using IndustryLP.Utils;
 using UnityEngine;
 
 namespace IndustryLP
 {
-    public class ModLoader : ILoadingExtension
+    public class ModLoaderExtension : ILoadingExtension
     {
 
-        private IndustryLPTool m_mainTool = null;
+        internal static MainTool mainTool { get; private set; } = null;
 
         #region Loading Extension
 
@@ -24,18 +25,16 @@ namespace IndustryLP
         /// <param name="mode">Defines what kind of level was just loaded</param>
         public void OnLevelLoaded(LoadMode mode)
         {
-            // Checks if we are in gameplay mode
+            // Checks if we are in gameplay mode and creates the main utility
             switch (mode)
             {
                 case LoadMode.NewGame:
                 case LoadMode.LoadGame:
-                    if (m_mainTool != null)
-                    {
-                        Object.Destroy(m_mainTool.gameObject);
-                    }
+                    // For remove old instances if the assembly is updated (development)
+                    GameObjectUtils.DestroyOldPanels();
 
-                    var obj = new GameObject();
-                    m_mainTool = obj.AddComponent<IndustryLPTool>();
+                    // Creates a new tool controller
+                    mainTool = GameObjectUtils.AddObjectWithComponent<MainTool>();
                     break;
             }
         }
@@ -45,10 +44,10 @@ namespace IndustryLP
         /// </summary>
         public void OnLevelUnloading()
         {
-            if (m_mainTool != null)
+            if (mainTool != null)
             {
-                Object.Destroy(m_mainTool.gameObject);
-                m_mainTool = null;
+                Object.Destroy(mainTool.gameObject);
+                mainTool = null;
             }
         }
 

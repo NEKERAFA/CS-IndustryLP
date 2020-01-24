@@ -2,10 +2,17 @@
 using IndustryLP.Constants;
 using System.Text;
 
-namespace IndustryLP.Common
+namespace IndustryLP.Utils
 {
-    internal static class DebugLogger
+    /// <summary>
+    /// This class represents a wrapper between <see cref="DebugOutputPanel"/> class
+    /// </summary>
+    static class LoggerUtils
     {
+        /// <summary>
+        /// Creates a message onto the output file
+        /// </summary>
+        /// <param name="values"></param>
         public static void Debug(params object[] values)
         {
             StringBuilder msg = new StringBuilder("");

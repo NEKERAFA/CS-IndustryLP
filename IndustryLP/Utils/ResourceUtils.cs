@@ -2,10 +2,22 @@
 using ColossalFramework.UI;
 using UnityEngine;
 
-namespace IndustryLP.Common
+namespace IndustryLP.Utils
 {
-    internal static class ResourceLoader
+    /// <summary>
+    /// This class loads the textures linked onto the c# assembly and converts into TextureAtlas.
+    /// 
+    /// From MoveIt.ResourceLoader
+    /// </summary>
+    static class ResourceUtils
     {
+        /// <summary>
+        /// Creates a new texture atlas
+        /// </summary>
+        /// <param name="atlasName">The n</param>
+        /// <param name="spriteNames"></param>
+        /// <param name="assemblyPath"></param>
+        /// <returns></returns>
         public static UITextureAtlas CreateTextureAtlas(string atlasName, string[] spriteNames, string assemblyPath)
         {
             var maxSize = 1024;

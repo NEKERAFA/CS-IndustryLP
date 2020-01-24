@@ -25,7 +25,7 @@
         /// <summary>
         /// Name of the resource that appears as the background of a button when the button is pressed
         /// </summary>
-        public static readonly string ButtonFocused = "ButtonFocused";
+        public static readonly string ButtonPushed = "ButtonPushed";
 
         /// <summary>
         /// Name of area selection resource

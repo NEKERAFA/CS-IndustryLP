@@ -65,20 +65,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ResourceLoader.cs" />
+    <Compile Include="Utils\GameObjectUtils.cs" />
+    <Compile Include="Utils\ResourceUtils.cs" />
     <Compile Include="Constants\LibraryConstants.cs" />
-    <Compile Include="Common\DebugLogger.cs" />
+    <Compile Include="Utils\LoggerUtils.cs" />
     <Compile Include="Constants\ResourceConstants.cs" />
-    <Compile Include="Enums\ToolType.cs" />
-    <Compile Include="IndustryLPTool.cs" />
+    <Compile Include="MainTool.cs" />
     <Compile Include="ModInfo.cs" />
-    <Compile Include="ModLoader.cs" />
+    <Compile Include="ModLoaderExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Buttons\UISelectionButton.cs" />
-    <Compile Include="UI\UIToolWindow.cs" />
+    <Compile Include="UI\Buttons\SelectionButton.cs" />
+    <Compile Include="UI\ToolButton.cs" />
+    <Compile Include="UI\ToolPanel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\ButtonFocused.png" />
+    <EmbeddedResource Include="Resources\Icons\ButtonPushed.png" />
     <EmbeddedResource Include="Resources\Icons\ButtonHover.png" />
     <EmbeddedResource Include="Resources\Icons\ButtonNormal.png" />
   </ItemGroup>
