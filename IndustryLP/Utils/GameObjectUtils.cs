@@ -1,9 +1,10 @@
 ﻿using ColossalFramework.UI;
+using IndustryLP.Components;
 using UnityEngine;
 
 namespace IndustryLP.Utils
 {
-    static class GameObjectUtils
+    internal static class GameObjectUtils
     {
         #region GameObject Utils
 
@@ -12,12 +13,13 @@ namespace IndustryLP.Utils
         /// </summary>
         public static void DestroyOldPanels()
         {
-            var panels = Object.FindObjectsOfType<MainTool>();
-            foreach (var panel in panels)
-            {
-                Object.Destroy(panel);
-            }
+            var panel = GameObject.Find(MainTool.ObjectName);
+            Object.Destroy(panel);
         }
+
+        #endregion
+
+        #region GameObject Extensions
 
         /// <summary>
         /// Creates a new object with a specific <see cref="Component"/> and converts it to type T

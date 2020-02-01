@@ -1,35 +1,40 @@
 ﻿namespace IndustryLP.Constants
 {
-    static class ResourceConstants
+    internal static class ResourceConstants
     {
         /// <summary>
         /// The resources path in the assembly
         /// </summary>
-        public static readonly string ResourcePath = $"{LibraryConstants.AssemblyName}.Resources";
+        public static string ResourcePath => $"{LibraryConstants.AssemblyName}.Resources";
 
         /// <summary>
         /// The icons path in the assembly
         /// </summary>
-        public static readonly string IconPath = $"{ResourcePath}.Icons";
+        public static string IconPath => $"{ResourcePath}.Icons";
 
         /// <summary>
         /// Name of the resource that appears as the background of a button
         /// </summary>
-        public static readonly string ButtonNormal = "ButtonNormal";
+        public static string ButtonNormal => "ButtonNormal";
 
         /// <summary>
         /// Name of the resource that appears as the background of a button when the cursor is over
         /// </summary>
-        public static readonly string ButtonHover = "ButtonHover";
+        public static string ButtonHover => "ButtonHover";
 
         /// <summary>
         /// Name of the resource that appears as the background of a button when the button is pressed
         /// </summary>
-        public static readonly string ButtonPushed = "ButtonPushed";
+        public static string ButtonPushed => "ButtonPushed";
 
         /// <summary>
         /// Name of area selection resource
         /// </summary>
-        public static readonly string SelectionIcon = "Selection";
+        public static string SelectionIcon => "Selection";
+
+        /// <summary>
+        /// Name of the atlas
+        /// </summary>
+        public static string AtlasName => $"{LibraryConstants.LibPrefix}_Atlas";
     }
 }

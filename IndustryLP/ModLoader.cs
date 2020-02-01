@@ -1,13 +1,17 @@
 ﻿using ICities;
+using IndustryLP.Components;
 using IndustryLP.Utils;
 using UnityEngine;
 
 namespace IndustryLP
 {
-    public class ModLoaderExtension : ILoadingExtension
+    public class ModLoader : ILoadingExtension
     {
+        #region Attributes
 
-        internal static MainTool mainTool { get; private set; } = null;
+        private static MainTool m_mainTool = null;
+
+        #endregion
 
         #region Loading Extension
 
@@ -32,9 +36,14 @@ namespace IndustryLP
                 case LoadMode.LoadGame:
                     // For remove old instances if the assembly is updated (development)
                     GameObjectUtils.DestroyOldPanels();
+                    // Removes old attached tool
+                    if (m_mainTool != null)
+                    {
+                        Object.Destroy(m_mainTool.gameObject);
+                    }
 
                     // Creates a new tool controller
-                    mainTool = GameObjectUtils.AddObjectWithComponent<MainTool>();
+                    m_mainTool = GameObjectUtils.AddObjectWithComponent<MainTool>();
                     break;
             }
         }
@@ -44,10 +53,10 @@ namespace IndustryLP
         /// </summary>
         public void OnLevelUnloading()
         {
-            if (mainTool != null)
+            if (m_mainTool != null)
             {
-                Object.Destroy(mainTool.gameObject);
-                mainTool = null;
+                Object.Destroy(m_mainTool.gameObject);
+                m_mainTool = null;
             }
         }
 

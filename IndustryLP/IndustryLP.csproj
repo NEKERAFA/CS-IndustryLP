@@ -65,14 +65,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\SelectionState.cs" />
+    <Compile Include="Tools\GeneratorTool.cs" />
+    <Compile Include="Tools\SelectionTool.cs" />
+    <Compile Include="Tools\ToolActionController.cs" />
     <Compile Include="Utils\GameObjectUtils.cs" />
-    <Compile Include="Utils\ResourceUtils.cs" />
+    <Compile Include="Utils\ResourceLoader.cs" />
     <Compile Include="Constants\LibraryConstants.cs" />
     <Compile Include="Utils\LoggerUtils.cs" />
     <Compile Include="Constants\ResourceConstants.cs" />
-    <Compile Include="MainTool.cs" />
+    <Compile Include="Components\MainTool.cs" />
     <Compile Include="ModInfo.cs" />
-    <Compile Include="ModLoaderExtension.cs" />
+    <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Buttons\SelectionButton.cs" />
     <Compile Include="UI\ToolButton.cs" />

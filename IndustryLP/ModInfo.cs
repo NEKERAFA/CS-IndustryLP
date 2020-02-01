@@ -12,18 +12,18 @@ namespace IndustryLP
         /// <summary>
         /// Current version of the mod
         /// </summary>
-        private const string Version = "1.0.0";
+        private static string Version => "1.0.0";
 
         /// <summary>
         /// Current git branch
         /// </summary>
 #if DEBUG
-        private const string Branch = "us1";
+        private static string Branch => "us1";
 #else
-        private const string Branch = null;
+        private static string Branch => null;
 #endif
 
-        public static readonly string ModName = string.IsNullOrEmpty(Branch) ? $"IndustryLP {Version}" : $"IndustryLP {Version}-{Branch}";
+        public static string ModName => string.IsNullOrEmpty(Branch) ? $"IndustryLP {Version}" : $"IndustryLP {Version}-{Branch}";
 
         #endregion
 

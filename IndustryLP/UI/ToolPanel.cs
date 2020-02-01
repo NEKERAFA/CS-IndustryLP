@@ -2,19 +2,35 @@
 using ColossalFramework.UI;
 using IndustryLP.Constants;
 using IndustryLP.UI.Buttons;
+using System;
+using System.Collections.Generic;
+using IndustryLP.Tools;
 
 namespace IndustryLP.UI
 {
     /// <summary>
     /// Defines the main toolbar of the mod
     /// </summary>
-    class ToolPanel : UIPanel
+    internal class ToolPanel : UIPanel
     {
-        private UILabel title = null;
+        public struct ToolAction
+        {
+            public ToolActionController Controller;
+            public ToolButton.OnButtonPressedDelegate Callback;
+        }
+
+        #region Atributtes
+
+        private UILabel m_title = null;
+        private List<ToolButton> m_buttons = null;
+
+        #endregion
 
         #region Properties
 
-        public static readonly string ObjectName = LibraryConstants.UIPrefix + "_ToolWindow";
+        public static string ObjectName => LibraryConstants.UIPrefix + "_ToolWindow";
+
+        public List<ToolAction> ToolActions { get; set; }
 
         #endregion
 
@@ -47,16 +63,34 @@ namespace IndustryLP.UI
             SetupTools();
         }
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            
+            if (m_title != null)
+            {
+                Destroy(m_title.gameObject);
+                m_title = null;
+            }
+
+            if (m_buttons != null)
+            {
+                m_buttons.ForEach(b => Destroy(b.gameObject));
+                m_buttons.Clear();
+                m_buttons = null;
+            }
+        }
+
         /// <summary>
         /// Creates a label as the title
         /// </summary>
         private void SetupTitle()
         {
-            title = AddUIComponent<UILabel>();
-            title.transform.parent = transform;
-            title.transform.localPosition = Vector3.zero;
-            title.relativePosition = new Vector2(5f, 5f);
-            title.text = ModInfo.ModName;
+            m_title = AddUIComponent<UILabel>();
+            m_title.transform.parent = transform;
+            m_title.transform.localPosition = Vector3.zero;
+            m_title.relativePosition = new Vector2(5f, 5f);
+            m_title.text = ModInfo.ModName;
         }
         
         /// <summary>
@@ -64,21 +98,29 @@ namespace IndustryLP.UI
         /// </summary>
         private void SetupTools()
         {
-            var buttonFactory = AddUIComponent<SelectionButton>();
-            buttonFactory.transform.parent = transform;
-            buttonFactory.transform.localPosition = Vector3.zero;
-            buttonFactory.relativePosition = new Vector3(5f, title.height+10f);
+            m_buttons = new List<ToolButton>();
+
+            var x = 5f;
+            foreach (var tool in ToolActions)
+            {
+                if (tool.Controller != null)
+                {
+                    var button = tool.Controller.CreateButton(isChecked => tool.Callback?.Invoke(isChecked));
+                    AttachUIComponent(button.gameObject);
+                    button.transform.parent = transform;
+                    button.transform.localPosition = Vector3.zero;
+                    button.relativePosition = new Vector3(x, m_title.height + 10f);
+                    x += 32f;
+                    m_buttons.Add(button);
+                }
+            }
         }
 
-        /// <summary>
-        /// Invokes when the tool is going to destroy
-        /// </summary>
-        public override void OnDestroy()
+        public void DisableAllButtons()
         {
-            base.OnDestroy();
-            title = null;
+            if (m_buttons != null) m_buttons.ForEach(b => b.IsChecked = false);
         }
 
-        #endregion Panel
+        #endregion
     }
 }

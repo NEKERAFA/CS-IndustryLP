@@ -1,6 +1,6 @@
-﻿using IndustryLP.Constants;
+﻿using ColossalFramework.UI;
+using IndustryLP.Constants;
 using IndustryLP.Utils;
-using ColossalFramework.UI;
 using UnityEngine;
 
 namespace IndustryLP.UI
@@ -8,28 +8,59 @@ namespace IndustryLP.UI
     /// <summary>
     /// Creates a clickable tool button
     /// </summary>
-    class ToolButton : UIButton
+    internal class ToolButton : UIButton
     {
-        #region Properties
-        
         /// <summary>
-        /// Checks if the button is pushed or not
+        /// Delegates that represents the action when the user press the button
         /// </summary>
-        public bool isPushed { get; private set; }
+        /// <param name="isChecked">True if the button is pushed on, false otherwise</param>
+        internal delegate void OnButtonPressedDelegate(bool isChecked);
+
+        protected bool m_isChecked;
+
+        #region Properties
+
+        /// <summary>
+        /// Checks if the button is pushed or not.
+        /// </summary>
+        internal bool IsChecked
+        { 
+            get => m_isChecked;
+            set
+            {
+                m_isChecked = value;
+
+                if (value)
+                {
+                    normalBgSprite = ResourceConstants.ButtonPushed;
+                    hoveredBgSprite = ResourceConstants.ButtonPushed;
+                }
+                else
+                {
+                    normalBgSprite = ResourceConstants.ButtonNormal;
+                    hoveredBgSprite = ResourceConstants.ButtonHover;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Invoked when the button is pressed.
+        /// </summary>
+        internal OnButtonPressedDelegate OnButtonPressed { get; set; }
 
         #endregion
 
         #region Button Behaviour
 
         /// <summary>
-        /// Awake is called when the script instance is being loaded.
+        /// Start is called when the script instance is being loaded.
         /// </summary>
-        public override void Awake()
+        public override void Start()
         {
-            base.Awake();
-            isPushed = false;
+            base.Start();
+            IsChecked = false;
             size = new Vector2(32, 32);
-            atlas = ResourceUtils.GetAtlas(LibraryConstants.AtlasName);
+            atlas = ResourceLoader.GetAtlas(ResourceConstants.AtlasName);
             normalBgSprite = ResourceConstants.ButtonNormal;
             hoveredBgSprite = ResourceConstants.ButtonHover;
         }
@@ -40,22 +71,10 @@ namespace IndustryLP.UI
         /// <param name="p">Event with information about mouse</param>
         protected override void OnClick(UIMouseEventParameter p)
         {
-            //base.OnClick(p);
-
             if (p.buttons.IsFlagSet(UIMouseButton.Left))
             {
-                isPushed = !isPushed;
-
-                if (isPushed)
-                {
-                    normalBgSprite = ResourceConstants.ButtonPushed;
-                    hoveredBgSprite = ResourceConstants.ButtonPushed;
-                }
-                else
-                {
-                    normalBgSprite = ResourceConstants.ButtonNormal;
-                    hoveredBgSprite = ResourceConstants.ButtonHover;
-                }
+                IsChecked = !IsChecked;
+                OnButtonPressed?.Invoke(this.IsChecked);
             }
         }
 
