@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
-using IndustryLP.Constants;
+using IndustryLP.Utils.Constants;
 using IndustryLP.Utils;
 using IndustryLP.UI;
 using System.Collections.Generic;
-using IndustryLP.Enums;
 using IndustryLP.Tools;
+using IndustryLP.UI.Buttons;
 
-namespace IndustryLP.Components
+namespace IndustryLP
 {
     /// <summary>
     /// This class represents the main funtionality of the mod
@@ -19,6 +19,8 @@ namespace IndustryLP.Components
         private ToolPanel m_mainView;
         private UITextureAtlas m_textureAtlas;
         private SelectionTool m_selectionState;
+        private GeneratorTool m_generatorState;
+        private ToolActionController m_currentState;
 
         #endregion
 
@@ -29,7 +31,16 @@ namespace IndustryLP.Components
         /// </summary>
         public static string ObjectName => LibraryConstants.ObjectPrefix + "_ToolWindow";
 
-        private ToolActionController CurrentState { get; set; } = null;
+        private ToolActionController CurrentState
+        {
+            set
+            {
+                var oldState = m_currentState;
+                m_currentState = value;
+                m_currentState.OnLeftController();
+                m_currentState.OnChangeController(oldState);
+            }
+        }
 
         #endregion
 
@@ -43,18 +54,21 @@ namespace IndustryLP.Components
             base.Awake();
 
             m_toolController = FindObjectOfType<ToolController>();
-            enabled = true;
             name = ObjectName;
             
             LoggerUtils.Log("Loading IndustryLP");
-
-            m_selectionState = new SelectionTool();
 
             if (m_textureAtlas == null)
             {
                 LoggerUtils.Log("Loading altas");
                 SetupResources();
             }
+
+            m_selectionState = new SelectionTool();
+            m_selectionState.OnStart(this);
+            m_generatorState = new GeneratorTool();
+            m_generatorState.OnStart(this);
+            m_currentState = null;
 
             if (m_mainView == null)
             {
@@ -88,6 +102,12 @@ namespace IndustryLP.Components
                 Resources.UnloadUnusedAssets();
                 m_textureAtlas = null;
             }
+
+            if (m_currentState != null)
+            {
+                m_currentState.OnDestroy();
+                m_currentState = null;
+            }
         }
 
         #endregion
@@ -110,6 +130,11 @@ namespace IndustryLP.Components
                 {
                     Controller = m_selectionState,
                     Callback = isChecked => OnSelectionPressed(isChecked)
+                },
+                new ToolPanel.ToolAction()
+                {
+                    Controller = m_generatorState,
+                    Callback = isChecked => OnGeneratorPressed(isChecked)
                 }
             };
         }
@@ -122,6 +147,7 @@ namespace IndustryLP.Components
             string[] sprites =
             {
                 ResourceConstants.SelectionIcon,
+                ResourceConstants.GeneratorIcon,
                 ResourceConstants.ButtonHover,
                 ResourceConstants.ButtonNormal,
                 ResourceConstants.ButtonPushed
@@ -134,7 +160,11 @@ namespace IndustryLP.Components
         {
             base.OnDisable();
             m_mainView.DisableAllButtons();
-            CurrentState = null;
+            if (m_currentState != null)
+            {
+                m_currentState.OnLeftController();
+                m_currentState = null;
+            }
         }
 
         /// <summary>
@@ -144,20 +174,23 @@ namespace IndustryLP.Components
         {
             base.OnToolUpdate();
 
-            if (CurrentState != null)
+            if (m_currentState != null)
             {
                 var mousePosition = GetTerrainMousePosition();
+
+                m_currentState.OnUpdate(mousePosition);
+
                 if (Input.GetMouseButtonDown(0))
                 {
-                    CurrentState.OnLeftMouseIsDown(mousePosition);
+                    m_currentState.OnLeftMouseIsDown(mousePosition);
                 }
                 else if (Input.GetMouseButton(0))
                 {
-                    CurrentState.OnLeftMouseIsPressed(mousePosition);
+                    m_currentState.OnLeftMouseIsPressed(mousePosition);
                 }
                 else if (Input.GetMouseButtonUp(0))
                 {
-                    CurrentState.OnLeftMouseIsUp(mousePosition);
+                    m_currentState.OnLeftMouseIsUp(mousePosition);
                 }
             }
         }
@@ -177,9 +210,21 @@ namespace IndustryLP.Components
         /// <param name="cameraInfo"></param>
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            if (CurrentState != null)
+            base.RenderOverlay(cameraInfo);
+
+            if (m_currentState != null)
             {
-                CurrentState.OnRenderOverlay(cameraInfo);
+                m_currentState.OnRenderOverlay(cameraInfo);
+            }
+        }
+
+        public override void SimulationStep()
+        {
+            base.SimulationStep();
+
+            if (m_currentState != null)
+            {
+                m_currentState.OnSimulationStep();
             }
         }
 
@@ -202,6 +247,17 @@ namespace IndustryLP.Components
             {
                 if (!enabled) enabled = true;
                 CurrentState = m_selectionState;
+                m_mainView.DisableButton(GeneratorButton.ObjectName);
+            }
+        }
+
+        private void OnGeneratorPressed(bool isChecked)
+        {
+            if (isChecked)
+            {
+                if (!enabled) enabled = true;
+                CurrentState = m_generatorState;
+                m_mainView.DisableButton(SelectionButton.ObjectName);
             }
         }
 

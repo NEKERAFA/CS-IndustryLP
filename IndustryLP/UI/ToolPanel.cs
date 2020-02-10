@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
-using IndustryLP.Constants;
+using IndustryLP.Utils.Constants;
 using IndustryLP.UI.Buttons;
 using System;
 using System.Collections.Generic;
@@ -110,7 +110,7 @@ namespace IndustryLP.UI
                     button.transform.parent = transform;
                     button.transform.localPosition = Vector3.zero;
                     button.relativePosition = new Vector3(x, m_title.height + 10f);
-                    x += 32f;
+                    x += 40f;
                     m_buttons.Add(button);
                 }
             }
@@ -119,6 +119,15 @@ namespace IndustryLP.UI
         public void DisableAllButtons()
         {
             if (m_buttons != null) m_buttons.ForEach(b => b.IsChecked = false);
+        }
+
+        public void DisableButton(string name)
+        {
+            foreach(var button in m_buttons)
+            {
+                if (button.name == name)
+                    button.IsChecked = false;
+            }
         }
 
         #endregion

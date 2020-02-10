@@ -1,4 +1,4 @@
-﻿namespace IndustryLP.Constants
+﻿namespace IndustryLP.Utils.Constants
 {
     internal static class LibraryConstants
     {

@@ -1,5 +1,5 @@
 ﻿using ColossalFramework.UI;
-using IndustryLP.Constants;
+using IndustryLP.Utils.Constants;
 using IndustryLP.Utils;
 using UnityEngine;
 

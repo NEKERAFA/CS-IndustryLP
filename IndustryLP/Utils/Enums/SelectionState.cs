@@ -1,4 +1,4 @@
-﻿namespace IndustryLP.Enums
+﻿namespace IndustryLP.Utils.Enums
 {
     internal enum SelectionState
     {

@@ -65,22 +65,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\SelectionState.cs" />
+    <Compile Include="Utils\Constants\ColorConstants.cs" />
+    <Compile Include="Utils\Enums\SelectionState.cs" />
     <Compile Include="Tools\GeneratorTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
     <Compile Include="Tools\ToolActionController.cs" />
+    <Compile Include="UI\Buttons\GeneratorButton.cs" />
     <Compile Include="Utils\GameObjectUtils.cs" />
+    <Compile Include="Utils\NetUtils.cs" />
     <Compile Include="Utils\ResourceLoader.cs" />
-    <Compile Include="Constants\LibraryConstants.cs" />
+    <Compile Include="Utils\Constants\LibraryConstants.cs" />
     <Compile Include="Utils\LoggerUtils.cs" />
-    <Compile Include="Constants\ResourceConstants.cs" />
-    <Compile Include="Components\MainTool.cs" />
+    <Compile Include="Utils\Constants\ResourceConstants.cs" />
+    <Compile Include="MainTool.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Buttons\SelectionButton.cs" />
     <Compile Include="UI\ToolButton.cs" />
     <Compile Include="UI\ToolPanel.cs" />
+    <Compile Include="Utils\Wrappers\NodeWrapper.cs" />
+    <Compile Include="Utils\Wrappers\RoadWrapper.cs" />
+    <Compile Include="Utils\Wrappers\SegmentWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\ButtonPushed.png" />
@@ -90,5 +96,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\Selection.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\Build.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,4 @@
-﻿using IndustryLP.Constants;
+﻿using IndustryLP.Utils.Constants;
 using System;
 using System.Text;
 using UnityEngine;

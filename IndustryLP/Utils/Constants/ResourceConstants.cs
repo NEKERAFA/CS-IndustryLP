@@ -1,4 +1,4 @@
-﻿namespace IndustryLP.Constants
+﻿namespace IndustryLP.Utils.Constants
 {
     internal static class ResourceConstants
     {
@@ -31,6 +31,11 @@
         /// Name of area selection resource
         /// </summary>
         public static string SelectionIcon => "Selection";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string GeneratorIcon => "Build";
 
         /// <summary>
         /// Name of the atlas

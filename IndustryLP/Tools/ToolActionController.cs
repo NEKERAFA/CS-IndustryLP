@@ -12,14 +12,23 @@ namespace IndustryLP.Tools
         /// <returns></returns>
         public abstract ToolButton CreateButton(ToolButton.OnButtonPressedDelegate callback);
 
-        public virtual void OnStart(ToolActionController oldController) { }
+        public virtual void OnStart(MainTool mainTool) { }
+
+        public virtual void OnDestroy() { }
 
         public virtual void OnChangeController(ToolActionController oldController) { }
+
+        public virtual void OnLeftController() { }
 
         /// <summary>
         /// Invoked when a new frame is going to be updated
         /// </summary>
-        public virtual void OnUpdate() { }
+        public virtual void OnUpdate(Vector3 mousePosition) { }
+
+        /// <summary>
+        /// Invoked when a new step in the simulation is going to happen
+        /// </summary>
+        public virtual void OnSimulationStep() { }
         
         /// <summary>
         /// Invoked when a new overlay effect is going to be updated 
