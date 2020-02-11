@@ -6,18 +6,32 @@ namespace IndustryLP.Tools
     internal abstract class ToolActionController
     {
         /// <summary>
-        /// Create a new button
+        /// Invoked when the main tool is going to create a button of this controller
         /// </summary>
         /// <param name="callback">The callback when the button is pressed</param>
         /// <returns></returns>
         public abstract ToolButton CreateButton(ToolButton.OnButtonPressedDelegate callback);
 
+        /// <summary>
+        /// Invoked the first time that the main tool creates the controller
+        /// </summary>
+        /// <param name="mainTool"></param>
         public virtual void OnStart(MainTool mainTool) { }
 
+        /// <summary>
+        /// Invoked when the main tool is going to be destroyed
+        /// </summary>
         public virtual void OnDestroy() { }
 
+        /// <summary>
+        /// Invoked when the main tool changes the current controller (user press in another button or the tool lose the control)
+        /// </summary>
+        /// <param name="oldController"></param>
         public virtual void OnChangeController(ToolActionController oldController) { }
 
+        /// <summary>
+        /// Invoked when the controller will be change.
+        /// </summary>
         public virtual void OnLeftController() { }
 
         /// <summary>

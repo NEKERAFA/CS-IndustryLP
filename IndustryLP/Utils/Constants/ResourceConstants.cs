@@ -33,7 +33,7 @@
         public static string SelectionIcon => "Selection";
 
         /// <summary>
-        /// 
+        /// Name of generator resource
         /// </summary>
         public static string GeneratorIcon => "Build";
 

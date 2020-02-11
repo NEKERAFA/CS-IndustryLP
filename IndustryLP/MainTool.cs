@@ -155,7 +155,9 @@ namespace IndustryLP
 
             m_textureAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.AtlasName, sprites, ResourceConstants.IconPath);
         }
-
+        /// <summary>
+        /// Invoked when the tool is disabled
+        /// </summary>
         protected override void OnDisable()
         {
             base.OnDisable();
@@ -218,6 +220,9 @@ namespace IndustryLP
             }
         }
 
+        /// <summary>
+        /// Invoked in simulation step updating
+        /// </summary>
         public override void SimulationStep()
         {
             base.SimulationStep();
@@ -232,6 +237,9 @@ namespace IndustryLP
 
         #region IndustryLP Controller
 
+        /// <summary>
+        /// Translate the current position of mouse in terrain position
+        /// </summary>
         private Vector3 GetTerrainMousePosition()
         {
             var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -241,6 +249,9 @@ namespace IndustryLP
             return output.m_hitPos;
         }
 
+        /// <summary>
+        /// Invoked when the selection button is pressed
+        /// </summary>
         private void OnSelectionPressed(bool isChecked)
         {
             if (isChecked)
@@ -251,6 +262,9 @@ namespace IndustryLP
             }
         }
 
+        /// <summary>
+        /// Invoked when the generation button is pressed
+        /// </summary>
         private void OnGeneratorPressed(bool isChecked)
         {
             if (isChecked)

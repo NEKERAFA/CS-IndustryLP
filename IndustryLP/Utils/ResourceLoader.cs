@@ -7,7 +7,7 @@ namespace IndustryLP.Utils
     /// <summary>
     /// This class loads the textures linked onto the c# assembly and converts into TextureAtlas.
     /// 
-    /// From MoveIt.ResourceLoader
+    /// This class is from <see cref="MoveIt.ResourceLoader"/>
     /// </summary>
     internal static class ResourceLoader
     {

@@ -4,6 +4,7 @@ using IndustryLP.UI;
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
+using UnityEngine;
 
 namespace IndustryLP.Tools
 {
@@ -53,55 +54,32 @@ namespace IndustryLP.Tools
 
         public override void OnSimulationStep()
         {
+            // Generate terrain
             if (m_selection.HasValue && !m_isGeneratedTerrain)
             {
-                var pos1 = m_selection.Value.a;
-                var pos2 = m_selection.Value.c;
+                // Gets the vertices
+                var posA = m_selection.Value.a;
+                var posB = m_selection.Value.b;
+                var posC = m_selection.Value.c;
+                var posD = m_selection.Value.d;
 
-                /*
-                // Gets the average point
-                //var averagePoint = new Vector3((pos1.x + pos2.x) / 2.0f, (pos1.y + pos2.y) / 2.0f, (pos1.z + pos2.z) / 2.0f);
+                LoggerUtils.Log("Calculating midpoints");
 
-                // Gets the top point
-                //var topPoint = new Vector3(averagePoint.x + 80, averagePoint.y, averagePoint.z);
+                // Calculates the midpoints
+                var midAB = Vector3.Lerp(posA, posB, 0.5f);
+                var midAC = Vector3.Lerp(posA, posC, 0.5f);
+                var midAD = Vector3.Lerp(posA, posD, 0.5f);
+                var midBC = Vector3.Lerp(posB, posC, 0.5f);
+                var midCD = Vector3.Lerp(posC, posD, 0.5f);
 
-                var randomizer = Singleton<SimulationManager>.instance.m_randomizer;
+                LoggerUtils.Log("Creating intersection");
 
-                // Gets road info
-                var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
-
-                LoggerUtils.Log("Creating net");
-
-                // Create first position
-                if (!NetManager.instance.CreateNode(out ushort node1, ref randomizer, netPrefab, pos1, Singleton<SimulationManager>.instance.m_currentBuildIndex + 1))
-                    LoggerUtils.Error("Cannot create node1");
-
-                Singleton<SimulationManager>.instance.m_currentBuildIndex++;
-
-                LoggerUtils.Log(Singleton<SimulationManager>.instance.m_currentBuildIndex);
-
-                // Create second position
-                if (!NetManager.instance.CreateNode(out ushort node2, ref randomizer, netPrefab, pos2, Singleton<SimulationManager>.instance.m_currentBuildIndex + 1))
-                    LoggerUtils.Error("Cannot create node2");
-
-                Singleton<SimulationManager>.instance.m_currentBuildIndex++;
-
-                LoggerUtils.Log(Singleton<SimulationManager>.instance.m_currentBuildIndex);
-
-                // Create segment
-                var dir1 = (pos2 - pos1).normalized;
-                var dir2 = (pos1 - pos2).normalized;
-
-                if (!NetManager.instance.CreateSegment(out ushort segment, ref randomizer, netPrefab, node1, node2, dir1, dir2, Singleton<SimulationManager>.instance.m_currentBuildIndex + 1, Singleton<SimulationManager>.instance.m_currentBuildIndex, false))
-                    LoggerUtils.Error("Cannot create segment");
-
-                Singleton<SimulationManager>.instance.m_currentBuildIndex++;
-
-                LoggerUtils.Log(Singleton<SimulationManager>.instance.m_currentBuildIndex);
-                */
-
-                LoggerUtils.Log("Creating net");
-                NetUtils.CreateStraightRoad(pos1, pos2, "Basic Road");
+                // Creates al roads
+                var firstRoad = NetUtils.CreateStraightRoad(midAC, midAB, "Basic Road");
+                var centerNode = firstRoad.Segments[0].StartPosition;
+                NetUtils.CreateStraightRoad(centerNode, midBC, "Basic Road");
+                NetUtils.CreateStraightRoad(centerNode, midCD, "Basic Road");
+                NetUtils.CreateStraightRoad(centerNode, midAD, "Basic Road");
 
                 m_isGeneratedTerrain = true;
             }
