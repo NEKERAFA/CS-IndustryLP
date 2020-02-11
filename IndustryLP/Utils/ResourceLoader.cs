@@ -7,17 +7,17 @@ namespace IndustryLP.Utils
     /// <summary>
     /// This class loads the textures linked onto the c# assembly and converts into TextureAtlas.
     /// 
-    /// From MoveIt.ResourceLoader
+    /// This class is from <see cref="MoveIt.ResourceLoader"/>
     /// </summary>
-    static class ResourceUtils
+    internal static class ResourceLoader
     {
         /// <summary>
-        /// Creates a new texture atlas
+        /// Creates a new texture atlas with the defined sprites
         /// </summary>
-        /// <param name="atlasName">The n</param>
-        /// <param name="spriteNames"></param>
-        /// <param name="assemblyPath"></param>
-        /// <returns></returns>
+        /// <param name="atlasName">The name of the new atlas</param>
+        /// <param name="spriteNames">The name of the sprites</param>
+        /// <param name="assemblyPath">The path of the sprites in the assembly</param>
+        /// <returns>The new <see cref="UITextureAtlas"/> object</returns>
         public static UITextureAtlas CreateTextureAtlas(string atlasName, string[] spriteNames, string assemblyPath)
         {
             var maxSize = 1024;
@@ -51,6 +51,12 @@ namespace IndustryLP.Utils
             return textureAtlas;
         }
 
+        /// <summary>
+        /// Adds a bunch of textures onto the atlas
+        /// </summary>
+        /// <param name="atlas">A <see cref="UITextureAtlas"/> object</param>
+        /// <param name="newTextures">A array with the <see cref="Texture2D"/> objects to add</param>
+        /// <param name="locked">True if the textures will be locked in the atlas</param>
         public static void AddTexturesInAtlas(UITextureAtlas atlas, Texture2D[] newTextures, bool locked = false)
         {
             var textures = new Texture2D[atlas.count + newTextures.Length];
@@ -101,6 +107,11 @@ namespace IndustryLP.Utils
             atlas.RebuildIndexes();
         }
 
+        /// <summary>
+        /// Gets a <see cref="UITextureAtlas"/> object that it was loaded
+        /// </summary>
+        /// <param name="name">The name of the <see cref="UITextureAtlas"/></param>
+        /// <returns>The <see cref="UITextureAtlas"/> object</returns>
         public static UITextureAtlas GetAtlas(string name)
         {
             var atlases = Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
@@ -111,6 +122,11 @@ namespace IndustryLP.Utils
             return UIView.GetAView().defaultAtlas;
         }
 
+        /// <summary>
+        /// Loads a <see cref="Texture2D"/> from the assembly
+        /// </summary>
+        /// <param name="path">The path of the texture in the asembly</param>
+        /// <returns>The <see cref="Texture2D"/> loaded</returns>
         private static Texture2D LoadTextureFromAssembly(string path)
         {
             var manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);

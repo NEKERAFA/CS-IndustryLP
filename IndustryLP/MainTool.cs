@@ -1,21 +1,46 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
-using IndustryLP.Constants;
+using IndustryLP.Utils.Constants;
 using IndustryLP.Utils;
 using IndustryLP.UI;
 using System.Collections.Generic;
+using IndustryLP.Tools;
+using IndustryLP.UI.Buttons;
 
 namespace IndustryLP
 {
-    class MainTool : MonoBehaviour
+    /// <summary>
+    /// This class represents the main funtionality of the mod
+    /// </summary>
+    public class MainTool : ToolBase
     {
-        private ToolPanel m_mainView = null;
+        #region Attributes
 
-        private UITextureAtlas m_textureAtlas = null;
+        private ToolPanel m_mainView;
+        private UITextureAtlas m_textureAtlas;
+        private SelectionTool m_selectionState;
+        private GeneratorTool m_generatorState;
+        private ToolActionController m_currentState;
+
+        #endregion
 
         #region Properties
 
-        public static readonly string ObjectName = LibraryConstants.ObjectPrefix + "_ToolWindow";
+        /// <summary>
+        /// The name of the object
+        /// </summary>
+        public static string ObjectName => LibraryConstants.ObjectPrefix + "_ToolWindow";
+
+        private ToolActionController CurrentState
+        {
+            set
+            {
+                var oldState = m_currentState;
+                m_currentState = value;
+                m_currentState.OnLeftController();
+                m_currentState.OnChangeController(oldState);
+            }
+        }
 
         #endregion
 
@@ -24,32 +49,44 @@ namespace IndustryLP
         /// <summary>
         /// Invoked when the tool is created
         /// </summary>
-        protected void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
+            m_toolController = FindObjectOfType<ToolController>();
             name = ObjectName;
             
-            LoggerUtils.Debug("Loading IndustryLP");
+            LoggerUtils.Log("Loading IndustryLP");
 
             if (m_textureAtlas == null)
             {
-                LoggerUtils.Debug("Loading altas");
+                LoggerUtils.Log("Loading altas");
                 SetupResources();
             }
 
+            m_selectionState = new SelectionTool();
+            m_selectionState.OnStart(this);
+            m_generatorState = new GeneratorTool();
+            m_generatorState.OnStart(this);
+            m_currentState = null;
+
             if (m_mainView == null)
             {
-                LoggerUtils.Debug("Setting tool panel");
+                LoggerUtils.Log("Setting tool panel");
                 SetupToolPanel();
             }
 
-            LoggerUtils.Debug("Finish");
+
+            LoggerUtils.Log("Finish");
         }
 
         /// <summary>
         /// Invoked when the tool is going to remove of the scene
         /// </summary>
-        protected void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             if (m_mainView != null)
             {
                 Destroy(m_mainView);
@@ -65,12 +102,21 @@ namespace IndustryLP
                 Resources.UnloadUnusedAssets();
                 m_textureAtlas = null;
             }
+
+            if (m_currentState != null)
+            {
+                m_currentState.OnDestroy();
+                m_currentState = null;
+            }
         }
 
         #endregion
 
         #region Tool Behaviour
 
+        /// <summary>
+        /// Creates the background pannel
+        /// </summary>
         private void SetupToolPanel()
         {
             var view = UIView.GetAView();
@@ -78,19 +124,155 @@ namespace IndustryLP
             m_mainView.transform.parent = view.transform;
             m_mainView.transform.localPosition = Vector3.zero;
             m_mainView.relativePosition = new Vector3(80f, 10f);
+            m_mainView.ToolActions = new List<ToolPanel.ToolAction>()
+            {
+                new ToolPanel.ToolAction()
+                {
+                    Controller = m_selectionState,
+                    Callback = isChecked => OnSelectionPressed(isChecked)
+                },
+                new ToolPanel.ToolAction()
+                {
+                    Controller = m_generatorState,
+                    Callback = isChecked => OnGeneratorPressed(isChecked)
+                }
+            };
         }
 
+        /// <summary>
+        /// Loads the icons and image buttons
+        /// </summary>
         private void SetupResources()
         {
             string[] sprites =
             {
                 ResourceConstants.SelectionIcon,
+                ResourceConstants.GeneratorIcon,
                 ResourceConstants.ButtonHover,
                 ResourceConstants.ButtonNormal,
                 ResourceConstants.ButtonPushed
             };
 
-            m_textureAtlas = ResourceUtils.CreateTextureAtlas(LibraryConstants.AtlasName, sprites, ResourceConstants.IconPath);
+            m_textureAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.AtlasName, sprites, ResourceConstants.IconPath);
+        }
+        /// <summary>
+        /// Invoked when the tool is disabled
+        /// </summary>
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            m_mainView.DisableAllButtons();
+            if (m_currentState != null)
+            {
+                m_currentState.OnLeftController();
+                m_currentState = null;
+            }
+        }
+
+        /// <summary>
+        /// Invoked before new frame rendering
+        /// </summary>
+        protected override void OnToolUpdate()
+        {
+            base.OnToolUpdate();
+
+            if (m_currentState != null)
+            {
+                var mousePosition = GetTerrainMousePosition();
+
+                m_currentState.OnUpdate(mousePosition);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    m_currentState.OnLeftMouseIsDown(mousePosition);
+                }
+                else if (Input.GetMouseButton(0))
+                {
+                    m_currentState.OnLeftMouseIsPressed(mousePosition);
+                }
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    m_currentState.OnLeftMouseIsUp(mousePosition);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns if the tool was an error
+        /// </summary>
+        /// <returns></returns>
+        public override ToolErrors GetErrors()
+        {
+            return ToolErrors.None;
+        }
+
+        /// <summary>
+        /// Renders a overlay effect
+        /// </summary>
+        /// <param name="cameraInfo"></param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            base.RenderOverlay(cameraInfo);
+
+            if (m_currentState != null)
+            {
+                m_currentState.OnRenderOverlay(cameraInfo);
+            }
+        }
+
+        /// <summary>
+        /// Invoked in simulation step updating
+        /// </summary>
+        public override void SimulationStep()
+        {
+            base.SimulationStep();
+
+            if (m_currentState != null)
+            {
+                m_currentState.OnSimulationStep();
+            }
+        }
+
+        #endregion
+
+        #region IndustryLP Controller
+
+        /// <summary>
+        /// Translate the current position of mouse in terrain position
+        /// </summary>
+        private Vector3 GetTerrainMousePosition()
+        {
+            var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            var input = new RaycastInput(mouseRay, Camera.main.farClipPlane);
+            input.m_ignoreTerrain = false;
+            RayCast(input, out RaycastOutput output);
+            return output.m_hitPos;
+        }
+
+        /// <summary>
+        /// Invoked when the selection button is pressed
+        /// </summary>
+        private void OnSelectionPressed(bool isChecked)
+        {
+            if (isChecked)
+            {
+                if (!enabled) enabled = true;
+                CurrentState = m_selectionState;
+                m_mainView.DisableButton(GeneratorButton.ObjectName);
+            }
+        }
+
+        /// <summary>
+        /// Invoked when the generation button is pressed
+        /// </summary>
+        private void OnGeneratorPressed(bool isChecked)
+        {
+            if (isChecked)
+            {
+                if (!enabled) enabled = true;
+                CurrentState = m_generatorState;
+                m_mainView.DisableButton(SelectionButton.ObjectName);
+            }
         }
 
         #endregion
