@@ -3,13 +3,13 @@
 namespace IndustryLP.UI.Buttons
 {
     /// <summary>
-    /// Creates a clickable button that represents the selection tool
+    /// Creates a clickable button that represents the generator tool
     /// </summary>
-    internal class SelectionButton : ToolButton
+    internal class GeneratorButton : ToolButton
     {
         #region Properties
 
-        public static string ObjectName => $"{LibraryConstants.UIPrefix}_SelectionButton";
+        public static string ObjectName => $"{LibraryConstants.UIPrefix}_GeneratorButton";
 
         #endregion
 
@@ -19,7 +19,7 @@ namespace IndustryLP.UI.Buttons
         {
             base.Start();
             name = ObjectName;
-            normalFgSprite = ResourceConstants.SelectionIcon;
+            normalFgSprite = ResourceConstants.GeneratorIcon;
         }
 
         #endregion
