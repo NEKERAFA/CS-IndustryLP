@@ -1,9 +1,10 @@
-﻿using ColossalFramework;
-using ColossalFramework.Math;
+﻿using ColossalFramework.Math;
+using IndustryLP.Definitions;
 using IndustryLP.UI;
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
+using System.Threading;
 using UnityEngine;
 
 namespace IndustryLP.Tools
@@ -17,6 +18,7 @@ namespace IndustryLP.Tools
 
         internal Quad3? m_selection;
         private bool m_isGeneratedTerrain = false;
+        private Thread m_threadGenerator;
 
         #endregion
 
@@ -52,8 +54,19 @@ namespace IndustryLP.Tools
             }
         }
 
+        public override void OnUpdate(Vector3 mousePosition)
+        {
+            if (!m_isGeneratedTerrain)
+            {
+                m_threadGenerator = new Thread(new ThreadStart(ThreadGenerator.Generate));
+                m_threadGenerator.Start();
+                m_isGeneratedTerrain = true;
+            }
+        }
+
         public override void OnSimulationStep()
         {
+            /*
             // Generate terrain
             if (m_selection.HasValue && !m_isGeneratedTerrain)
             {
@@ -83,6 +96,7 @@ namespace IndustryLP.Tools
 
                 m_isGeneratedTerrain = true;
             }
+            */
         }
 
         #endregion
