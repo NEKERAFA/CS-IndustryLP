@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IndustryLP</RootNamespace>
     <AssemblyName>IndustryLP</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>false</Deterministic>
     <NuGetPackageImportStamp>
@@ -47,14 +47,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\ICities.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.dll</HintPath>
@@ -63,9 +55,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Definitions\ThreadGenerator.cs" />
+    <Compile Include="DomainDefinition\ClingoControlThread.cs" />
+    <Compile Include="Utils\Constants\ClingoConstants.cs" />
     <Compile Include="Utils\Constants\ColorConstants.cs" />
     <Compile Include="Utils\Enums\SelectionState.cs" />
     <Compile Include="Tools\GeneratorTool.cs" />
@@ -101,21 +95,15 @@
     <EmbeddedResource Include="Resources\Icons\Build.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper">
-      <Version>9.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="ClingoSharp">
-      <Version>0.0.2-alpha</Version>
-    </PackageReference>
-    <PackageReference Include="ClingoSharp.CoreServices">
-      <Version>0.0.3-alpha1</Version>
-    </PackageReference>
-    <PackageReference Include="ClingoSharp.NativeWrapper">
-      <Version>0.0.2-alpha</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.Loader">
-      <Version>4.3.0</Version>
-    </PackageReference>
+    <ProjectReference Include="..\ClingoSharp\src\ClingoSharp\ClingoSharp.csproj">
+      <Project>{6C7E386E-E44D-46F2-9AAB-A0F8D19AFDBF}</Project>
+      <Name>ClingoSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="DomainDefinition\logic_program\generator.lp" />
+    <None Include="DomainDefinition\logic_program\item_definition.lp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

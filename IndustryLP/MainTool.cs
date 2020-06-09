@@ -6,6 +6,8 @@ using IndustryLP.UI;
 using System.Collections.Generic;
 using IndustryLP.Tools;
 using IndustryLP.UI.Buttons;
+using ColossalFramework.IO;
+using IndustryLP.DomainDefinition;
 
 namespace IndustryLP
 {
@@ -76,6 +78,9 @@ namespace IndustryLP
                 SetupToolPanel();
             }
 
+            LoggerUtils.Log("Loading clingo");
+
+            ClingoControlThread.LoadClingo();
 
             LoggerUtils.Log("Finish");
         }

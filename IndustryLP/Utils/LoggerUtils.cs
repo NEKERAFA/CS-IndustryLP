@@ -66,7 +66,7 @@ namespace IndustryLP.Utils
             msg.AppendLine($", {ex.Message}");
             msg.AppendLine(ex.StackTrace);
 
-            Debug.LogError($"{LibraryConstants.AssemblyName}: {msg.ToString()}");
+            Debug.LogError($"{LibraryConstants.AssemblyName}: {ex.GetType().FullName} : {msg}");
         }
     }
 }

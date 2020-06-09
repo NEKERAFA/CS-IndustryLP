@@ -1,5 +1,5 @@
 ﻿using ColossalFramework.Math;
-using IndustryLP.Definitions;
+using IndustryLP.DomainDefinition;
 using IndustryLP.UI;
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
@@ -58,7 +58,7 @@ namespace IndustryLP.Tools
         {
             if (!m_isGeneratedTerrain)
             {
-                m_threadGenerator = new Thread(new ThreadStart(ThreadGenerator.Generate));
+                m_threadGenerator = new Thread(new ThreadStart(ClingoControlThread.Generate));
                 m_threadGenerator.Start();
                 m_isGeneratedTerrain = true;
             }
