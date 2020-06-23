@@ -8,12 +8,13 @@ namespace IndustryLP.DomainDefinition
 {
     internal static class ClingoControlThread
     {
-        internal static Clingo clingo;
+        internal static Clingo clingo = null;
 
         public static void LoadClingo()
         {
             try
             {
+                LoggerUtils.Log($"Clingo Path: {ClingoConstants.ClingoPath}");
                 clingo = new Clingo(ClingoConstants.ClingoPath);
             }
             catch (Exception ex)
@@ -24,31 +25,39 @@ namespace IndustryLP.DomainDefinition
 
         public static void Generate()
         {
-            try
+            LoggerUtils.Log("Creating program");
+
+            Control program = new Control();
+
+            LoggerUtils.Log("Loading files");
+
+            program.Load(ClingoConstants.ItemDefinitionFile);
+            program.Load(ClingoConstants.IndustryGeneratorFile);
+
+            LoggerUtils.Log("Grounding program");
+
+            var parts = new List<Tuple<string, List<Symbol>>>()
             {
-                Control program = new Control();
+                new Tuple<string, List<Symbol>>("base", new List<Symbol>())
+            };
+            program.Ground(parts);
 
-                program.Load(ClingoConstants.ItemDefinitionFile);
-                program.Load(ClingoConstants.IndustryGeneratorFile);
+            LoggerUtils.Log("Solve program");
 
-                var parts = new List<Tuple<string, List<Symbol>>>()
-                {
-                    new Tuple<string, List<Symbol>>("base", new List<Symbol>())
-                };
-                program.Ground(parts);
+            SolveHandle handle = program.Solve(yield: true, async: true);
 
-                SolveHandle handle = program.Solve(onModel: m =>
-                {
-                    LoggerUtils.Log(m.ToString());
-                    return false;
-                }, async: true);
-
-                while (!handle.Wait(0)) continue;
-            }
-            catch(Exception ex)
+            foreach (Model model in handle)
             {
-                LoggerUtils.Error(ex);
+                LoggerUtils.Log($"Model: {model}");
+
+                SolveResult result = handle.Get();
+
+                LoggerUtils.Log($"SAT: {result.IsSatisfiable}");
+
+                handle.Cancel();
             }
+
+            LoggerUtils.Log("Done");
         }
     }
 }

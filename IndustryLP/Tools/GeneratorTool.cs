@@ -4,6 +4,7 @@ using IndustryLP.UI;
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ namespace IndustryLP.Tools
         internal Quad3? m_selection;
         private bool m_isGeneratedTerrain = false;
         private Thread m_threadGenerator;
+        private bool m_generatedMessage = false;
 
         #endregion
 
@@ -58,9 +60,43 @@ namespace IndustryLP.Tools
         {
             if (!m_isGeneratedTerrain)
             {
-                m_threadGenerator = new Thread(new ThreadStart(ClingoControlThread.Generate));
+                m_threadGenerator = new Thread(() => SafeExecution(ClingoControlThread.Generate, ExceptionHandler));
                 m_threadGenerator.Start();
                 m_isGeneratedTerrain = true;
+            }
+            else
+            {
+                if (!m_threadGenerator.IsAlive && !m_generatedMessage)
+                {
+                    LoggerUtils.Log("Terrain Generated");
+                    m_threadGenerator.Join();
+                    m_generatedMessage = true;
+                }
+            }
+        }
+
+        private void SafeExecution(Action execution, Action<Exception> handler)
+        {
+            try
+            {
+                execution.Invoke();
+            }
+            catch (Exception ex)
+            {
+                handler(ex);
+            }
+        }
+
+        private void ExceptionHandler(Exception ex)
+        {
+            LoggerUtils.Error(ex);
+        }
+
+        public override void OnDestroy()
+        {
+            if (m_threadGenerator.ThreadState != ThreadState.Running)
+            {
+                m_threadGenerator.Abort();
             }
         }
 

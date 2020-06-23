@@ -62,8 +62,12 @@ namespace IndustryLP.Utils
         public static void Error(Exception ex, params object[] values)
         {
             StringBuilder msg = new StringBuilder("");
-            if (values.Length > 0) msg.Append(GetParamsAsString(values));
-            msg.AppendLine($", {ex.Message}");
+            if (values != null && values.Length > 0)
+            {
+                msg.Append(GetParamsAsString(values));
+                msg.Append(", ");
+            }
+            msg.AppendLine($"{ex.Message}");
             msg.AppendLine(ex.StackTrace);
 
             Debug.LogError($"{LibraryConstants.AssemblyName}: {ex.GetType().FullName} : {msg}");
