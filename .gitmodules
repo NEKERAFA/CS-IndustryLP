@@ -1,0 +1,3 @@
+[submodule "ClingoSharp"]
+	path = ClingoSharp
+	url = git@github.com:NEKERAFA/ClingoSharp.git

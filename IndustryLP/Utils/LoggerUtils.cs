@@ -61,12 +61,16 @@ namespace IndustryLP.Utils
         /// <param name="ex">A <see cref="Exception"/> object to print message errors</param>
         public static void Error(Exception ex, params object[] values)
         {
-            StringBuilder msg = new StringBuilder("");
-            if (values.Length > 0) msg.Append(GetParamsAsString(values));
-            msg.AppendLine($", {ex.Message}");
+            StringBuilder msg = new StringBuilder();
+            if (values != null && values.Length > 0)
+            {
+                msg.Append(GetParamsAsString(values));
+                msg.Append(", ");
+            }
+            msg.AppendLine($"{ex.Message}");
             msg.AppendLine(ex.StackTrace);
 
-            Debug.LogError($"{LibraryConstants.AssemblyName}: {msg.ToString()}");
+            Debug.LogError($"{LibraryConstants.AssemblyName}: {ex.GetType().FullName} : {msg}");
         }
     }
 }

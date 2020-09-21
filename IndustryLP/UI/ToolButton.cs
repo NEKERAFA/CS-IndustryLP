@@ -13,40 +13,58 @@ namespace IndustryLP.UI
         /// <summary>
         /// Delegates that represents the action when the user press the button
         /// </summary>
-        /// <param name="isChecked">True if the button is pushed on, false otherwise</param>
-        internal delegate void OnButtonPressedDelegate(bool isChecked);
+        /// <param name="isChecked"><c>true</c> if the button is pushed on, <c>false</c> otherwise. <c>null</c> if the button is not switched</param>
+        public delegate void OnButtonClickedDelegate(bool isChecked);
 
-        protected bool m_isChecked;
+        #region Attributes
+
+        private bool m_isChecked;
+
+        #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Invoked when the button is pressed.
+        /// </summary>
+        public OnButtonClickedDelegate OnButtonClicked { get; set; }
+
+        /// <summary>
+        /// The button is setted as checkbox
+        /// </summary>
+        public bool AsCheckbox { get; set; }
 
         /// <summary>
         /// Checks if the button is pushed or not.
         /// </summary>
         internal bool IsChecked
-        { 
+        {
             get => m_isChecked;
             set
             {
                 m_isChecked = value;
 
-                if (value)
+                if (AsCheckbox)
                 {
-                    normalBgSprite = ResourceConstants.ButtonPushed;
-                    hoveredBgSprite = ResourceConstants.ButtonPushed;
+                    if (value)
+                    {
+                        normalBgSprite = ResourceConstants.ButtonPushed;
+                        hoveredBgSprite = ResourceConstants.ButtonPushed;
+                    }
+                    else
+                    {
+                        normalBgSprite = ResourceConstants.ButtonNormal;
+                        hoveredBgSprite = ResourceConstants.ButtonHover;
+                    }
                 }
                 else
                 {
                     normalBgSprite = ResourceConstants.ButtonNormal;
                     hoveredBgSprite = ResourceConstants.ButtonHover;
+                    pressedBgSprite = ResourceConstants.ButtonPushed;
                 }
             }
         }
-
-        /// <summary>
-        /// Invoked when the button is pressed.
-        /// </summary>
-        internal OnButtonPressedDelegate OnButtonPressed { get; set; }
 
         #endregion
 
@@ -55,14 +73,13 @@ namespace IndustryLP.UI
         /// <summary>
         /// Start is called when the script instance is being loaded.
         /// </summary>
-        public override void Start()
+        public void Start(bool asCheckbox)
         {
             base.Start();
-            IsChecked = false;
             size = new Vector2(32, 32);
             atlas = ResourceLoader.GetAtlas(ResourceConstants.AtlasName);
-            normalBgSprite = ResourceConstants.ButtonNormal;
-            hoveredBgSprite = ResourceConstants.ButtonHover;
+            AsCheckbox = asCheckbox;
+            IsChecked = false;
         }
 
         /// <summary>
@@ -71,10 +88,12 @@ namespace IndustryLP.UI
         /// <param name="p">Event with information about mouse</param>
         protected override void OnClick(UIMouseEventParameter p)
         {
+            base.OnClick(p);
+
             if (p.buttons.IsFlagSet(UIMouseButton.Left))
             {
-                IsChecked = !IsChecked;
-                OnButtonPressed?.Invoke(this.IsChecked);
+                if (AsCheckbox) IsChecked = !IsChecked;
+                OnButtonClicked?.Invoke(IsChecked);
             }
         }
 

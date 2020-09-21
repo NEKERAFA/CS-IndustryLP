@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 using IndustryLP.Utils.Constants;
-using IndustryLP.UI.Buttons;
-using System;
 using System.Collections.Generic;
 using IndustryLP.Tools;
+using IndustryLP.UI.Buttons;
+using IndustryLP.Utils;
 
 namespace IndustryLP.UI
 {
@@ -16,13 +16,15 @@ namespace IndustryLP.UI
         public struct ToolAction
         {
             public ToolActionController Controller;
-            public ToolButton.OnButtonPressedDelegate Callback;
+            public ToolButton.OnButtonClickedDelegate Callback;
         }
 
-        #region Atributtes
+        #region Attributes
 
         private UILabel m_title = null;
-        private List<ToolButton> m_buttons = null;
+        private SelectionButton m_selectionButton = null;
+        private GenerateOptionsButton m_generatorButton = null;
+        private bool m_selectionDone = false;
 
         #endregion
 
@@ -32,9 +34,25 @@ namespace IndustryLP.UI
 
         public List<ToolAction> ToolActions { get; set; }
 
+        public bool IsSelectionDone
+        {
+            get
+            {
+                return m_selectionDone;
+            }
+            set
+            {
+                m_selectionDone = value;
+
+                if (m_generatorButton != null)
+                    if (m_selectionDone) m_generatorButton.Enable();
+                    else m_generatorButton.Disable();
+            }
+        }
+
         #endregion
 
-        #region Panel Behaviour
+        #region Unity Behaviour
 
         /// <summary>
         /// Invoked when the panel is created
@@ -53,11 +71,7 @@ namespace IndustryLP.UI
             SetupTitle();
 
             // Defines a drag handler of the toolbar
-            //var dragHandler = AddUIComponent<UIDragHandle>();
-            //dragHandler.transform.parent = transform;
-            //dragHandler.transform.localPosition = Vector3.zero;
-            //dragHandler.target = this;
-            //dragHandler.size = size;
+            GUIUtils.CreateDragHandle(this, size);
 
             // set the tool buttons
             SetupTools();
@@ -66,31 +80,37 @@ namespace IndustryLP.UI
         public override void OnDestroy()
         {
             base.OnDestroy();
-            
+
             if (m_title != null)
             {
                 Destroy(m_title.gameObject);
                 m_title = null;
             }
 
-            if (m_buttons != null)
+            if (m_selectionButton != null)
             {
-                m_buttons.ForEach(b => Destroy(b.gameObject));
-                m_buttons.Clear();
-                m_buttons = null;
+                Destroy(m_selectionButton.gameObject);
+                m_selectionButton = null;
+            }
+
+            if (m_generatorButton != null)
+            {
+                Destroy(m_generatorButton.gameObject);
+                m_generatorButton = null;
             }
         }
+
+        #endregion
+
+        #region Panel Behaviour
 
         /// <summary>
         /// Creates a label as the title
         /// </summary>
         private void SetupTitle()
         {
-            m_title = AddUIComponent<UILabel>();
-            m_title.transform.parent = transform;
-            m_title.transform.localPosition = Vector3.zero;
+            m_title = GUIUtils.CreateLabel(this, ModInfo.ModName);
             m_title.relativePosition = new Vector2(5f, 5f);
-            m_title.text = ModInfo.ModName;
         }
         
         /// <summary>
@@ -98,8 +118,6 @@ namespace IndustryLP.UI
         /// </summary>
         private void SetupTools()
         {
-            m_buttons = new List<ToolButton>();
-
             var x = 5f;
             foreach (var tool in ToolActions)
             {
@@ -110,24 +128,48 @@ namespace IndustryLP.UI
                     button.transform.parent = transform;
                     button.transform.localPosition = Vector3.zero;
                     button.relativePosition = new Vector3(x, m_title.height + 10f);
+
+                    if (button is SelectionButton)
+                    {
+                        m_selectionButton = button as SelectionButton;
+                    }
+                    else
+                    {
+                        m_generatorButton = button as GenerateOptionsButton;
+                        m_generatorButton.Disable();
+                    }
+
                     x += 40f;
-                    m_buttons.Add(button);
                 }
             }
         }
 
+        /// <summary>
+        /// Set disabled all buttons
+        /// </summary>
         public void DisableAllButtons()
         {
-            if (m_buttons != null) m_buttons.ForEach(b => b.IsChecked = false);
+            if (m_generatorButton != null)
+                m_generatorButton.IsChecked = false;
+
+            if (m_selectionButton != null)
+                m_selectionButton.IsChecked = false;
         }
 
+        /// <summary>
+        /// Set disable a specified button
+        /// </summary>
+        /// <param name="name"></param>
         public void DisableButton(string name)
         {
-            foreach(var button in m_buttons)
-            {
-                if (button.name == name)
-                    button.IsChecked = false;
-            }
+            ToolButton button;
+
+            if (m_generatorButton.name.Equals(name))
+                button = m_generatorButton;
+            else
+                button = m_selectionButton;
+
+            button.IsChecked = false;
         }
 
         #endregion

@@ -33,9 +33,24 @@
         public static string SelectionIcon => "Selection";
 
         /// <summary>
-        /// Name of generator resource
+        /// Name of build resource
         /// </summary>
-        public static string GeneratorIcon => "Build";
+        public static string BuildIcon => "Build";
+
+        /// <summary>
+        /// Name of options resource
+        /// </summary>
+        public static string OptionsIcon => "Options";
+
+        /// <summary>
+        /// Name of up arrow resource
+        /// </summary>
+        public static string UpArrowIcon => "UpArrow";
+
+        /// <summary>
+        /// Name of down arrow resource
+        /// </summary>
+        public static string DownArrowIcon => "DownArrow";
 
         /// <summary>
         /// Name of the atlas

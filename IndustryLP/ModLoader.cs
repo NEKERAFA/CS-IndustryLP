@@ -33,8 +33,6 @@ namespace IndustryLP
             {
                 case LoadMode.NewGame:
                 case LoadMode.LoadGame:
-                    // For remove old instances if the assembly is updated (development)
-                    GameObjectUtils.DestroyOldPanels();
                     // Removes old attached tool
                     if (m_mainTool != null)
                     {
@@ -57,6 +55,9 @@ namespace IndustryLP
                 Object.Destroy(m_mainTool.gameObject);
                 m_mainTool = null;
             }
+
+            // For remove old instances if the assembly is updated (development)
+            GameObjectUtils.DestroyOldPanels();
         }
 
         /// <summary>

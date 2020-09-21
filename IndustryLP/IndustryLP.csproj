@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IndustryLP</RootNamespace>
     <AssemblyName>IndustryLP</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>false</Deterministic>
     <NuGetPackageImportStamp>
@@ -47,14 +47,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\ICities.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.dll</HintPath>
@@ -63,14 +55,27 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CS-Assemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DomainDefinition\GeneratorThread.cs" />
+    <Compile Include="DomainDefinition\Region.cs" />
+    <Compile Include="DomainDefinition\Result.cs" />
+    <Compile Include="UI\Buttons\BuildSolutionButton.cs" />
+    <Compile Include="UI\Buttons\DownArrowButton.cs" />
+    <Compile Include="UI\Buttons\UpArrowButton.cs" />
+    <Compile Include="UI\GeneratorDialog.cs" />
+    <Compile Include="UI\GeneratorPanel.cs" />
+    <Compile Include="UI\ToolButton.cs" />
+    <Compile Include="Utils\BuildingUtils.cs" />
+    <Compile Include="Utils\Constants\ClingoConstants.cs" />
     <Compile Include="Utils\Constants\ColorConstants.cs" />
+    <Compile Include="Utils\Enums\GenerationState.cs" />
     <Compile Include="Utils\Enums\SelectionState.cs" />
     <Compile Include="Tools\GeneratorTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
     <Compile Include="Tools\ToolActionController.cs" />
-    <Compile Include="UI\Buttons\GeneratorButton.cs" />
+    <Compile Include="UI\Buttons\GenerateOptionsButton.cs" />
     <Compile Include="Utils\GameObjectUtils.cs" />
     <Compile Include="Utils\NetUtils.cs" />
     <Compile Include="Utils\ResourceLoader.cs" />
@@ -82,8 +87,9 @@
     <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Buttons\SelectionButton.cs" />
-    <Compile Include="UI\ToolButton.cs" />
     <Compile Include="UI\ToolPanel.cs" />
+    <Compile Include="Utils\SimulationUtils.cs" />
+    <Compile Include="Utils\GUIUtils.cs" />
     <Compile Include="Utils\Wrappers\NodeWrapper.cs" />
     <Compile Include="Utils\Wrappers\RoadWrapper.cs" />
     <Compile Include="Utils\Wrappers\SegmentWrapper.cs" />
@@ -99,6 +105,26 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\Build.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ClingoSharp\src\ClingoSharp.NativeWrapper\ClingoSharp.NativeWrapper.csproj">
+      <Project>{DC151E4D-7E1D-4460-B894-39F3829F665E}</Project>
+      <Name>ClingoSharp.NativeWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClingoSharp\src\ClingoSharp\ClingoSharp.csproj">
+      <Project>{6C7E386E-E44D-46F2-9AAB-A0F8D19AFDBF}</Project>
+      <Name>ClingoSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DomainDefinition\logic_program\generator.lp" />
+    <None Include="DomainDefinition\logic_program\item_definition.lp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\DownArrow.png" />
+    <EmbeddedResource Include="Resources\Icons\UpArrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\Options.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
