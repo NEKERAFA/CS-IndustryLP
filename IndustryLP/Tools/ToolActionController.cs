@@ -10,7 +10,7 @@ namespace IndustryLP.Tools
         /// </summary>
         /// <param name="callback">The callback when the button is pressed</param>
         /// <returns></returns>
-        public abstract ToolButton CreateButton(ToolButton.OnButtonPressedDelegate callback);
+        public abstract ToolButton CreateButton(ToolButton.OnButtonClickedDelegate callback);
 
         /// <summary>
         /// Invoked the first time that the main tool creates the controller
@@ -30,6 +30,11 @@ namespace IndustryLP.Tools
         public virtual void OnChangeController(ToolActionController oldController) { }
 
         /// <summary>
+        /// Invoked when the controller is going to set the current controller
+        /// </summary>
+        public virtual void OnEnterController() { }
+
+        /// <summary>
         /// Invoked when the controller will be change.
         /// </summary>
         public virtual void OnLeftController() { }
@@ -43,7 +48,12 @@ namespace IndustryLP.Tools
         /// Invoked when a new step in the simulation is going to happen
         /// </summary>
         public virtual void OnSimulationStep() { }
-        
+
+        /// <summary>
+        /// Invoked when a new geometry effect is going to be updated 
+        /// </summary>
+        public virtual void OnRenderGeometry(RenderManager.CameraInfo cameraInfo) { }
+
         /// <summary>
         /// Invoked when a new overlay effect is going to be updated 
         /// </summary>

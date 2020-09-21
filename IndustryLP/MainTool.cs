@@ -1,10 +1,10 @@
 ﻿using ColossalFramework.UI;
-using IndustryLP.DomainDefinition;
 using IndustryLP.Tools;
 using IndustryLP.UI;
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
+using IndustryLP.Utils.Enums;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +17,6 @@ namespace IndustryLP
     {
         #region Attributes
 
-        private ToolPanel m_mainView;
         private UITextureAtlas m_textureAtlas;
         private SelectionTool m_selectionState;
         private GeneratorTool m_generatorState;
@@ -32,14 +31,20 @@ namespace IndustryLP
         /// </summary>
         public static string ObjectName => LibraryConstants.ObjectPrefix + "_ToolWindow";
 
+        /// <summary>
+        /// The main tool panel
+        /// </summary>
+        internal ToolPanel MainPanel { get; private set; }
+
         private ToolActionController CurrentState
         {
             set
             {
                 var oldState = m_currentState;
+                if (oldState != null) oldState.OnLeftController();
                 m_currentState = value;
-                m_currentState.OnLeftController();
                 m_currentState.OnChangeController(oldState);
+                m_currentState.OnEnterController();
             }
         }
 
@@ -71,15 +76,11 @@ namespace IndustryLP
             m_generatorState.OnStart(this);
             m_currentState = null;
 
-            if (m_mainView == null)
+            if (MainPanel == null)
             {
                 LoggerUtils.Log("Setting tool panel");
                 SetupToolPanel();
             }
-
-            LoggerUtils.Log("Loading clingo");
-
-            ClingoControlThread.LoadClingo();
 
             LoggerUtils.Log("Finish");
         }
@@ -91,10 +92,10 @@ namespace IndustryLP
         {
             base.OnDestroy();
 
-            if (m_mainView != null)
+            if (MainPanel != null)
             {
-                Destroy(m_mainView);
-                m_mainView = null;
+                Destroy(MainPanel);
+                MainPanel = null;
             }
 
             if (m_textureAtlas != null)
@@ -123,12 +124,9 @@ namespace IndustryLP
         /// </summary>
         private void SetupToolPanel()
         {
-            var view = UIView.GetAView();
-            m_mainView = view.AddUIComponent<ToolPanel>();
-            m_mainView.transform.parent = view.transform;
-            m_mainView.transform.localPosition = Vector3.zero;
-            m_mainView.relativePosition = new Vector3(80f, 10f);
-            m_mainView.ToolActions = new List<ToolPanel.ToolAction>()
+            MainPanel = GameObjectUtils.AddUIComponent<ToolPanel>();
+            MainPanel.relativePosition = new Vector3(80f, 10f);
+            MainPanel.ToolActions = new List<ToolPanel.ToolAction>()
             {
                 new ToolPanel.ToolAction()
                 {
@@ -138,7 +136,7 @@ namespace IndustryLP
                 new ToolPanel.ToolAction()
                 {
                     Controller = m_generatorState,
-                    Callback = isChecked => OnGeneratorPressed(isChecked)
+                    Callback = isChecked => OnGeneratorPressed()
                 }
             };
         }
@@ -151,26 +149,27 @@ namespace IndustryLP
             string[] sprites =
             {
                 ResourceConstants.SelectionIcon,
-                ResourceConstants.GeneratorIcon,
+                ResourceConstants.BuildIcon,
+                ResourceConstants.UpArrowIcon,
+                ResourceConstants.DownArrowIcon,
                 ResourceConstants.ButtonHover,
                 ResourceConstants.ButtonNormal,
-                ResourceConstants.ButtonPushed
+                ResourceConstants.ButtonPushed,
+                ResourceConstants.OptionsIcon
             };
 
             m_textureAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.AtlasName, sprites, ResourceConstants.IconPath);
         }
+
         /// <summary>
         /// Invoked when the tool is disabled
         /// </summary>
         protected override void OnDisable()
         {
             base.OnDisable();
-            m_mainView.DisableAllButtons();
-            if (m_currentState != null)
-            {
-                m_currentState.OnLeftController();
-                m_currentState = null;
-            }
+            MainPanel.DisableAllButtons();
+            m_currentState?.OnLeftController();
+            m_currentState = null;
         }
 
         /// <summary>
@@ -180,24 +179,21 @@ namespace IndustryLP
         {
             base.OnToolUpdate();
 
-            if (m_currentState != null)
+            var mousePosition = GetTerrainMousePosition();
+
+            m_currentState?.OnUpdate(mousePosition);
+
+            if (Input.GetMouseButtonDown(0))
             {
-                var mousePosition = GetTerrainMousePosition();
-
-                m_currentState.OnUpdate(mousePosition);
-
-                if (Input.GetMouseButtonDown(0))
-                {
-                    m_currentState.OnLeftMouseIsDown(mousePosition);
-                }
-                else if (Input.GetMouseButton(0))
-                {
-                    m_currentState.OnLeftMouseIsPressed(mousePosition);
-                }
-                else if (Input.GetMouseButtonUp(0))
-                {
-                    m_currentState.OnLeftMouseIsUp(mousePosition);
-                }
+                m_currentState?.OnLeftMouseIsDown(mousePosition);
+            }
+            else if (Input.GetMouseButton(0))
+            {
+                m_currentState?.OnLeftMouseIsPressed(mousePosition);
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                m_currentState?.OnLeftMouseIsUp(mousePosition);
             }
         }
 
@@ -211,17 +207,23 @@ namespace IndustryLP
         }
 
         /// <summary>
+        /// Renders a geometry effect
+        /// </summary>
+        /// <param name="cameraInfo"></param>
+        public override void RenderGeometry(RenderManager.CameraInfo cameraInfo)
+        {
+            base.RenderGeometry(cameraInfo);
+            m_currentState?.OnRenderGeometry(cameraInfo);
+        }
+
+        /// <summary>
         /// Renders a overlay effect
         /// </summary>
         /// <param name="cameraInfo"></param>
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
             base.RenderOverlay(cameraInfo);
-
-            if (m_currentState != null)
-            {
-                m_currentState.OnRenderOverlay(cameraInfo);
-            }
+            m_currentState?.OnRenderOverlay(cameraInfo);
         }
 
         /// <summary>
@@ -230,11 +232,7 @@ namespace IndustryLP
         public override void SimulationStep()
         {
             base.SimulationStep();
-
-            if (m_currentState != null)
-            {
-                m_currentState.OnSimulationStep();
-            }
+            m_currentState?.OnSimulationStep();
         }
 
         #endregion
@@ -242,13 +240,41 @@ namespace IndustryLP
         #region IndustryLP Controller
 
         /// <summary>
+        /// Called when the selection starts
+        /// </summary>
+        public void StartSelection()
+        {
+            MainPanel.IsSelectionDone = false;
+        }
+
+        /// <summary>
+        /// Called when the selection finished
+        /// </summary>
+        public void FinishSelection()
+        {
+            MainPanel.IsSelectionDone = true;
+        }
+
+        /// <summary>
+        /// Called when the selection is cancel
+        /// </summary>
+        public void CancelSelection()
+        {
+            MainPanel.DisableButton(SelectionButton.ObjectName);
+            m_currentState.OnLeftController();
+            m_currentState = null;
+        }
+
+        /// <summary>
         /// Translate the current position of mouse in terrain position
         /// </summary>
         private Vector3 GetTerrainMousePosition()
         {
             var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            var input = new RaycastInput(mouseRay, Camera.main.farClipPlane);
-            input.m_ignoreTerrain = false;
+            var input = new RaycastInput(mouseRay, Camera.main.farClipPlane)
+            {
+                m_ignoreTerrain = false
+            };
             RayCast(input, out RaycastOutput output);
             return output.m_hitPos;
         }
@@ -262,20 +288,20 @@ namespace IndustryLP
             {
                 if (!enabled) enabled = true;
                 CurrentState = m_selectionState;
-                m_mainView.DisableButton(GeneratorButton.ObjectName);
+                MainPanel.DisableButton(GenerateOptionsButton.ObjectName);
             }
         }
 
         /// <summary>
         /// Invoked when the generation button is pressed
         /// </summary>
-        private void OnGeneratorPressed(bool isChecked)
+        private void OnGeneratorPressed()
         {
-            if (isChecked)
+            if (!enabled) enabled = true;
+            if (m_currentState != m_generatorState)
             {
-                if (!enabled) enabled = true;
                 CurrentState = m_generatorState;
-                m_mainView.DisableButton(SelectionButton.ObjectName);
+                MainPanel.DisableButton(SelectionButton.ObjectName);
             }
         }
 

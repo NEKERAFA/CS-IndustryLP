@@ -10,7 +10,7 @@
         /// <summary>
         /// The prefix of IndustryLP Library
         /// </summary>
-        public static string LibPrefix => "ILP";
+        public static string LibPrefix => "IndustryLP";
 
         /// <summary>
         /// The prefix of all IndustryLP Gameobjects

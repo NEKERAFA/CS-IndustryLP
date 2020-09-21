@@ -8,7 +8,7 @@ namespace IndustryLP.Utils.Constants
 #if DEBUG
         public static string ClingoPath => Path.Combine(DataLocation.modsPath, "IndustryLP");
 #else
-        public static string ClingoPath => "";
+        public static string ClingoPath => { throw new NotImplementedException() };
 #endif
 
         public static string LogicProgramPath => Path.Combine(ClingoPath, "logic_program");

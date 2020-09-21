@@ -3,12 +3,15 @@
 namespace IndustryLP.UI.Buttons
 {
     /// <summary>
-    /// Creates a clickable button that represents the selection tool
+    /// Creates a switchable button that represents the selection tool
     /// </summary>
     internal class SelectionButton : ToolButton
     {
         #region Properties
 
+        /// <summary>
+        /// The name of the button
+        /// </summary>
         public static string ObjectName => $"{LibraryConstants.UIPrefix}_SelectionButton";
 
         #endregion
@@ -17,7 +20,7 @@ namespace IndustryLP.UI.Buttons
 
         public override void Start()
         {
-            base.Start();
+            Start(true);
             name = ObjectName;
             normalFgSprite = ResourceConstants.SelectionIcon;
         }

@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using ColossalFramework.Math;
 using IndustryLP.Utils.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -20,21 +21,6 @@ namespace IndustryLP.Utils
         }
 
         /// <summary>
-        /// Gets the next build index and update the simulation manager build index
-        /// </summary>
-        private static uint GetNewBuildIndex()
-        {
-            // Gets managers
-            var simulationManager = Singleton<SimulationManager>.instance;
-            // Get fresh build index
-            uint newBuildIndex = simulationManager.m_currentBuildIndex++;
-            // Set new build index
-            simulationManager.m_currentBuildIndex = newBuildIndex;
-
-            return newBuildIndex;
-        }
-
-        /// <summary>
         /// Tries to create a new node.
         /// </summary>
         /// <param name="position">Node position</param>
@@ -44,16 +30,15 @@ namespace IndustryLP.Utils
         public static bool TryCreateNode(Vector3 position, NetInfo netPrefab, out ushort nodeId)
         {   
             // Gets managers
-            var simulationManager = Singleton<SimulationManager>.instance;
             var netManager = Singleton<NetManager>.instance;
 
             // Gets default randomizer
-            var randomizer = simulationManager.m_randomizer;
+            var randomizer = SimulationUtils.GetRandomizer();
 
             LoggerUtils.Log("Creating node");
 
             // Create Node
-            return netManager.CreateNode(out nodeId, ref randomizer, netPrefab, position, GetNewBuildIndex());
+            return netManager.CreateNode(out nodeId, ref randomizer, netPrefab, position, SimulationUtils.GetNewBuildIndex());
         }
 
         /// <summary>
@@ -106,11 +91,10 @@ namespace IndustryLP.Utils
         public static bool TryCreateSegment(ushort idStartNode, Vector3 startPosition, ushort idEndNode, Vector3 endPosition, NetInfo netPrefab, out ushort segmentId)
         {
             // Gets managers
-            var simulationManager = Singleton<SimulationManager>.instance;
             var netManager = Singleton<NetManager>.instance;
 
             // Gets default randomizer
-            var randomizer = simulationManager.m_randomizer;
+            var randomizer = SimulationUtils.GetRandomizer();
 
             LoggerUtils.Log("Creating net");
 
@@ -120,7 +104,7 @@ namespace IndustryLP.Utils
             if (startDirection.magnitude > 80)
                 LoggerUtils.Warning("The length of the segment is longer that the recommend (80 units)");
 
-            var buildIndex = GetNewBuildIndex();
+            var buildIndex = SimulationUtils.GetNewBuildIndex();
 
             // Create segment
             return netManager.CreateSegment(out segmentId, ref randomizer, netPrefab, idStartNode, idEndNode, startDirection.normalized, endDirection.normalized, buildIndex, buildIndex, false);
@@ -347,6 +331,90 @@ namespace IndustryLP.Utils
             subdivisions.Add(endPosition);
 
             return CreateRoad(attachedNode, subdivisions, netPrefab);
+        }
+
+        /// <summary>
+        /// Renders a road in the terrain.
+        /// </summary>
+        /// <param name="cameraInfo">A <see cref="RenderManager.CameraInfo"/> object</param>
+        /// <param name="startPosition">The start position of the road</param>
+        /// <param name="startDirection">The direction of the road</param>
+        /// <param name="endPosition">The end position of the road</param>
+        /// <param name="endDirection">The end direction of the road</param>
+        /// <param name="netPrefab">A <see cref="NetInfo"/> object</param>
+        /// <param name="roadColor">The color of the road</param>
+        public static void RenderRoad(RenderManager.CameraInfo cameraInfo, Vector3 startPosition, Vector3 startDirection, Vector3 endPosition, Vector3 endDirection, NetInfo netPrefab, Color roadColor)
+        {
+            // Get bezier representation
+            Bezier3 bezier;
+            bezier.a = startPosition;
+            bezier.d = endPosition;
+
+            NetSegment.CalculateMiddlePoints(bezier.a, startDirection.normalized,bezier.d, endDirection.normalized, false, false, out bezier.b, out bezier.c);
+
+            // Render road
+            RenderManager.instance.OverlayEffect.DrawBezier(cameraInfo, roadColor, bezier, netPrefab.m_halfWidth * 4f / 3f, 100000f, -100000f, -1f, 1280f, false, true);
+        }
+
+        /// <summary>
+        /// Renders a straight road in the terrain.
+        /// </summary>
+        /// <param name="cameraInfo">A <see cref="RenderManager.CameraInfo"/> object</param>
+        /// <param name="startPosition">The start position of the road</param>
+        /// <param name="endPosition">The end position of the road</param>
+        /// <param name="netPrefab">A <see cref="NetInfo"/> object</param>
+        /// <param name="roadColor">The color of the road</param>
+        public static void RenderStraightRoad(RenderManager.CameraInfo cameraInfo, Vector3 startPosition, Vector3 endPosition, NetInfo netPrefab, Color roadColor)
+        {
+            // Get the direction of the road
+            var startDirection = endPosition - startPosition;
+            var endDirection = startPosition - endPosition;
+
+            RenderRoad(cameraInfo, startPosition, startDirection.normalized, endPosition, endDirection.normalized, netPrefab, roadColor);
+        }
+
+        /// <summary>
+        /// Renders a grid
+        /// </summary>
+        /// <param name="cameraInfo">A <see cref="RenderManager.CameraInfo"/> object</param>
+        /// <param name="region">The region to draw the roads</param>
+        /// <param name="rows">The number of rows</param>
+        /// <param name="columns">The number of columns</param>
+        /// <param name="selectionColor">The color of the roads</param>
+        public static void RenderRoadGrid(RenderManager.CameraInfo cameraInfo, Quad3 region, int rows, int columns, Color selectionColor)
+        {
+            // Gets road info
+            var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
+
+            // Render rows
+            RenderStraightRoad(cameraInfo, region.a, region.b, netPrefab, selectionColor);
+
+            for (int row = 0; row <= rows; row++)
+            {
+                // Interpolate positions
+                var startPos = Vector3.Lerp(region.a, region.d, Convert.ToSingle(row) / Convert.ToSingle(rows));
+                var endPos = Vector3.Lerp(region.b, region.c, Convert.ToSingle(row) / Convert.ToSingle(rows));
+
+                // Render road
+                RenderStraightRoad(cameraInfo, startPos, endPos, netPrefab, selectionColor);
+            }
+
+            RenderStraightRoad(cameraInfo, region.d, region.c, netPrefab, selectionColor);
+
+            // Render columns
+            RenderStraightRoad(cameraInfo, region.a, region.d, netPrefab, selectionColor);
+
+            for (int col = 0; col <= columns; col++)
+            {
+                // Interpolate positions
+                var startPos = Vector3.Lerp(region.a, region.b, Convert.ToSingle(col) / Convert.ToSingle(columns));
+                var endPos = Vector3.Lerp(region.d, region.c, Convert.ToSingle(col) / Convert.ToSingle(columns));
+
+                // Render road
+                RenderStraightRoad(cameraInfo, startPos, endPos, netPrefab, selectionColor);
+            }
+
+            RenderStraightRoad(cameraInfo, region.b, region.c, netPrefab, selectionColor);
         }
     }
 }

@@ -11,4 +11,4 @@ row(0 .. (rows-1)).
 % Columna de la cuadrícula
 col(0 .. (cols-1)).
 % Número de parcela
-n_parcel(0 .. (parcels-1)).
+n_parcel(0 .. 8).

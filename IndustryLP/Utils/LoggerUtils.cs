@@ -61,7 +61,7 @@ namespace IndustryLP.Utils
         /// <param name="ex">A <see cref="Exception"/> object to print message errors</param>
         public static void Error(Exception ex, params object[] values)
         {
-            StringBuilder msg = new StringBuilder("");
+            StringBuilder msg = new StringBuilder();
             if (values != null && values.Length > 0)
             {
                 msg.Append(GetParamsAsString(values));
