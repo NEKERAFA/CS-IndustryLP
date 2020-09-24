@@ -18,6 +18,7 @@ namespace IndustryLP.Tools
         #region Attributes
 
         internal Quad3? m_selection;
+        internal float? m_angle;
 
         private MainTool m_mainTool;
         private GeneratorThread m_generator = null;
@@ -87,10 +88,17 @@ namespace IndustryLP.Tools
                     var rowLength = Vector3.Distance(m_selection.Value.a, m_selection.Value.d);
                     var columnLength = Vector3.Distance(m_selection.Value.a, m_selection.Value.b);
 
-                    rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 80f));
-                    cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 80f));
+                    rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 40f));
+                    cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 40f));
 
+#if DEBUG
                     debug_m_showSize.SetText(string.Format("({0}, {1})", rows, cols));
+#endif
+                }
+
+                if (selectionTool.m_angle.HasValue)
+                {
+                    m_angle = -selectionTool.m_angle.Value;
                 }
             }
         }
@@ -100,15 +108,22 @@ namespace IndustryLP.Tools
             // Draws the buildings
             if (m_controls != null && m_controls.Solution > 0 && m_generator != null && m_generator.Count > 0)
             {
+                // Gets the directions
                 var directionB = (m_selection.Value.b - m_selection.Value.a).normalized;
                 var directionD = (m_selection.Value.d - m_selection.Value.a).normalized;
+
+                // Gets the midpoint
+                var midPoint = Vector3.Lerp(m_selection.Value.a, m_selection.Value.c, 0.5f);
 
                 // Gets the lengths
                 var rowSize = Vector3.Distance(m_selection.Value.a, m_selection.Value.b) / rows;
                 var columnSize = Vector3.Distance(m_selection.Value.a, m_selection.Value.d) / cols;
 
+                // Gets TRS matrix
+                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
                 // Gets the current solution
-                var solution = m_generator.GetSolution(m_controls.Solution);
+                var solution = m_generator.GetSolution(m_controls.Solution - 1);
 
                 // Iterate over solution
                 for (int i = 0; i < rows; i++)
@@ -127,22 +142,7 @@ namespace IndustryLP.Tools
                             Vector3 position = m_selection.Value.a + (directionB * i * rowSize) + (directionB * rowSize / 2) + (directionD * j * columnSize) + (directionD * columnSize / 2);
 
                             // Draws the building
-                            buildingPrefab.m_buildingAI.RenderBuildGeometry(cameraInfo, position, 0, 0);
-                            BuildingTool.RenderGeometry(cameraInfo, buildingPrefab, 0, position, 0, false, buildingColor);
-
-                            if (buildingPrefab.m_subBuildings != null && buildingPrefab.m_subBuildings.Length != 0)
-                            {
-                                Matrix4x4 subMatrix4x = Matrix4x4.identity;
-                                subMatrix4x.SetTRS(position, Quaternion.identity, Vector3.one);
-                                for (int n = 0; n < buildingPrefab.m_subBuildings.Length; n++)
-                                {
-                                    BuildingInfo buildingInfo2 = buildingPrefab.m_subBuildings[n].m_buildingInfo;
-                                    Vector3 subPosition = subMatrix4x.MultiplyPoint(buildingPrefab.m_subBuildings[n].m_position);
-                                    float angle = buildingPrefab.m_subBuildings[n].m_angle;
-                                    buildingInfo2.m_buildingAI.RenderBuildGeometry(cameraInfo, subPosition, angle, 0);
-                                    BuildingTool.RenderGeometry(cameraInfo, buildingInfo2, 0, subPosition, angle, true, buildingColor);
-                                }
-                            }
+                            BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, position, m_angle.Value, buildingPrefab, buildingColor);
                         }
                     }
                 }
@@ -153,6 +153,9 @@ namespace IndustryLP.Tools
         {
             if (m_selection.HasValue)
             {
+                // Gets the midpoint
+                var midPoint = Vector3.Lerp(m_selection.Value.a, m_selection.Value.c, 0.5f);
+
                 // Draws the roads
                 NetUtils.RenderRoadGrid(cameraInfo, m_selection.Value, rows, cols, ColorConstants.SelectedColor);
 
@@ -166,8 +169,11 @@ namespace IndustryLP.Tools
                     var rowSize = Vector3.Distance(m_selection.Value.a, m_selection.Value.b) / rows;
                     var columnSize = Vector3.Distance(m_selection.Value.a, m_selection.Value.d) / cols;
 
+                    // Gets TRS matrix
+                    Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
                     // Gets the current solution
-                    var solution = m_generator.GetSolution(m_controls.Solution);
+                    var solution = m_generator.GetSolution(m_controls.Solution - 1);
 
                     // Iterate over solution
                     for (int i = 0; i < rows; i++)
@@ -185,7 +191,7 @@ namespace IndustryLP.Tools
                                 Vector3 position = m_selection.Value.a + (directionB * i * rowSize) + (directionB * rowSize / 2) + (directionD * j * columnSize) + (directionD * columnSize / 2);
 
                                 // Draws the building
-                                BuildingUtils.RenderBuilding(cameraInfo, position, 0, buildingPrefab, ColorConstants.SelectedColor);
+                                //BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, position, m_angle.Value, buildingPrefab, ColorConstants.SelectedColor);
                             }
                         }
                     }
@@ -195,7 +201,6 @@ namespace IndustryLP.Tools
                 if (!debug_m_showSize.isVisible) debug_m_showSize.Show();
 
                 var mainView = UIView.GetAView();
-                var midPoint = Vector3.Lerp(m_selection.Value.a, m_selection.Value.c, 0.5f);
                 var newPosition = Camera.main.WorldToScreenPoint(midPoint) / mainView.inputScale;
                 debug_m_showSize.relativePosition = mainView.ScreenPointToGUI(newPosition) - new Vector2(debug_m_showSize.width / 2f, debug_m_showSize.height / 2f);
 #endif
@@ -296,11 +301,11 @@ namespace IndustryLP.Tools
             */
         }
 
-        #endregion
+#endregion
 
-        #region Generator Behaviour
+#region Generator Behaviour
 
-        #region Dialog events
+#region Dialog events
 
         private void OnClosePopup(UIComponent c, UIMouseEventParameter p)
         {
@@ -314,14 +319,14 @@ namespace IndustryLP.Tools
             m_popup.Hide();
         }
 
-        #endregion
+#endregion
 
-        #region Panel event
+#region Panel event
 
         private void OnChangeSolution(bool _)
         {
             LoggerUtils.Log($"Solution {m_controls.Solution}: ");
-            var solution = m_generator.GetSolution(m_controls.Solution);
+            var solution = m_generator.GetSolution(m_controls.Solution - 1);
 
             for (int i = 0; i < rows; i++)
             {
@@ -333,7 +338,7 @@ namespace IndustryLP.Tools
             }
         }
 
-        #endregion
+#endregion
 
         public override ToolButton CreateButton(ToolButton.OnButtonClickedDelegate callback)
         {
@@ -368,12 +373,12 @@ namespace IndustryLP.Tools
                 case Region.Parcel.OilExtractor:
                     return "Oil 3x2 Extractor02";
                 case Region.Parcel.OilProcesssing:
-                    return "Oil 3x2 Processsing";
+                    return "Oil 3x2 Processing";
                 default:
                     return null;
             }
         }
 
-        #endregion
+#endregion
     }
 }

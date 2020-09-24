@@ -25,6 +25,8 @@ namespace IndustryLP.Tools
         private static readonly MethodInfo RenderSegment = typeof(NetTool).GetMethod("RenderSegment", BindingFlags.NonPublic | BindingFlags.Static);
 
         internal Quad3? m_currentMouseSelection;
+        internal float? m_angle;
+
         private MainTool m_mainTool;
 
 #if DEBUG
@@ -94,6 +96,7 @@ namespace IndustryLP.Tools
             if (CurrentState == SelectionState.None)
             {
                 m_currentMouseSelection = new Quad3(mousePosition, mousePosition, mousePosition, mousePosition);
+                m_angle = Camera.main.transform.localEulerAngles.y * Mathf.Deg2Rad;
                 CurrentState = SelectionState.CreatingSelection;
             }
         }
@@ -106,8 +109,7 @@ namespace IndustryLP.Tools
 
                 selection.c = mousePosition;
 
-                var angle = Camera.main.transform.localEulerAngles.y * Mathf.Deg2Rad;
-                var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
+                var down = new Vector3(Mathf.Cos(m_angle.Value), 0, -Mathf.Sin(m_angle.Value));
                 var right = new Vector3(-down.z, 0, down.x);
 
                 var diagonal = selection.c - selection.a;
@@ -137,8 +139,8 @@ namespace IndustryLP.Tools
                 var rowLength = Vector3.Distance(m_currentMouseSelection.Value.a, m_currentMouseSelection.Value.b);
                 var columnLength = Vector3.Distance(m_currentMouseSelection.Value.a, m_currentMouseSelection.Value.d);
 
-                var rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 80f));
-                var cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 80f));
+                var rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 40f));
+                var cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 40f));
 
                 if (diagonal > kMinDistance && rows > 1 && cols > 1)
                 {
@@ -166,8 +168,8 @@ namespace IndustryLP.Tools
                     var columnLength = Vector3.Distance(m_currentMouseSelection.Value.a, m_currentMouseSelection.Value.b);
                     var diagonalLength = Vector3.Distance(m_currentMouseSelection.Value.a, m_currentMouseSelection.Value.c);
 
-                    var rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 80f));
-                    var cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 80f));
+                    var rows = System.Convert.ToInt32(System.Math.Floor(rowLength / 40f));
+                    var cols = System.Convert.ToInt32(System.Math.Floor(columnLength / 40f));
 
                     Color32 color;
                     if (rows > 1 && cols > 1)
@@ -207,7 +209,7 @@ namespace IndustryLP.Tools
                     var newPositionD = Camera.main.WorldToScreenPoint(m_currentMouseSelection.Value.d) / mainView.inputScale;
                     debug_m_showPositionD.relativePosition = mainView.ScreenPointToGUI(newPositionD) - new Vector2(debug_m_showPositionD.width / 2f, debug_m_showPositionD.height / 2f);
 #endif
-                }
+                    }
             }
         }
 
