@@ -195,6 +195,19 @@ namespace IndustryLP
             {
                 m_currentState?.OnLeftMouseIsUp(mousePosition);
             }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                m_currentState?.OnRightMouseIsDown(mousePosition);
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                m_currentState?.OnRightMouseIsPressed(mousePosition);
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                m_currentState?.OnRightMouseIsUp(mousePosition);
+            }
         }
 
         /// <summary>
@@ -266,17 +279,32 @@ namespace IndustryLP
         }
 
         /// <summary>
-        /// Translate the current position of mouse in terrain position
+        /// Obtiene una colision contra el terreno
         /// </summary>
-        private Vector3 GetTerrainMousePosition()
+        /// <param name="ray"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public bool GetColisingWithTerrain(Ray ray, out Vector3 output)
         {
-            var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            var input = new RaycastInput(mouseRay, Camera.main.farClipPlane)
+            var raycastInput = new RaycastInput(ray, Camera.main.farClipPlane)
             {
                 m_ignoreTerrain = false
             };
-            RayCast(input, out RaycastOutput output);
-            return output.m_hitPos;
+
+            var result = RayCast(raycastInput, out RaycastOutput raycastOutput);
+            output = result ? raycastOutput.m_hitPos : default;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Translate the current position of mouse in terrain position
+        /// </summary>
+        public Vector3 GetTerrainMousePosition()
+        {
+            var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            GetColisingWithTerrain(mouseRay, out Vector3 output);
+            return output;
         }
 
         /// <summary>

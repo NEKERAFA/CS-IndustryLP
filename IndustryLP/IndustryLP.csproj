@@ -71,6 +71,7 @@
     <Compile Include="Utils\Constants\ClingoConstants.cs" />
     <Compile Include="Utils\Constants\ColorConstants.cs" />
     <Compile Include="Utils\Enums\GenerationState.cs" />
+    <Compile Include="Utils\Enums\PointSelectionState.cs" />
     <Compile Include="Utils\Enums\SelectionState.cs" />
     <Compile Include="Tools\GeneratorTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
