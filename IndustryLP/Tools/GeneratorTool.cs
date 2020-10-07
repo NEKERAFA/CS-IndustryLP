@@ -81,9 +81,9 @@ namespace IndustryLP.Tools
             if (oldController is SelectionTool)
             {
                 var selectionTool = oldController as SelectionTool;
-                if (selectionTool.m_currentMouseSelection.HasValue)
+                if (selectionTool.m_selection.HasValue)
                 {
-                    m_selection = selectionTool.m_currentMouseSelection;
+                    m_selection = selectionTool.m_selection;
 
                     var rowLength = Vector3.Distance(m_selection.Value.a, m_selection.Value.d);
                     var columnLength = Vector3.Distance(m_selection.Value.a, m_selection.Value.b);
@@ -96,10 +96,12 @@ namespace IndustryLP.Tools
 #endif
                 }
 
+                /*
                 if (selectionTool.m_angle.HasValue)
                 {
                     m_angle = -selectionTool.m_angle.Value;
                 }
+                */
             }
         }
 

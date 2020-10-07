@@ -7,6 +7,9 @@
     {
         None,
         CreatingSelection,
-        SelectionCreated
+        SelectionCreated,
+        RotatingSelection,
+        MovingSelection,
+        MovingPointSelection
     }
 }

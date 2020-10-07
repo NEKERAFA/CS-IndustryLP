@@ -10,6 +10,11 @@ namespace IndustryLP.Utils.Constants
         public static Color BadSelectionColor => new Color32(255, 0, 0, 220);
 
         /// <summary>
+        /// The color to apply to the pointers
+        /// </summary>
+        public static Color PointerColor => new Color(0, 255, 0, 128);
+
+        /// <summary>
         /// The color to apply in selection mode
         /// </summary>
         public static Color SelectionColor => new Color32(255, 128, 0, 220);
@@ -22,16 +27,16 @@ namespace IndustryLP.Utils.Constants
         /// <summary>
         /// The color to apply when the object are disable
         /// </summary>
-        public static Color32 DisableColor => new Color32(128, 128, 128, 255);
+        public static Color DisableColor => new Color32(128, 128, 128, 255);
 
         /// <summary>
         /// The color to apply when the text is selected
         /// </summary>
-        public static Color32 TextSelectionColor => new Color32(0, 192, 255, 255);
+        public static Color TextSelectionColor => new Color32(0, 192, 255, 255);
 
         /// <summary>
         /// White color, <c>RGBA(255, 255, 255, 255)</c>
         /// </summary>
-        public static Color32 WhiteColor => new Color32(255, 255, 255, 255);
+        public static Color WhiteColor => new Color32(255, 255, 255, 255);
     }
 }
