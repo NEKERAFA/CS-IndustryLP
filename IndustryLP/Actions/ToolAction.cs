@@ -1,22 +1,17 @@
-﻿using IndustryLP.UI;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace IndustryLP.Tools
 {
-    internal abstract class ToolActionController
+    /// <summary>
+    /// Represents an action
+    /// </summary>
+    internal abstract class ToolAction
     {
-        /// <summary>
-        /// Invoked when the main tool is going to create a button of this controller
-        /// </summary>
-        /// <param name="callback">The callback when the button is pressed</param>
-        /// <returns></returns>
-        public abstract ToolButton CreateButton(ToolButton.OnButtonClickedDelegate callback);
-
         /// <summary>
         /// Invoked the first time that the main tool creates the controller
         /// </summary>
         /// <param name="mainTool"></param>
-        public virtual void OnStart(MainTool mainTool) { }
+        public virtual void OnStart(IMainTool mainTool) { }
 
         /// <summary>
         /// Invoked when the main tool is going to be destroyed
@@ -27,7 +22,7 @@ namespace IndustryLP.Tools
         /// Invoked when the main tool changes the current controller (user press in another button or the tool lose the control)
         /// </summary>
         /// <param name="oldController"></param>
-        public virtual void OnChangeController(ToolActionController oldController) { }
+        public virtual void OnChangeController(ToolAction oldController) { }
 
         /// <summary>
         /// Invoked when the controller is going to set the current controller
@@ -47,17 +42,17 @@ namespace IndustryLP.Tools
         /// <summary>
         /// Invoked when a new step in the simulation is going to happen
         /// </summary>
-        public virtual void OnSimulationStep() { }
+        public virtual void OnSimulationStep(Vector3 mousePosition) { }
 
         /// <summary>
         /// Invoked when a new geometry effect is going to be updated 
         /// </summary>
-        public virtual void OnRenderGeometry(RenderManager.CameraInfo cameraInfo) { }
+        public virtual void OnRenderGeometry(RenderManager.CameraInfo cameraInfo, Vector3 mousePosition) { }
 
         /// <summary>
         /// Invoked when a new overlay effect is going to be updated 
         /// </summary>
-        public virtual void OnRenderOverlay(RenderManager.CameraInfo cameraInfo) { }
+        public virtual void OnRenderOverlay(RenderManager.CameraInfo cameraInfo, Vector3 mousePosition) { }
 
         /// <summary>
         /// Invoked when the left mouse button is down
