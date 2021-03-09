@@ -3,7 +3,7 @@ using IndustryLP.Utils.Constants;
 
 namespace IndustryLP.UI
 {
-    internal abstract class OptionButton : UIButton
+    internal abstract class UIOptionButton : UIButton
     {
         #region Unity Behaviour Methods
 
@@ -11,7 +11,7 @@ namespace IndustryLP.UI
         {
             base.Awake();
 
-            atlas = IndustryTool.Atlas;
+            atlas = IndustryTool.IconAtlas;
             playAudioEvents = true;
 
             // Set background sprite

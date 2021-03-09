@@ -2,9 +2,9 @@
 using IndustryLP.UI.Buttons;
 using IndustryLP.Utils;
 
-namespace IndustryLP.UI
+namespace IndustryLP.UI.Panels
 {
-    internal class IndustryOptionPanel : UITabstrip
+    internal class UIOptionPanel : UITabstrip
     {
         #region Unity Behaviour Methods
 
@@ -22,16 +22,16 @@ namespace IndustryLP.UI
         private void SetupOptionButtons()
         {
             // Zoning option
-            var zoningTemplate = GameObjectUtils.AddObjectWithComponent<ZoningOptionButton>();
-            AddTab(ZoningOptionButton.Name, zoningTemplate, false);
+            var zoningTemplate = GameObjectUtils.AddObjectWithComponent<UIZoningButton>();
+            AddTab(UIZoningButton.Name, zoningTemplate, false);
 
             // Zone movement option
-            var moveZoneTemplate = GameObjectUtils.AddObjectWithComponent<MoveZoneOptionButton>();
-            AddTab(MoveZoneOptionButton.Name, moveZoneTemplate, false);
+            var moveZoneTemplate = GameObjectUtils.AddObjectWithComponent<UIMoveZoneButton>();
+            AddTab(UIMoveZoneButton.Name, moveZoneTemplate, false);
 
             // Zoning option
-            var buildZoneTemplate = GameObjectUtils.AddObjectWithComponent<BuildZoneOptionButton>();
-            AddTab(BuildZoneOptionButton.Name, buildZoneTemplate, false);
+            var buildZoneTemplate = GameObjectUtils.AddObjectWithComponent<UIBuildZoneButton>();
+            AddTab(UIBuildZoneButton.Name, buildZoneTemplate, false);
 
             // Set disabled buttons
             DisableTab(1);

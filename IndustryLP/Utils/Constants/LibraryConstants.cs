@@ -21,5 +21,15 @@
         /// The prefix of all IndustryLP Unity UI objects
         /// </summary>
         public static string UIPrefix => $"{ObjectPrefix}.UI";
+
+        /// <summary>
+        /// The minimun number of rows
+        /// </summary>
+        public static int MinRows => 3;
+
+        /// <summary>
+        /// The minimun number of columns
+        /// </summary>
+        public static int MinColumns => 3;
     }
 }

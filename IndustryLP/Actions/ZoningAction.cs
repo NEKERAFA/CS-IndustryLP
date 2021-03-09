@@ -21,7 +21,7 @@ namespace IndustryLP.Actions
         private ZoningState m_state = ZoningState.None;
         private IMainTool m_mainTool = null;
         private Quad3? m_selection = null;
-        private float m_cameraAngle = 0;
+        private float? m_cameraAngle = null;
 
         GUIUtils.UITextDebug showSize = null;
 
@@ -126,6 +126,13 @@ namespace IndustryLP.Actions
 #endif
         }
 
+        public override void OnEnterController()
+        {
+            m_selection = null;
+            m_cameraAngle = null;
+            m_mainTool.CancelZoning();
+        }
+
         public override void OnLeftController()
         {
             showSize.Hide();
@@ -139,9 +146,10 @@ namespace IndustryLP.Actions
 
         public override void OnLeftMouseIsDown(Vector3 mousePosition)
         {
-            m_cameraAngle = Camera.main.transform.localEulerAngles.y * Mathf.Deg2Rad;
+            var angle = Camera.main.transform.localEulerAngles.y * Mathf.Deg2Rad;
+            m_cameraAngle = angle;
 
-            var down = new Vector3(Mathf.Cos(m_cameraAngle), 0, -Mathf.Sin(m_cameraAngle));
+            var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
             var right = new Vector3(-down.z, 0, down.x);
 
             m_selection = new Quad3(
@@ -159,8 +167,9 @@ namespace IndustryLP.Actions
             if (m_state == ZoningState.CreatingZone)
             {
                 var quad = m_selection.Value;
+                var angle = m_cameraAngle.Value;
 
-                var down = new Vector3(Mathf.Cos(m_cameraAngle), 0, -Mathf.Sin(m_cameraAngle));
+                var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
                 var right = new Vector3(-down.z, 0, down.x);
 
                 var minC = quad.a - 40f * down - 40 * right;
@@ -170,7 +179,6 @@ namespace IndustryLP.Actions
 
                 if (diagonal.magnitude > minDiagonal.magnitude)
                 {
-
                     quad.c = mousePosition;
 
                     var dotDown = Vector3.Dot(diagonal, down);
@@ -197,6 +205,7 @@ namespace IndustryLP.Actions
             if (m_state == ZoningState.CreatingZone)
             {
                 var quad = Selection;
+                var angle = m_cameraAngle.Value;
 
                 var diagonal = Vector3.Distance(quad.a, quad.c);
 
@@ -204,7 +213,7 @@ namespace IndustryLP.Actions
                 {
                     m_selection = quad;
                     m_state = ZoningState.ZoneCreated;
-                    m_mainTool.DoZoning(m_selection.Value);
+                    m_mainTool.DoZoning(m_selection.Value, angle);
                 }
                 else
                 {
@@ -217,16 +226,15 @@ namespace IndustryLP.Actions
 
         public override void OnRenderOverlay(RenderManager.CameraInfo cameraInfo, Vector3 mousePosition)
         {
-
             if (m_state != ZoningState.None)
             {
-                var quad = (m_state == ZoningState.CreatingZone) ? Selection : m_selection.Value;
+                var quad = Selection;
 
                 var diagonal = Vector3.Distance(quad.a, quad.c);
 
                 if (diagonal > k_minDistante)
                 {
-                    Color color = (Rows > 1 && Columns > 1) ? ColorConstants.SelectionColor : ColorConstants.BadSelectionColor;
+                    Color color = (Rows > LibraryConstants.MinRows && Columns > LibraryConstants.MinColumns) ? ColorConstants.SelectionColor : ColorConstants.BadSelectionColor;
 
                     RenderManager.instance.OverlayEffect.DrawQuad(cameraInfo, color, quad, -1f, 1280f, false, false);
 

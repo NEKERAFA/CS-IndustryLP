@@ -2,7 +2,7 @@
 
 namespace IndustryLP.UI.Buttons
 {
-    internal class ZoningOptionButton : OptionButton
+    internal class UIZoningButton : UIOptionButton
     {
         #region Properties
 

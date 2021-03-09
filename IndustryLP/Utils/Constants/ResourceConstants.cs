@@ -13,6 +13,11 @@
         public static string IconsPath => $"{ResourcesPath}.Icons";
 
         /// <summary>
+        /// The distribution button path in the assembly
+        /// </summary>
+        public static string DistributionsPath => $"{ResourcesPath}.Distributions";
+
+        /// <summary>
         /// The main toolbar icon
         /// </summary>
         public static string ToolbarNormal => "ToolbarIconNormal";
@@ -113,8 +118,83 @@
         public static string OptionFgDisabled => "OptionBaseDisabled";
 
         /// <summary>
+        /// The grid distribution
+        /// </summary>
+        public static string GridDistributionNormal => "GridDistribution";
+
+        /// <summary>
+        /// The grid distribution when is hovered
+        /// </summary>
+        public static string GridDistributionHovered => "GridDistributionHovered";
+
+        /// <summary>
+        /// The grid distribution when is pressed
+        /// </summary>
+        public static string GridDistributionPressed => "GridDistributionPressed";
+
+        /// <summary>
+        /// The grid distribution when is focused
+        /// </summary>
+        public static string GridDistributionFocused => "GridDistributionFocused";
+
+        /// <summary>
+        /// The line distribution
+        /// </summary>
+        public static string LineDistributionNormal => "LineDistribution";
+
+        /// <summary>
+        /// The line distribution when is hovered
+        /// </summary>
+        public static string LineDistributionHovered => "LineDistributionHovered";
+
+        /// <summary>
+        /// The line distribution when is pressed
+        /// </summary>
+        public static string LineDistributionPressed => "LineDistributionPressed";
+
+        /// <summary>
+        /// The grid distribution when is focused
+        /// </summary>
+        public static string LineDistributionFocused => "LineDistributionFocused";
+
+        /// <summary>
+        /// The mine distribution
+        /// </summary>
+        public static string MineDistributionNormal => "MineDistribution";
+
+        /// <summary>
+        /// The mine distribution when is hovered
+        /// </summary>
+        public static string MineDistributionHovered => "MineDistributionHovered";
+
+        /// <summary>
+        /// The grid distribution when is pressed
+        /// </summary>
+        public static string MineDistributionPressed => "MineDistributionPressed";
+
+        /// <summary>
+        /// The grid distribution when is focused
+        /// </summary>
+        public static string MineDistributionFocused => "MineDistributionFocused";
+
+        /// <summary>
+        /// The disabled distribution
+        /// </summary>
+        public static string DistributionDisabled => "DistributionDisabled";
+        
+        /// <summary>
         /// Name of the atlas
         /// </summary>
         public static string AtlasName => $"{LibraryConstants.LibPrefix}.Atlas";
+
+        /// <summary>
+        /// Name of the icons atlas
+        /// </summary>
+        public static string IconAtlasName => $"{AtlasName}.Icons";
+
+        /// <summary>
+        /// Name of the distribution thumbnails atlas
+        /// </summary>
+        public static string DistributionAtlasName => $"{AtlasName}.DistributionThumbnails";
     }
 }

@@ -1,8 +1,8 @@
 ﻿using IndustryLP.Utils.Constants;
 
-namespace IndustryLP.UI
+namespace IndustryLP.UI.Panels
 {
-    internal class IndustryGroupPanel : GeneratedGroupPanel
+    internal class UIGroupPanel : GeneratedGroupPanel
     {
         #region Properties
         

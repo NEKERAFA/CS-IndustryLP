@@ -2,11 +2,11 @@
 
 namespace IndustryLP.UI.Buttons
 {
-    internal class MoveZoneOptionButton : OptionButton
+    internal class UIBuildZoneButton : UIOptionButton
     {
         #region Properties
 
-        public static string Name => LibraryConstants.ObjectPrefix + ".MoveZoneOptionButton";
+        public static string Name => LibraryConstants.ObjectPrefix + ".BuildZoneOptionButton";
 
         #endregion
 
@@ -15,7 +15,7 @@ namespace IndustryLP.UI.Buttons
         public override void Awake()
         {
             base.Awake();
-            normalFgSprite = ResourceConstants.OptionMove;
+            normalFgSprite = ResourceConstants.OptionBuild;
         }
 
         #endregion

@@ -1,13 +1,15 @@
-﻿using ColossalFramework.Math;
+﻿using ColossalFramework.Globalization;
+using ColossalFramework.Math;
 using ColossalFramework.UI;
 using IndustryLP.Actions;
+using IndustryLP.DistributionDefinition;
 using IndustryLP.Tools;
-using IndustryLP.UI;
+using IndustryLP.UI.Panels;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using System;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace IndustryLP
 {
@@ -24,9 +26,14 @@ namespace IndustryLP
         public static IndustryTool instance = null;
 
         /// <summary>
-        /// Represents current atlas
+        /// Represents current icon atlas
         /// </summary>
-        private static UITextureAtlas m_atlas = null;
+        private static UITextureAtlas m_iconAtlas = null;
+
+        /// <summary>
+        /// Represents current thumbnail atlas
+        /// </summary>
+        private static UITextureAtlas m_thumbnailAtlas = null;
 
         /// <summary>
         /// Toolbar button
@@ -41,9 +48,17 @@ namespace IndustryLP
         /// <summary>
         /// Options panel
         /// </summary>
-        private IndustryOptionPanel m_optionPanel = null;
+        private UIOptionPanel m_optionPanel = null;
 
+        /// <summary>
+        /// Current action
+        /// </summary>
         private ToolAction m_action = null;
+
+        /// <summary>
+        /// Current distribution
+        /// </summary>
+        private DistributionInfo m_distribution = null;
 
         private Vector3? m_mouseTerrainPosition = null;
         private bool m_mouseHoverToolbar = false;
@@ -57,20 +72,28 @@ namespace IndustryLP
 
         #endregion
 
+        #region Distributions
+
+        private DistributionThread gridDistribution;
+        private DistributionThread lineDistribution;
+        private DistributionThread mineDistribution;
+
+        #endregion
+
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the texture atlas
+        /// Gets the icon texture atlas
         /// </summary>
-        public static UITextureAtlas Atlas
+        public static UITextureAtlas IconAtlas
         {
             get
             {
-                if (m_atlas == null)
+                if (m_iconAtlas == null)
                 {
-                    string[] spriteNames =
+                    string[] iconsNames =
                     {
                         ResourceConstants.ToolbarNormal,
                         ResourceConstants.ToolbarHovered,
@@ -83,8 +106,7 @@ namespace IndustryLP
                         ResourceConstants.OptionMove
                     };
 
-                    // Loads custom resources
-                    m_atlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.AtlasName, spriteNames, ResourceConstants.IconsPath);
+                    m_iconAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.IconAtlasName, iconsNames, ResourceConstants.IconsPath);
 
                     var defaultAtlas = ResourceLoader.GetAtlas("Ingame");
                     Texture2D[] textures =
@@ -102,11 +124,44 @@ namespace IndustryLP
                         defaultAtlas[ResourceConstants.OptionFgDisabled].texture,
                     };
 
-                    // Add default resources
-                    ResourceLoader.AddTexturesInAtlas(Atlas, textures);
+                    // Add resources
+                    ResourceLoader.AddTexturesInAtlas(m_iconAtlas, textures, true);
                 }
 
-                return m_atlas;
+                return m_iconAtlas;
+            }
+        }
+
+        /// <summary>
+        /// Gets the thumbnail texture atlas
+        /// </summary>
+        public static UITextureAtlas ThumbnailAtlas
+        {
+            get
+            {
+                if (m_thumbnailAtlas == null)
+                {
+                    string[] distributionsNames =
+                    {
+                        ResourceConstants.DistributionDisabled,
+                        ResourceConstants.GridDistributionNormal,
+                        ResourceConstants.GridDistributionHovered,
+                        ResourceConstants.GridDistributionPressed,
+                        ResourceConstants.GridDistributionFocused,
+                        ResourceConstants.LineDistributionNormal,
+                        ResourceConstants.LineDistributionHovered,
+                        ResourceConstants.LineDistributionPressed,
+                        ResourceConstants.LineDistributionFocused,
+                        ResourceConstants.MineDistributionNormal,
+                        ResourceConstants.MineDistributionHovered,
+                        ResourceConstants.MineDistributionPressed,
+                        ResourceConstants.MineDistributionFocused,
+                    };
+
+                     m_thumbnailAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.DistributionAtlasName, distributionsNames, ResourceConstants.DistributionsPath);
+                }
+
+                return m_thumbnailAtlas;
             }
         }
 
@@ -115,9 +170,9 @@ namespace IndustryLP
         /// </summary>
         public static string ObjectName => LibraryConstants.ObjectPrefix + ".ToolBehaviour";
 
-        public Quad3 Selection { get; set; }
+        public Quad3? Selection { get; set; } = null;
 
-        public float SelectionAngle { get; set; }
+        public float? SelectionAngle { get; set; } = null;
 
         #endregion
 
@@ -136,9 +191,11 @@ namespace IndustryLP
             LoggerUtils.Log("Loading IndustryLP");
 
             SetupToolbarButton();
+            SetupTutorialPanel();
             SetupOptionPanel();
             SetupScrollablePanel();
             SetupActions();
+            SetupDistributions();
 
             LoggerUtils.Log("Finished");
         }
@@ -180,13 +237,11 @@ namespace IndustryLP
         {
             base.OnToolUpdate();
 
-            var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
+            m_mouseTerrainPosition = TerrainUtils.GetTerrainMousePosition();
 
             // Checks if mouse is over UI
             if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
             {
-                m_mouseTerrainPosition = GetTerrainMousePosition();
-
                 m_action?.OnUpdate(m_mouseTerrainPosition.Value);
 
                 if (Input.GetMouseButtonDown(0))
@@ -233,7 +288,8 @@ namespace IndustryLP
         public override void RenderGeometry(RenderManager.CameraInfo cameraInfo)
         {
             base.RenderGeometry(cameraInfo);
-            if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
+
+            if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
         }
 
@@ -244,8 +300,14 @@ namespace IndustryLP
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
             base.RenderOverlay(cameraInfo);
-            if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
+
+            if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
+
+            if (m_distribution != null)
+            {
+                DistributionUtils.RenderSegments(cameraInfo, ColorConstants.SelectionColor, m_distribution.Road);
+            }
         }
 
         /// <summary>
@@ -254,7 +316,8 @@ namespace IndustryLP
         public override void SimulationStep()
         {
             base.SimulationStep();
-            if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
+
+            if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnSimulationStep(m_mouseTerrainPosition.Value);
         }
 
@@ -262,25 +325,23 @@ namespace IndustryLP
 
         #region Public methods
 
+        /// <inheritdoc/>
         public void CancelZoning()
         {
             m_optionPanel.DisableTab(1);
             m_optionPanel.DisableTab(2);
         }
 
-        public void DoZoning(Quad3 zone)
+        /// <inheritdoc/>
+        public void DoZoning(Quad3 selection, float angle)
         {
-            Selection = zone;
+            Selection = selection;
+            SelectionAngle = angle;
             m_optionPanel.EnableTab(1);
             m_optionPanel.DisableTab(2);
         }
 
-        /// <summary>
-        /// Obtiene una colision contra el terreno
-        /// </summary>
-        /// <param name="ray"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public bool GetColisingWithTerrain(Ray ray, out Vector3 output)
         {
             var raycastInput = new RaycastInput(ray, Camera.main.farClipPlane)
@@ -292,6 +353,33 @@ namespace IndustryLP
             output = result ? raycastOutput.m_hitPos : default;
 
             return result;
+        }
+
+        /// <inheritdoc/>
+        public void SetGridDistribution()
+        {
+            if (Selection.HasValue && SelectionAngle.HasValue)
+            {
+                m_distribution = gridDistribution.Generate(Selection.Value, SelectionAngle.Value);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void SetLineDistribution()
+        {
+            if (Selection.HasValue && SelectionAngle.HasValue)
+            {
+                m_distribution = lineDistribution.Generate(Selection.Value, SelectionAngle.Value);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void SetMineDistribution()
+        {
+            if (Selection.HasValue && SelectionAngle.HasValue)
+            {
+                m_distribution = mineDistribution.Generate(Selection.Value, SelectionAngle.Value);
+            }
         }
 
         #endregion
@@ -314,9 +402,9 @@ namespace IndustryLP
             var subPanelGameObject = UITemplateManager.GetAsGameObject("ScrollableSubPanelTemplate");
 
             // Creates the main button
-            m_toolbarButton = mainToolbar.AddTab(LibraryConstants.ObjectPrefix + ".ToolButton", mainButtonGameObject, subPanelGameObject, new Type[] { typeof(IndustryGroupPanel) }) as UIButton;
+            m_toolbarButton = mainToolbar.AddTab(LibraryConstants.ObjectPrefix + ".ToolButton", mainButtonGameObject, subPanelGameObject, new Type[] { typeof(UIGroupPanel) }) as UIButton;
 
-            m_toolbarButton.atlas = Atlas;
+            m_toolbarButton.atlas = IconAtlas;
             m_toolbarButton.playAudioEvents = true;
 
             // Background sprites
@@ -341,11 +429,37 @@ namespace IndustryLP
         }
 
         /// <summary>
+        /// Setup the tutorial panel
+        /// </summary>
+        private void SetupTutorialPanel()
+        {
+            Locale locale = (Locale)typeof(LocaleManager).GetField("m_Locale", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(LocaleManager.instance);
+            Locale.Key key = new Locale.Key
+            {
+                m_Identifier = "TUTORIAL_ADVISER_TITLE",
+                m_Key = m_toolbarButton.name
+            };
+            if (!locale.Exists(key))
+            {
+                locale.AddLocalizedString(key, ModInfo.ModName);
+            }
+            key = new Locale.Key
+            {
+                m_Identifier = "TUTORIAL_ADVISER",
+                m_Key = m_toolbarButton.name
+            };
+            if (!locale.Exists(key))
+            {
+                locale.AddLocalizedString(key, "Work in progress...");
+            }
+        }
+
+        /// <summary>
         /// Creates the option panel
         /// </summary>
         private void SetupOptionPanel()
         {
-            m_optionPanel = GameObjectUtils.AddUIComponent<IndustryOptionPanel>();
+            m_optionPanel = GameObjectUtils.AddUIComponent<UIOptionPanel>();
             m_optionPanel.relativePosition = new Vector2(474 - m_optionPanel.width, 949);
             m_optionPanel.selectedIndex = 0;
             m_optionPanel.eventSelectedIndexChanged += OnChangeSelectedIndex;
@@ -362,8 +476,8 @@ namespace IndustryLP
             var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
             
             // Gets the main group panel
-            var groupPanel = mainToolbar.GetComponentInContainer(m_toolbarButton, typeof(IndustryGroupPanel)) as IndustryGroupPanel;
-            groupPanel.name = IndustryGroupPanel.Name;
+            var groupPanel = mainToolbar.GetComponentInContainer(m_toolbarButton, typeof(UIGroupPanel)) as UIGroupPanel;
+            groupPanel.name = UIGroupPanel.Name;
             groupPanel.enabled = true;
             groupPanel.component.isInteractive = true;
             groupPanel.m_OptionsBar = m_optionPanel;
@@ -375,6 +489,7 @@ namespace IndustryLP
 
             // Gets scrollable toolbar
             m_scrollablePanel = groupPanel.GetComponentInChildren<UIScrollablePanel>();
+            UIGeneratorOptionPanel.SetupInstance(m_scrollablePanel);
             m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
             m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
             m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
@@ -391,31 +506,71 @@ namespace IndustryLP
             m_movingZoneAction.OnStart(this);
         }
 
+        /// <summary>
+        /// Creates the build distributions
+        /// </summary>
+        private void SetupDistributions()
+        {
+            gridDistribution = new GridDistribution();
+            //lineDistribution = new LineDistribution();
+            //mineDistribution = new MineDistribution();
+        }
+
+        /// <summary>
+        /// Invoked when the mouse is hover the toolbar
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseEnterToolbar(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverToolbar = true;
         }
 
+        /// <summary>
+        /// Invoked when the mouse leaves the toolbar
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseLeaveToolbar(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverToolbar = false;
         }
 
+        /// <summary>
+        /// Invoked when the mouse is hover the panel options
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseEnterOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverOptionPanel = true;
         }
 
+        /// <summary>
+        /// Invoked when the mouse leaves the panel options
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseLeaveOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverOptionPanel = false;
         }
 
+        /// <summary>
+        /// Invoked when the mouse is hover the scrollable panel
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseEnterScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverScrollablePanel = true;
         }
 
+        /// <summary>
+        /// Invoked when the mouse leaves the scrollable panel
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
         private void OnMouseLeaveScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
         {
             m_mouseHoverScrollablePanel = false;
@@ -469,16 +624,6 @@ namespace IndustryLP
 
             m_action?.OnChangeController(oldAction);
             m_action?.OnEnterController();
-        }
-
-        /// <summary>
-        /// Translate the current position of mouse in terrain position
-        /// </summary>
-        private Vector3 GetTerrainMousePosition()
-        {
-            var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            GetColisingWithTerrain(mouseRay, out Vector3 output);
-            return output;
         }
 
         #endregion

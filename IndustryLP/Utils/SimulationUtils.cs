@@ -4,7 +4,7 @@ using ColossalFramework.Math;
 namespace IndustryLP.Utils
 {
     /// <summary>
-    /// This class has methods that abstracts some operations about instance creation 
+    /// This class has methods that abstracts some operations about simulation manager 
     /// </summary>
     internal static class SimulationUtils
     {

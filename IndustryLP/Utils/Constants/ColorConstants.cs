@@ -12,7 +12,7 @@ namespace IndustryLP.Utils.Constants
         /// <summary>
         /// The color to apply to the pointers
         /// </summary>
-        public static Color PointerColor => new Color(0, 255, 0, 128);
+        public static Color PointerColor => new Color32(0, 255, 0, 128);
 
         /// <summary>
         /// The color to apply in selection mode
