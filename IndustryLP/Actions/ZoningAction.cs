@@ -184,16 +184,8 @@ namespace IndustryLP.Actions
                     var dotDown = Vector3.Dot(diagonal, down);
                     var dotRight = Vector3.Dot(diagonal, right);
 
-                    if ((dotDown > 0 && dotRight > 0) || (dotDown <= 0 && dotRight <= 0))
-                    {
-                        quad.b = quad.a + dotDown * down;
-                        quad.d = quad.a + dotRight * right;
-                    }
-                    else
-                    {
-                        quad.b = quad.a + dotRight * right;
-                        quad.d = quad.a + dotDown * down;
-                    }
+                    quad.b = quad.a + dotDown * down;
+                    quad.d = quad.a + dotRight * right;
 
                     m_selection = quad;
                 }

@@ -57,15 +57,17 @@ namespace IndustryLP.DistributionDefinition
             return subdivisions;
         }
 
-        private List<Bezier3> GenerateRoad(Vector3 start, Vector3 end, int subdivisionLenght = 80)
+        private List<Bezier3> GenerateRoad(Vector3 start, Vector3 end)
         {
             var length = (end - start).magnitude;
-            var subdivisions = new List<Bezier3>();
+            var subdivisionsCount = Mathf.Ceil(length / 80);
+            var subdivisionsLength = length / subdivisionsCount;
+            var subdivisions = new List<Bezier3>() { };
 
             var position = start;
-            for (var remainded = length; remainded - subdivisionLenght > 0; remainded -= subdivisionLenght)
+            for (int i = 0; i <= subdivisionsCount; i++)
             {
-                var next = Vector3.MoveTowards(position, end, subdivisionLenght);
+                var next = Vector3.MoveTowards(position, end, subdivisionsLength);
                 var startDir = (next - start).normalized;
                 var endDir = (start - next).normalized;
                 var segment = GenerateSegment(position, startDir, next, endDir);
@@ -76,7 +78,7 @@ namespace IndustryLP.DistributionDefinition
             return subdivisions;
         }
 
-        public override DistributionInfo Generate(Quad3 selection, float angle)
+        public override DistributionInfo Generate(Quad3 selection)
         {
             // Create info value
             var info = new GridDistributionInfo
@@ -85,8 +87,8 @@ namespace IndustryLP.DistributionDefinition
                 Road = new List<Bezier3>(),
             };
 
-            var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
-            var right = new Vector3(-down.z, 0, down.x);
+            var down = (selection.d - selection.a).normalized;
+            var right = (selection.b - selection.a).normalized;
 
             // Create roundabout
             var midPointAB = Vector3.Lerp(selection.a, selection.b, 0.5f);

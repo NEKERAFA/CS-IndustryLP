@@ -11,8 +11,7 @@ namespace IndustryLP.DistributionDefinition
         /// Generates a building distribution inside a selection
         /// </summary>
         /// <param name="selection">A <see cref="Quad3"/> object</param>
-        /// <param name="angle">The object</param>
         /// <returns>A <see cref="DistributionInfo"/> object</returns>
-        public abstract DistributionInfo Generate(Quad3 selection, float angle);
+        public abstract DistributionInfo Generate(Quad3 selection);
     }
 }

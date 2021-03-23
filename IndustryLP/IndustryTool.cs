@@ -360,7 +360,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = gridDistribution.Generate(Selection.Value, SelectionAngle.Value);
+                m_distribution = gridDistribution.Generate(Selection.Value);
             }
         }
 
@@ -369,7 +369,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = lineDistribution.Generate(Selection.Value, SelectionAngle.Value);
+                m_distribution = lineDistribution.Generate(Selection.Value);
             }
         }
 
@@ -378,7 +378,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = mineDistribution.Generate(Selection.Value, SelectionAngle.Value);
+                m_distribution = mineDistribution.Generate(Selection.Value);
             }
         }
 
