@@ -15,11 +15,21 @@
         /// <summary>
         /// The prefix of all IndustryLP Gameobjects
         /// </summary>
-        public static string ObjectPrefix => $"{LibPrefix}_GameObject";
+        public static string ObjectPrefix => $"{LibPrefix}.GameObject";
 
         /// <summary>
         /// The prefix of all IndustryLP Unity UI objects
         /// </summary>
-        public static string UIPrefix => $"{ObjectPrefix}_UI";
+        public static string UIPrefix => $"{ObjectPrefix}.UI";
+
+        /// <summary>
+        /// The minimun number of rows
+        /// </summary>
+        public static int MinRows => 3;
+
+        /// <summary>
+        /// The minimun number of columns
+        /// </summary>
+        public static int MinColumns => 3;
     }
 }
