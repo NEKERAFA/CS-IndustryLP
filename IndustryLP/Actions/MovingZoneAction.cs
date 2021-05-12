@@ -83,7 +83,7 @@ namespace IndustryLP.Actions
             {
                 if (m_selection.HasValue)
                 {
-                    var quad = m_selection.Value;
+                    var quad = new Quad3(m_selection.Value.a, m_selection.Value.b, m_selection.Value.c, m_selection.Value.d);
 
                     // Obtenemos las distancias reales y las aproximadas
                     var columns = Vector3.Distance(quad.a, quad.d) / 40f;
@@ -135,6 +135,16 @@ namespace IndustryLP.Actions
         {
             m_selection = m_mainTool.Selection;
             m_cameraAngle = m_mainTool.SelectionAngle;
+        }
+
+        public override void OnLeftController()
+        {
+#if DEBUG
+            debug_m_showPositionA.Hide();
+            debug_m_showPositionB.Hide();
+            debug_m_showPositionC.Hide();
+            debug_m_showPositionD.Hide();
+#endif
         }
 
         public override void OnLeftMouseIsDown(Vector3 mousePosition)
@@ -217,16 +227,8 @@ namespace IndustryLP.Actions
                     var dotDown = Vector3.Dot(diagonal, down);
                     var dotRight = Vector3.Dot(diagonal, right);
 
-                    if ((dotDown > 0 && dotRight > 0) || (dotDown <= 0 && dotRight <= 0))
-                    {
-                        quad.b = quad.a + dotDown * down;
-                        quad.d = quad.a + dotRight * right;
-                    }
-                    else
-                    {
-                        quad.b = quad.a + dotRight * right;
-                        quad.d = quad.a + dotDown * down;
-                    }
+                    quad.b = quad.a + dotDown * down;
+                    quad.d = quad.a + dotRight * right;
 
                     m_selection = quad;
                 }
@@ -304,10 +306,25 @@ namespace IndustryLP.Actions
         public override void OnRenderOverlay(RenderManager.CameraInfo cameraInfo, Vector3 mousePosition)
         {
             var quad = Selection;
+            var angle = m_cameraAngle.Value + m_rotation * Mathf.Deg2Rad;
+            var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
+            var right = new Vector3(-down.z, 0, down.x);
+            var diagonal = quad.c - quad.a;
+            var dotDown = Vector3.Dot(diagonal, down);
+            var dotRight = Vector3.Dot(diagonal, right);
 
-            var diagonal = Vector3.Distance(quad.a, quad.c);
+            if ((dotDown > 0 && dotRight > 0) || (dotDown <= 0 && dotRight <= 0))
+            {
+                quad.b = quad.a + dotDown * down;
+                quad.d = quad.a + dotRight * right;
+            }
+            else
+            {
+                quad.b = quad.a + dotRight * right;
+                quad.d = quad.a + dotDown * down;
+            }
 
-            if (diagonal > k_minDistante)
+            if (diagonal.magnitude > k_minDistante)
             {
                 Color32 color;
                 if (Rows > LibraryConstants.MinRows && Columns > LibraryConstants.MinColumns)
@@ -328,6 +345,8 @@ namespace IndustryLP.Actions
                 if (!debug_m_showPositionB.isVisible) debug_m_showPositionB.Show();
                 if (!debug_m_showPositionC.isVisible) debug_m_showPositionC.Show();
                 if (!debug_m_showPositionD.isVisible) debug_m_showPositionD.Show();
+
+                quad = Selection;
 
                 debug_m_showPositionA.SetText(string.Format("A ({0:0.##}, {1:0.##}, {2:0.##})", quad.a.x, quad.a.y, quad.a.z));
                 debug_m_showPositionB.SetText(string.Format("B ({0:0.##}, {1:0.##}, {2:0.##})", quad.b.x, quad.b.y, quad.b.z));

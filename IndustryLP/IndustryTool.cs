@@ -7,6 +7,7 @@ using IndustryLP.Tools;
 using IndustryLP.UI.Panels;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
+using IndustryLP.Utils.Enums;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -328,6 +329,11 @@ namespace IndustryLP
         /// <inheritdoc/>
         public void CancelZoning()
         {
+            if (m_distribution != null)
+            {
+                m_distribution = null;
+            }
+
             m_optionPanel.DisableTab(1);
             m_optionPanel.DisableTab(2);
         }
@@ -339,6 +345,12 @@ namespace IndustryLP
             SelectionAngle = angle;
             m_optionPanel.EnableTab(1);
             m_optionPanel.DisableTab(2);
+
+            if (m_distribution?.Type == DistributionType.GRID)
+            {
+                var distributionThread = new GridDistribution();
+                m_distribution = distributionThread.Generate(Selection.Value);
+            }
         }
 
         /// <inheritdoc/>

@@ -105,6 +105,56 @@ namespace IndustryLP.DistributionDefinition
             var rightRoad = GenerateRoad(roundabout[2].a, rightPos);
             info.Road.AddRange(rightRoad);
 
+            var upPos = Vector3.Lerp(selection.c, selection.d, 0.5f);
+            var upRoad = GenerateRoad(roundabout[3].a, upPos);
+            info.Road.AddRange(upRoad);
+
+            var left = (selection.a - selection.b).normalized;
+
+            // Generate secondary roads
+            List<Bezier3> lastLeftRoadBranch = null, lastRightRoadBranch = null;
+            
+            foreach(var position in upRoad)
+            {
+                var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
+
+                var leftRoadBranch = GenerateRoad(position.d, position.d + left * roadLength);
+                info.Road.AddRange(leftRoadBranch);
+
+                if (lastLeftRoadBranch != null)
+                {
+                    for (int pos = 1; pos < leftRoadBranch.Count; pos++)
+                    {
+                        var startPos = lastLeftRoadBranch[pos].a;
+                        var endPos = leftRoadBranch[pos].a;
+                        var startDir = (endPos - startPos).normalized;
+                        var endDir = (startPos - endPos).normalized;
+
+                        info.Road.Add(GenerateSegment(startPos, startDir, endPos, endDir));
+                    }
+                }
+
+                lastLeftRoadBranch = leftRoadBranch;
+
+                var rightRoadBranch = GenerateRoad(position.d, position.d + right * roadLength);
+                info.Road.AddRange(rightRoadBranch);
+
+                if (lastRightRoadBranch != null)
+                {
+                    for (int pos = 1; pos < rightRoadBranch.Count; pos++)
+                    {
+                        var startPos = lastRightRoadBranch[pos].a;
+                        var endPos = rightRoadBranch[pos].a;
+                        var startDir = (endPos - startPos).normalized;
+                        var endDir = (startPos - endPos).normalized;
+
+                        info.Road.Add(GenerateSegment(startPos, startDir, endPos, endDir));
+                    }
+                }
+
+                lastRightRoadBranch = rightRoadBranch;
+            }
+
             return info;
         }
     }

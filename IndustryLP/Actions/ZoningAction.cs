@@ -81,7 +81,7 @@ namespace IndustryLP.Actions
             {
                 if (m_selection.HasValue)
                 {
-                    var quad = m_selection.Value;
+                    var quad = new Quad3(m_selection.Value.a, m_selection.Value.b, m_selection.Value.c, m_selection.Value.d);
 
                     // Obtenemos las distancias reales y las aproximadas
                     var columns = Vector3.Distance(quad.a, quad.d) / 40f;
@@ -128,6 +128,7 @@ namespace IndustryLP.Actions
 
         public override void OnEnterController()
         {
+            m_state = ZoningState.None;
             m_selection = null;
             m_cameraAngle = null;
             m_mainTool.CancelZoning();
@@ -198,7 +199,6 @@ namespace IndustryLP.Actions
             {
                 var quad = Selection;
                 var angle = m_cameraAngle.Value;
-
                 var diagonal = Vector3.Distance(quad.a, quad.c);
 
                 if (diagonal > k_minDistante && Rows > 1 && Columns > 1)
@@ -221,10 +221,25 @@ namespace IndustryLP.Actions
             if (m_state != ZoningState.None)
             {
                 var quad = Selection;
+                var angle = m_cameraAngle.Value;
+                var down = new Vector3(Mathf.Cos(angle), 0, -Mathf.Sin(angle));
+                var right = new Vector3(-down.z, 0, down.x);
+                var diagonal = quad.c - quad.a;
+                var dotDown = Vector3.Dot(diagonal, down);
+                var dotRight = Vector3.Dot(diagonal, right);
 
-                var diagonal = Vector3.Distance(quad.a, quad.c);
+                if ((dotDown > 0 && dotRight > 0) || (dotDown <= 0 && dotRight <= 0))
+                {
+                    quad.b = quad.a + dotDown * down;
+                    quad.d = quad.a + dotRight * right;
+                }
+                else
+                {
+                    quad.b = quad.a + dotRight * right;
+                    quad.d = quad.a + dotDown * down;
+                }
 
-                if (diagonal > k_minDistante)
+                if (diagonal.magnitude > k_minDistante)
                 {
                     Color color = (Rows > LibraryConstants.MinRows && Columns > LibraryConstants.MinColumns) ? ColorConstants.SelectionColor : ColorConstants.BadSelectionColor;
 
@@ -243,6 +258,8 @@ namespace IndustryLP.Actions
                     if (!debug_m_showPositionB.isVisible) debug_m_showPositionB.Show();
                     if (!debug_m_showPositionC.isVisible) debug_m_showPositionC.Show();
                     if (!debug_m_showPositionD.isVisible) debug_m_showPositionD.Show();
+
+                    quad = Selection;
 
                     debug_m_showPositionA.SetText(string.Format("A ({0:0.##}, {1:0.##}, {2:0.##})", quad.a.x, quad.a.y, quad.a.z));
                     debug_m_showPositionB.SetText(string.Format("B ({0:0.##}, {1:0.##}, {2:0.##})", quad.b.x, quad.b.y, quad.b.z));
@@ -276,7 +293,7 @@ namespace IndustryLP.Actions
                     mousePosition + 20f * down - 20f * right
                 );
 
-                RenderManager.instance.OverlayEffect.DrawQuad(cameraInfo, ColorConstants.SelectionColor, quad, -1f, 1280f, false, false);
+                RenderManager.instance.OverlayEffect.DrawQuad(cameraInfo, ColorConstants.PointerColor, quad, -1f, 1280f, false, false);
 
                 if (showSize.isVisible) showSize.Hide();
 #if DEBUG
