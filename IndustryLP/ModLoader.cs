@@ -6,12 +6,6 @@ namespace IndustryLP
 {
     public class ModLoader : ILoadingExtension
     {
-        #region Attributes
-
-        private static MainTool m_mainTool = null;
-
-        #endregion
-
         #region Loading Extension
 
         /// <summary>
@@ -33,16 +27,14 @@ namespace IndustryLP
             {
                 case LoadMode.NewGame:
                 case LoadMode.LoadGame:
-                    // For remove old instances if the assembly is updated (development)
-                    GameObjectUtils.DestroyOldPanels();
                     // Removes old attached tool
-                    if (m_mainTool != null)
+                    if (IndustryTool.instance != null)
                     {
-                        Object.Destroy(m_mainTool.gameObject);
+                        Object.Destroy(IndustryTool.instance);
                     }
 
-                    // Creates a new tool controller
-                    m_mainTool = GameObjectUtils.AddObjectWithComponent<MainTool>();
+                    // Creates a new tool instance
+                    IndustryTool.instance = GameObjectUtils.AddObjectWithComponent<IndustryTool>();
                     break;
             }
         }
@@ -52,10 +44,10 @@ namespace IndustryLP
         /// </summary>
         public void OnLevelUnloading()
         {
-            if (m_mainTool != null)
+            if (IndustryTool.instance != null)
             {
-                Object.Destroy(m_mainTool.gameObject);
-                m_mainTool = null;
+                Object.Destroy(IndustryTool.instance);
+                IndustryTool.instance = null;
             }
         }
 

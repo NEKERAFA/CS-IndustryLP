@@ -18,7 +18,7 @@ namespace IndustryLP
         /// Current git branch
         /// </summary>
 #if DEBUG
-        private static string Branch => "us1";
+        private static string Branch => "us55";
 #else
         private static string Branch => null;
 #endif

@@ -23,12 +23,11 @@ namespace IndustryLP.Utils
             var maxSize = 1024;
             var texture2D = new Texture2D(maxSize, maxSize, TextureFormat.ARGB32, false);
             var textures = new Texture2D[spriteNames.Length];
-            var regions = new Rect[spriteNames.Length];
 
             for (var i = 0; i < spriteNames.Length; i++)
                 textures[i] = LoadTextureFromAssembly(assemblyPath + "." + spriteNames[i] + ".png");
 
-            regions = texture2D.PackTextures(textures, 2, maxSize);
+           var regions = texture2D.PackTextures(textures, 2, maxSize);
 
             var textureAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             var material = Object.Instantiate(UIView.GetAView().defaultAtlas.material);
