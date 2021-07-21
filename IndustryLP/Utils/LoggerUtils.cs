@@ -1,5 +1,6 @@
 ﻿using IndustryLP.Utils.Constants;
 using System;
+using System.Diagnostics;
 using System.Text;
 using UnityEngine;
 
@@ -17,15 +18,43 @@ namespace IndustryLP.Utils
         /// <returns></returns>
         private static string GetParamsAsString(object[] values)
         {
-            StringBuilder msg = new StringBuilder("");
-            for (int i = 0; i < values.Length; i++)
-            {
-                msg.Append(values[i].ToString());
+            var msg = new StringBuilder("");
 
-                if (i < values.Length - 1)
+            if (values != null)
+            {
+                for (int i = 0; i < values.Length; i++)
                 {
-                    msg.Append(", ");
+                    var val = values[i];
+                    msg.Append(val == null ? "null" : val.ToString());
+
+                    if (i < values.Length - 1)
+                    {
+                        msg.Append(", ");
+                    }
                 }
+            }
+
+            return msg.ToString();
+        }
+
+        private static string GetHeader()
+        {
+            var msg = new StringBuilder("");
+            msg.Append(DateTime.Now.ToString("r"));
+            msg.Append(" - ");
+            msg.Append(LibraryConstants.AssemblyName);
+
+            var lastFrame = new StackTrace().GetFrame(2);
+
+            if (lastFrame != null) {
+                msg.Append(" - ");
+                msg.Append(lastFrame.GetFileName());
+                msg.Append(": ");
+                msg.Append(lastFrame.GetMethod().Name);
+                msg.Append(": ");
+                msg.Append(lastFrame.GetFileLineNumber());
+                msg.Append(":");
+                msg.Append(lastFrame.GetFileColumnNumber());
             }
 
             return msg.ToString();
@@ -36,7 +65,7 @@ namespace IndustryLP.Utils
         /// </summary>
         public static void Log(params object[] values)
         {
-            Debug.Log($"{LibraryConstants.AssemblyName}: {GetParamsAsString(values)}");
+            UnityEngine.Debug.Log($"{GetHeader()}: {GetParamsAsString(values)}");
         }
 
         /// <summary>
@@ -44,7 +73,7 @@ namespace IndustryLP.Utils
         /// </summary>
         public static void Warning(params object[] values)
         {
-            Debug.LogWarning($"{LibraryConstants.AssemblyName}: {GetParamsAsString(values)}");
+            UnityEngine.Debug.LogWarning($"{GetHeader()}: {GetParamsAsString(values)}");
         }
 
         /// <summary>
@@ -52,7 +81,7 @@ namespace IndustryLP.Utils
         /// </summary>
         public static void Error(params object[] values)
         {
-            Debug.LogError($"{LibraryConstants.AssemblyName}: {GetParamsAsString(values)}");
+            UnityEngine.Debug.LogError($"{GetHeader()}: {GetParamsAsString(values)}");
         }
 
         /// <summary>
@@ -70,7 +99,7 @@ namespace IndustryLP.Utils
             msg.AppendLine($"{ex.Message}");
             msg.AppendLine(ex.StackTrace);
 
-            Debug.LogError($"{LibraryConstants.AssemblyName}: {ex.GetType().FullName} : {msg}");
+            UnityEngine.Debug.LogError($"{GetHeader()}: {ex.GetType().FullName} : {msg}");
         }
     }
 }

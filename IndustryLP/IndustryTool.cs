@@ -5,6 +5,7 @@ using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
 using IndustryLP.Tools;
 using IndustryLP.UI.Panels;
+using IndustryLP.UI.Tabs;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
@@ -52,6 +53,11 @@ namespace IndustryLP
         private UIOptionPanel m_optionPanel = null;
 
         /// <summary>
+        /// Category Options Panel
+        /// </summary>
+        private UICategoryOptionPanel m_categoryPanel = null;
+
+        /// <summary>
         /// Current action
         /// </summary>
         private ToolAction m_action = null;
@@ -65,6 +71,7 @@ namespace IndustryLP
         private bool m_mouseHoverToolbar = false;
         private bool m_mouseHoverOptionPanel = false;
         private bool m_mouseHoverScrollablePanel = false;
+        private float m_defaultXPos;
 
         #region Actions
 
@@ -104,8 +111,18 @@ namespace IndustryLP
                         ResourceConstants.SolutionUp,
                         ResourceConstants.SolutionDown,
                         ResourceConstants.OptionBuild,
-                        ResourceConstants.OptionMove
-                    };
+                        ResourceConstants.OptionMove,
+                        ResourceConstants.SubBarPreferenceNormal,
+                        ResourceConstants.SubBarPreferenceFocused,
+                        ResourceConstants.SubBarPreferenceHovered,
+                        ResourceConstants.SubBarPreferencePressed,
+                        ResourceConstants.SubBarPreferenceDisabled,
+                        ResourceConstants.SubBarRestrictionNormal,
+                        ResourceConstants.SubBarRestrictionFocused,
+                        ResourceConstants.SubBarRestrictionHovered,
+                        ResourceConstants.SubBarRestrictionPressed,
+                        ResourceConstants.SubBarRestrictionDisabled
+                };
 
                     m_iconAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.IconAtlasName, iconsNames, ResourceConstants.IconsPath);
 
@@ -123,6 +140,16 @@ namespace IndustryLP
                         defaultAtlas[ResourceConstants.OptionFgFocused].texture,
                         defaultAtlas[ResourceConstants.OptionFgPressed].texture,
                         defaultAtlas[ResourceConstants.OptionFgDisabled].texture,
+                        defaultAtlas[ResourceConstants.SubBarBackgroundNormal].texture,
+                        defaultAtlas[ResourceConstants.SubBarBackgroundDisabled].texture,
+                        defaultAtlas[ResourceConstants.SubBarBackgroundFocused].texture,
+                        defaultAtlas[ResourceConstants.SubBarBackgroundHovered].texture,
+                        defaultAtlas[ResourceConstants.SubBarBackgroundPressed].texture,
+                        defaultAtlas[ResourceConstants.SubBarDistributionNormal].texture,
+                        defaultAtlas[ResourceConstants.SubBarDistributionDisabled].texture,
+                        defaultAtlas[ResourceConstants.SubBarDistributionFocused].texture,
+                        defaultAtlas[ResourceConstants.SubBarDistributionHovered].texture,
+                        defaultAtlas[ResourceConstants.SubBarDistributionPressed].texture
                     };
 
                     // Add resources
@@ -197,6 +224,7 @@ namespace IndustryLP
             SetupScrollablePanel();
             SetupActions();
             SetupDistributions();
+            
 
             LoggerUtils.Log("Finished");
         }
@@ -209,11 +237,17 @@ namespace IndustryLP
             LoggerUtils.Log("Enabled");
             
             base.OnEnable();
-            
-            m_optionPanel.Show();
 
-            m_action = m_zoningAction;
-            m_action.OnEnterController();
+            if (m_optionPanel != null)
+            {
+                m_optionPanel.Show();
+            }
+
+            if (m_optionPanel != null)
+            {
+                m_action = m_zoningAction;
+                m_action.OnEnterController();
+            }
         }
 
         /// <summary>
@@ -225,10 +259,15 @@ namespace IndustryLP
 
             base.OnDisable();
 
-            m_optionPanel.Hide();
+            if (m_optionPanel != null) {
+                m_optionPanel.Hide();
+            }
 
-            m_action.OnLeftController();
-            m_action = null;
+            if (m_action != null)
+            {
+                m_action.OnLeftController();
+                m_action = null;
+            }
         }
 
         /// <summary>
@@ -486,7 +525,10 @@ namespace IndustryLP
         {
             // Gets the main toolbar
             var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
-            
+
+            m_defaultXPos = mainToolbar.relativePosition.x;
+            UpdateMainToolbar();
+
             // Gets the main group panel
             var groupPanel = mainToolbar.GetComponentInContainer(m_toolbarButton, typeof(UIGroupPanel)) as UIGroupPanel;
             groupPanel.name = UIGroupPanel.Name;
@@ -500,11 +542,22 @@ namespace IndustryLP
             }
 
             // Gets scrollable toolbar
-            m_scrollablePanel = groupPanel.GetComponentInChildren<UIScrollablePanel>();
-            UIGeneratorOptionPanel.SetupInstance(m_scrollablePanel);
+            var oldPanel = groupPanel.GetComponentInChildren<UIScrollablePanel>();
+            m_scrollablePanel = UIGeneratorOptionPanel.Create(oldPanel);
+
             m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
             m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
             m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
+            m_scrollablePanel.eventClicked += OnItemClickedScrollablePanel;
+
+            m_categoryPanel = GameObjectUtils.AddUIComponent<UICategoryOptionPanel>();
+            m_categoryPanel.relativePosition = new Vector3(604, 854);
+            m_categoryPanel.selectedIndex = 0;
+            m_categoryPanel.Hide();
+            //categoryOptionPanel.eventSelectedIndexChanged += OnChangeSelectedIndex;
+            m_categoryPanel.eventMouseEnter += OnMouseEnterOptionPanel;
+            m_categoryPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
+
         }
 
         /// <summary>
@@ -526,6 +579,33 @@ namespace IndustryLP
             gridDistribution = new GridDistribution();
             //lineDistribution = new LineDistribution();
             //mineDistribution = new MineDistribution();
+        }
+
+        private void UpdateMainToolbar()
+        {
+            UITabstrip tabstrip = ToolsModifierControl.mainToolbar.component as UITabstrip;
+            if (tabstrip == null) return;
+
+            tabstrip.eventComponentAdded -= new ChildComponentEventHandler(UpdatePosition);
+            tabstrip.eventComponentRemoved -= new ChildComponentEventHandler(UpdatePosition);
+
+            tabstrip.eventComponentAdded += new ChildComponentEventHandler(UpdatePosition);
+            tabstrip.eventComponentRemoved += new ChildComponentEventHandler(UpdatePosition);
+            UpdatePosition(tabstrip, null);
+        }
+
+        private void UpdatePosition(UIComponent c, UIComponent p)
+        {
+            UITabstrip tabstrip = c as UITabstrip;
+
+            float width = 0;
+            foreach (UIComponent child in tabstrip.tabs)
+            {
+                width += child.width;
+            }
+
+            float newXPos = (tabstrip.parent.width - width) / 2;
+            tabstrip.relativePosition = new Vector3(Mathf.Min(m_defaultXPos, newXPos), tabstrip.relativePosition.y);
         }
 
         /// <summary>
@@ -588,6 +668,13 @@ namespace IndustryLP
             m_mouseHoverScrollablePanel = false;
         }
 
+        private void OnItemClickedScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            UIButton item = eventParam.source as UIButton;
+            PrefabInfo prefab = item.objectUserData as PrefabInfo;
+            LoggerUtils.Log($"Clicked on {prefab.name}");
+        }
+
         /// <summary>
         /// Invoked when the user clicks in the toolbar button
         /// </summary>
@@ -608,6 +695,8 @@ namespace IndustryLP
         /// <param name="visibility"></param>
         private void OnChangeVisibilityPanel(UIComponent component, bool visibility)
         {
+            LoggerUtils.Log("visibility", visibility);
+            if (visibility) m_categoryPanel.Show(); else m_categoryPanel.Hide();
             enabled = visibility;
         }
 
