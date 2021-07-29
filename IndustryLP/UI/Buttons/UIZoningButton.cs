@@ -16,6 +16,7 @@ namespace IndustryLP.UI.Buttons
         {
             base.Awake();
             normalFgSprite = ResourceConstants.OptionZoning;
+            name = Name;
         }
 
         #endregion

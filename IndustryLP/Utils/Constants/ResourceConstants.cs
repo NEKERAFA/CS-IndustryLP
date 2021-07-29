@@ -153,35 +153,140 @@
         public static string LineDistributionPressed => "LineDistributionPressed";
 
         /// <summary>
-        /// The grid distribution when is focused
+        /// The line distribution when is focused
         /// </summary>
         public static string LineDistributionFocused => "LineDistributionFocused";
 
         /// <summary>
-        /// The mine distribution
+        /// The forestal distribution
         /// </summary>
-        public static string MineDistributionNormal => "MineDistribution";
+        public static string ForestalDistributionNormal => "ForestalDistribution";
 
         /// <summary>
-        /// The mine distribution when is hovered
+        /// The forestal distribution when is hovered
         /// </summary>
-        public static string MineDistributionHovered => "MineDistributionHovered";
+        public static string ForestalDistributionHovered => "ForestalDistributionHovered";
 
         /// <summary>
-        /// The grid distribution when is pressed
+        /// The forestal distribution when is pressed
         /// </summary>
-        public static string MineDistributionPressed => "MineDistributionPressed";
+        public static string ForestalDistributionPressed => "ForestalDistributionPressed";
 
         /// <summary>
         /// The grid distribution when is focused
         /// </summary>
-        public static string MineDistributionFocused => "MineDistributionFocused";
+        public static string ForestalDistributionFocused => "ForestalDistributionFocused";
 
         /// <summary>
         /// The disabled distribution
         /// </summary>
         public static string DistributionDisabled => "DistributionDisabled";
-        
+
+        /// <summary>
+        /// The focused selected filter effect
+        /// </summary>
+        public static string SelectFilter => "SelectFilter";
+
+        /// <summary>
+        /// The distibution icon tab
+        /// </summary>
+        public static string SubBarDistributionNormal => "SubBarDistrictSpecializationIndustrial";
+
+        /// <summary>
+        /// The distibution icon tab when is disabled
+        /// </summary>
+        public static string SubBarDistributionDisabled => "SubBarDistrictSpecializationIndustrialDisabled";
+
+        /// <summary>
+        /// The distibution icon tab when is focused
+        /// </summary>
+        public static string SubBarDistributionFocused => "SubBarDistrictSpecializationIndustrialFocused";
+
+        /// <summary>
+        /// The distibution icon tab when the mouse is hovered
+        /// </summary>
+        public static string SubBarDistributionHovered => "SubBarDistrictSpecializationIndustrialHovered";
+
+        /// <summary>
+        /// The distibution icon tab when is pressed
+        /// </summary>
+        public static string SubBarDistributionPressed => "SubBarDistrictSpecializationIndustrialPressed";
+
+        /// <summary>
+        /// The preference building icon tab
+        /// </summary>
+        public static string SubBarPreferenceNormal => "SubBarBuildingPreference";
+
+        /// <summary>
+        /// The preference building icon tab when is disabled
+        /// </summary>
+        public static string SubBarPreferenceDisabled => "SubBarBuildingPreferenceDisabled";
+
+        /// <summary>
+        /// The preference building icon tab when is focused
+        /// </summary>
+        public static string SubBarPreferenceFocused => "SubBarBuildingPreferenceFocused";
+
+        /// <summary>
+        /// The preference building icon tab when the mouse is hovered
+        /// </summary>
+        public static string SubBarPreferenceHovered => "SubBarBuildingPreferenceHovered";
+
+        /// <summary>
+        /// The preference building icon tab when is pressed
+        /// </summary>
+        public static string SubBarPreferencePressed => "SubBarBuildingPreferencePressed";
+
+        /// <summary>
+        /// The restriction building icon tab
+        /// </summary>
+        public static string SubBarRestrictionNormal => "SubBarBuildingRestriction";
+
+        /// <summary>
+        /// The restriction building icon tab when is disabled
+        /// </summary>
+        public static string SubBarRestrictionDisabled => "SubBarBuildingRestrictionDisabled";
+
+        /// <summary>
+        /// The restriction building icon tab when is focused
+        /// </summary>
+        public static string SubBarRestrictionFocused => "SubBarBuildingRestrictionFocused";
+
+        /// <summary>
+        /// The restriction building icon tab when the mouse is hovered
+        /// </summary>
+        public static string SubBarRestrictionHovered => "SubBarBuildingRestrictionHovered";
+
+        /// <summary>
+        /// The restriction building icon tab when is pressed
+        /// </summary>
+        public static string SubBarRestrictionPressed => "SubBarBuildingRestrictionPressed";
+
+        /// <summary>
+        /// The background tab
+        /// </summary>
+        public static string SubBarBackgroundNormal => "SubBarButtonBase";
+
+        /// <summary>
+        /// The background tab when is disabled
+        /// </summary>
+        public static string SubBarBackgroundDisabled => "SubBarButtonBaseDisabled";
+
+        /// <summary>
+        /// The background tab when is focused
+        /// </summary>
+        public static string SubBarBackgroundFocused => "SubBarButtonBaseFocused";
+
+        /// <summary>
+        /// The background tab when the mouse is hovered
+        /// </summary>
+        public static string SubBarBackgroundHovered => "SubBarButtonBaseHovered";
+
+        /// <summary>
+        /// The background tab when is pressed
+        /// </summary>
+        public static string SubBarBackgroundPressed => "SubBarButtonBasePressed";
+
         /// <summary>
         /// Name of the atlas
         /// </summary>
@@ -195,6 +300,6 @@
         /// <summary>
         /// Name of the distribution thumbnails atlas
         /// </summary>
-        public static string DistributionAtlasName => $"{AtlasName}.DistributionThumbnails";
+        public static string DistributionAtlasName => $"{AtlasName}.Distributions";
     }
 }

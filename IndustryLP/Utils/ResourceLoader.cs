@@ -126,7 +126,7 @@ namespace IndustryLP.Utils
         /// </summary>
         /// <param name="path">The path of the texture in the asembly</param>
         /// <returns>The <see cref="Texture2D"/> loaded</returns>
-        private static Texture2D LoadTextureFromAssembly(string path)
+        public static Texture2D LoadTextureFromAssembly(string path)
         {
             var manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
 
@@ -137,6 +137,50 @@ namespace IndustryLP.Utils
             texture2D.LoadImage(array);
 
             return texture2D;
+        }
+
+        public static Texture2D ConvertRenderTexture(RenderTexture renderTexture)
+        {
+            RenderTexture active = RenderTexture.active;
+            Texture2D texture2D = new Texture2D(renderTexture.width, renderTexture.height);
+            RenderTexture.active = renderTexture;
+            texture2D.ReadPixels(new Rect(0f, 0f, (float)renderTexture.width, (float)renderTexture.height), 0, 0);
+            texture2D.Apply();
+            RenderTexture.active = active;
+
+            return texture2D;
+        }
+
+        public static void ResizeTexture(Texture2D texture, int width, int height)
+        {
+            RenderTexture active = RenderTexture.active;
+
+            texture.filterMode = FilterMode.Trilinear;
+            RenderTexture renderTexture = RenderTexture.GetTemporary(width, height);
+            renderTexture.filterMode = FilterMode.Trilinear;
+
+            RenderTexture.active = renderTexture;
+            Graphics.Blit(texture, renderTexture);
+            texture.Resize(width, height);
+            texture.ReadPixels(new Rect(0, 0, width, width), 0, 0);
+            texture.Apply();
+
+            RenderTexture.active = active;
+            RenderTexture.ReleaseTemporary(renderTexture);
+        }
+
+        public static void CopyTexture(Texture2D texture2D, Texture2D dest)
+        {
+            RenderTexture renderTexture = RenderTexture.GetTemporary(texture2D.width, texture2D.height, 0);
+            Graphics.Blit(texture2D, renderTexture);
+
+            RenderTexture active = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+            dest.ReadPixels(new Rect(0f, 0f, (float)renderTexture.width, (float)renderTexture.height), 0, 0);
+            dest.Apply();
+            RenderTexture.active = active;
+
+            RenderTexture.ReleaseTemporary(renderTexture);
         }
     }
 }

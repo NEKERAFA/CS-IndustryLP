@@ -36,7 +36,7 @@ namespace IndustryLP.DistributionDefinition
             {
                 if (direction == CellNeighbour.UP && row < Rows)
                 {
-                    return Cells[pos + Rows];
+                    return Cells[pos + Columns];
                 }
 
                 if (direction == CellNeighbour.DOWN && row > 0)
