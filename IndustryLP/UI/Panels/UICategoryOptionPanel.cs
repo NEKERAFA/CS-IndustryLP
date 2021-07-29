@@ -44,6 +44,7 @@ namespace IndustryLP.UI.Panels
             button.horizontalAlignment = UIHorizontalAlignment.Center;
             button.verticalAlignment = UIVerticalAlignment.Middle;
             button.tooltip = tooltipMessage;
+            button.Disable();
         }
 
         #endregion

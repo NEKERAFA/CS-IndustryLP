@@ -1,17 +1,20 @@
-﻿using ColossalFramework.DataBinding;
-using ColossalFramework.UI;
+﻿using ColossalFramework.UI;
 using IndustryLP.UI.Panels.Items;
 using IndustryLP.UI.RestrictionButtons;
 using IndustryLP.Utils;
+using System;
+using System.Linq;
 using UnityEngine;
 
 namespace IndustryLP.UI.Panels
 {
-    internal class UIGeneratorOptionPanel : UIFastList<UIGridItem.ItemData, UIGridItem, UIButton>
+    internal class UIDistributionOptionPanel : UIFastList<UIDistributionItem.ItemData, UIDistributionItem, UIButton>
     {
-        public static UIGeneratorOptionPanel Create(UIScrollablePanel oldPanel)
+        #region Public Methods
+
+        public static UIDistributionOptionPanel Create(UIScrollablePanel oldPanel)
         {
-            UIGeneratorOptionPanel panel = oldPanel.parent.AddUIComponent<UIGeneratorOptionPanel>();
+            UIDistributionOptionPanel panel = oldPanel.parent.AddUIComponent<UIDistributionOptionPanel>();
             panel.name = oldPanel.name;
             panel.autoLayout = false;
             panel.autoReset = false;
@@ -24,19 +27,7 @@ namespace IndustryLP.UI.Panels
             panel.relativePosition = new Vector3(48, 5);
             panel.atlas = oldPanel.atlas;
 
-            panel.parent.parent.eventSizeChanged += (c, p) =>
-            {
-                if (panel.isVisible)
-                {
-                    panel.size = new Vector2((int)((p.x - 40f) / panel.itemWidth) * panel.itemWidth, (int)(p.y / panel.itemHeight) * panel.itemHeight);
-                    panel.relativePosition = new Vector3(panel.relativePosition.x, Mathf.Floor((p.y - panel.height) / 2));
-
-                    if (panel.rightArrow != null)
-                    {
-                        panel.rightArrow.relativePosition = new Vector3(panel.relativePosition.x + panel.width, 0);
-                    }
-                }
-            };
+            panel.parent.parent.eventSizeChanged += panel.OnPanelChangeSize;
 
             int zOrder = oldPanel.zOrder;
 
@@ -56,9 +47,49 @@ namespace IndustryLP.UI.Panels
             arrow.relativePosition = new Vector2(811, 0);
             panel.rightArrow = arrow;
 
-            PopulateList(panel);
+            panel.PopulateTable();
 
             return panel;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void OnPanelChangeSize(UIComponent c, Vector2 size)
+        {
+            if (isVisible)
+            {
+                size = new Vector2((int)((size.x - 40f) / itemWidth) * itemWidth, (int)(size.y / itemHeight) * itemHeight);
+                relativePosition = new Vector3(relativePosition.x, Mathf.Floor((size.y - height) / 2));
+
+                if (rightArrow != null)
+                {
+                    rightArrow.relativePosition = new Vector3(relativePosition.x + width, 0);
+                }
+            }
+        }
+
+        private void PopulateTable()
+        {
+            itemsData.Clear();
+
+            foreach (var type in Enum.GetValues(typeof(UIDistributionItem.ItemType)).Cast<UIDistributionItem.ItemType>())
+            {
+                var data = new UIDistributionItem.ItemData
+                {
+                    Name = type.ToString(),
+                    Tooltip = type.ToString(),
+                    Panel = this,
+                    Type = type
+                };
+
+                LoggerUtils.Log($"Added {type} item");
+
+                itemsData.Add(data);
+            }
+
+            DisplayAt(0);
         }
 
         private static void DestroyScrollbars(UIComponent parent)
@@ -70,28 +101,7 @@ namespace IndustryLP.UI.Panels
             }
         }
 
-        private static void PopulateList(UIGeneratorOptionPanel panel)
-        {
-            for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
-            {
-                var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i) as BuildingInfo;
-
-                if (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric)
-                {
-                    var data = new UIGridItem.ItemData
-                    {
-                        name = LocaleUtils.GetLocalizedTitle(prefab),
-                        prefab = prefab,
-                        tooltip = LocaleUtils.GetLocalizedTooltip(prefab),
-                    };
-                    data.tooltipBox = GeneratedPanel.GetTooltipBox(TooltipHelper.GetHashCode(data.tooltip));
-
-                    panel.itemsData.Add(data);
-                }
-            }
-
-            panel.DisplayAt(0);
-        }
+        #endregion
 
         /*
         public static void SetupInstance(UIScrollablePanel oldPanel)

@@ -5,7 +5,7 @@ using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
 using IndustryLP.Tools;
 using IndustryLP.UI.Panels;
-using IndustryLP.UI.Tabs;
+using IndustryLP.UI.Panels.Items;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
@@ -84,7 +84,7 @@ namespace IndustryLP
 
         private DistributionThread gridDistribution;
         private DistributionThread lineDistribution;
-        private DistributionThread mineDistribution;
+        private DistributionThread forestalDistribution;
 
         #endregion
 
@@ -180,10 +180,10 @@ namespace IndustryLP
                         ResourceConstants.LineDistributionHovered,
                         ResourceConstants.LineDistributionPressed,
                         ResourceConstants.LineDistributionFocused,
-                        ResourceConstants.MineDistributionNormal,
-                        ResourceConstants.MineDistributionHovered,
-                        ResourceConstants.MineDistributionPressed,
-                        ResourceConstants.MineDistributionFocused,
+                        ResourceConstants.ForestalDistributionNormal,
+                        ResourceConstants.ForestalDistributionHovered,
+                        ResourceConstants.ForestalDistributionPressed,
+                        ResourceConstants.ForestalDistributionFocused,
                     };
 
                      m_thumbnailAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.DistributionAtlasName, distributionsNames, ResourceConstants.DistributionsPath);
@@ -221,7 +221,7 @@ namespace IndustryLP
             SetupToolbarButton();
             SetupTutorialPanel();
             SetupOptionPanel();
-            SetupScrollablePanel();
+            SetupScrollablePanels();
             SetupActions();
             SetupDistributions();
             
@@ -375,6 +375,10 @@ namespace IndustryLP
 
             m_optionPanel.DisableTab(1);
             m_optionPanel.DisableTab(2);
+            m_categoryPanel.DisableTab(0);
+            m_categoryPanel.DisableTab(1);
+            m_categoryPanel.DisableTab(2);
+            m_scrollablePanel.Disable();
         }
 
         /// <inheritdoc/>
@@ -384,11 +388,16 @@ namespace IndustryLP
             SelectionAngle = angle;
             m_optionPanel.EnableTab(1);
             m_optionPanel.DisableTab(2);
+            m_categoryPanel.EnableTab(0);
+            m_categoryPanel.selectedIndex = 0;
+            m_scrollablePanel.Enable();
 
             if (m_distribution?.Type == DistributionType.GRID)
             {
                 var distributionThread = new GridDistribution();
                 m_distribution = distributionThread.Generate(Selection.Value);
+                m_categoryPanel.EnableTab(1);
+                m_categoryPanel.EnableTab(2);
             }
         }
 
@@ -425,11 +434,11 @@ namespace IndustryLP
         }
 
         /// <inheritdoc/>
-        public void SetMineDistribution()
+        public void SetForestalDistribution()
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = mineDistribution.Generate(Selection.Value);
+                m_distribution = forestalDistribution.Generate(Selection.Value);
             }
         }
 
@@ -519,9 +528,9 @@ namespace IndustryLP
         }
 
         /// <summary>
-        /// Setup the scrollable panel
+        /// Creates all the scrollable panels
         /// </summary>
-        private void SetupScrollablePanel()
+        private void SetupScrollablePanels()
         {
             // Gets the main toolbar
             var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
@@ -543,18 +552,19 @@ namespace IndustryLP
 
             // Gets scrollable toolbar
             var oldPanel = groupPanel.GetComponentInChildren<UIScrollablePanel>();
-            m_scrollablePanel = UIGeneratorOptionPanel.Create(oldPanel);
-
+            m_scrollablePanel = UIDistributionOptionPanel.Create(oldPanel);
+            m_scrollablePanel.Disable();
             m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
             m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
             m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
-            m_scrollablePanel.eventClicked += OnItemClickedScrollablePanel;
+            m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
 
+            // Sets the main tabs
             m_categoryPanel = GameObjectUtils.AddUIComponent<UICategoryOptionPanel>();
-            m_categoryPanel.relativePosition = new Vector3(604, 854);
+            m_categoryPanel.relativePosition = new Vector3(604, 855);
             m_categoryPanel.selectedIndex = 0;
             m_categoryPanel.Hide();
-            //categoryOptionPanel.eventSelectedIndexChanged += OnChangeSelectedIndex;
+            m_categoryPanel.eventSelectedIndexChanged += OnChangeTabIndex;
             m_categoryPanel.eventMouseEnter += OnMouseEnterOptionPanel;
             m_categoryPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
 
@@ -668,11 +678,63 @@ namespace IndustryLP
             m_mouseHoverScrollablePanel = false;
         }
 
-        private void OnItemClickedScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
+        /// <summary>
+        /// Invoked when the user clicks on the distributions panel
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
+        private void OnItemClickedDistributionPanel(UIComponent component, UIMouseEventParameter eventParam)
         {
             UIButton item = eventParam.source as UIButton;
-            PrefabInfo prefab = item.objectUserData as PrefabInfo;
-            LoggerUtils.Log($"Clicked on {prefab.name}");
+            if (item != null)
+            {
+                //PrefabInfo prefab = item.objectUserData as PrefabInfo;
+                var type = (UIDistributionItem.ItemType)item.objectUserData;
+                switch (type)
+                {
+                    case UIDistributionItem.ItemType.Grid:
+                        SetGridDistribution();
+                        break;
+                    case UIDistributionItem.ItemType.Line:
+                        SetLineDistribution();
+                        break;
+                    case UIDistributionItem.ItemType.Forestal:
+                        SetForestalDistribution();
+                        break;
+                }
+                m_categoryPanel.EnableTab(1);
+                m_categoryPanel.EnableTab(2);
+            }
+        }
+
+        /// <summary>
+        /// Invoked when the user clicks on the building panel to insert preferences
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
+        private void OnItemClickedPreferenceBuildingPanel(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            UIButton item = eventParam.source as UIButton;
+            if (item != null)
+            {
+                PrefabInfo prefab = item.objectUserData as PrefabInfo;
+                LoggerUtils.Log($"Clicked on {prefab.name} preference");
+            }
+        }
+
+        /// <summary>
+        /// Invoked when the user clicks on the building panel to insert restrictions
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="eventParam"></param>
+        private void OnItemClickedRestrictionBuildingPanel(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            UIButton item = eventParam.source as UIButton;
+            if (item != null)
+            {
+                PrefabInfo prefab = item.objectUserData as PrefabInfo;
+                LoggerUtils.Log($"Clicked on {prefab.name} restriction");
+            }
         }
 
         /// <summary>
@@ -689,13 +751,12 @@ namespace IndustryLP
         }
 
         /// <summary>
-        /// Invoked when CS changes the visibility of the toolbar scrollable panel
+        /// Invoked when CS changes the visibility of the options panel
         /// </summary>
         /// <param name="component"></param>
         /// <param name="visibility"></param>
         private void OnChangeVisibilityPanel(UIComponent component, bool visibility)
         {
-            LoggerUtils.Log("visibility", visibility);
             if (visibility) m_categoryPanel.Show(); else m_categoryPanel.Hide();
             enabled = visibility;
         }
@@ -725,6 +786,34 @@ namespace IndustryLP
 
             m_action?.OnChangeController(oldAction);
             m_action?.OnEnterController();
+        }
+
+        private void OnChangeTabIndex(UIComponent component, int tabIndex)
+        {
+            switch (tabIndex)
+            {
+                case 0:
+                    m_scrollablePanel = UIDistributionOptionPanel.Create(m_scrollablePanel);
+                    m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
+                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
+                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
+                    m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
+                    break;
+                case 1:
+                    m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
+                    m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
+                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
+                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
+                    m_scrollablePanel.eventClicked += OnItemClickedPreferenceBuildingPanel;
+                    break;
+                case 2:
+                    m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
+                    m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
+                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
+                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
+                    m_scrollablePanel.eventClicked += OnItemClickedRestrictionBuildingPanel;
+                    break;
+            }
         }
 
         #endregion

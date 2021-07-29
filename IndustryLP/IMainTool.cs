@@ -44,6 +44,6 @@ namespace IndustryLP
         /// <summary>
         /// Sets build distribution as mine distribution
         /// </summary>
-        void SetMineDistribution();
+        void SetForestalDistribution();
     }
 }

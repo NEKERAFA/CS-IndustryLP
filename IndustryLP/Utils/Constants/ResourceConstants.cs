@@ -153,29 +153,29 @@
         public static string LineDistributionPressed => "LineDistributionPressed";
 
         /// <summary>
-        /// The grid distribution when is focused
+        /// The line distribution when is focused
         /// </summary>
         public static string LineDistributionFocused => "LineDistributionFocused";
 
         /// <summary>
-        /// The mine distribution
+        /// The forestal distribution
         /// </summary>
-        public static string MineDistributionNormal => "MineDistribution";
+        public static string ForestalDistributionNormal => "ForestalDistribution";
 
         /// <summary>
-        /// The mine distribution when is hovered
+        /// The forestal distribution when is hovered
         /// </summary>
-        public static string MineDistributionHovered => "MineDistributionHovered";
+        public static string ForestalDistributionHovered => "ForestalDistributionHovered";
 
         /// <summary>
-        /// The grid distribution when is pressed
+        /// The forestal distribution when is pressed
         /// </summary>
-        public static string MineDistributionPressed => "MineDistributionPressed";
+        public static string ForestalDistributionPressed => "ForestalDistributionPressed";
 
         /// <summary>
         /// The grid distribution when is focused
         /// </summary>
-        public static string MineDistributionFocused => "MineDistributionFocused";
+        public static string ForestalDistributionFocused => "ForestalDistributionFocused";
 
         /// <summary>
         /// The disabled distribution
@@ -300,6 +300,6 @@
         /// <summary>
         /// Name of the distribution thumbnails atlas
         /// </summary>
-        public static string DistributionAtlasName => $"{AtlasName}.DistributionThumbnails";
+        public static string DistributionAtlasName => $"{AtlasName}.Distributions";
     }
 }

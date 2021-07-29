@@ -77,11 +77,12 @@
     <Compile Include="UI\Buttons\UIArrowPanelButton.cs" />
     <Compile Include="UI\Buttons\UIMoveZoneButton.cs" />
     <Compile Include="UI\Buttons\UIZoningButton.cs" />
-    <Compile Include="UI\Panels\Items\UIGridItem.cs" />
-    <Compile Include="UI\Panels\Items\UIItemData.cs" />
-    <Compile Include="UI\Panels\Items\UIThumbnailItem.cs" />
+    <Compile Include="UI\Panels\Items\UIDistributionItem.cs" />
+    <Compile Include="UI\Panels\Items\UIBuildingItem.cs" />
+    <Compile Include="UI\Panels\Items\IItemData.cs" />
     <Compile Include="UI\Panels\UICategoryOptionPanel.cs" />
-    <Compile Include="UI\Panels\UIGeneratorOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIBuildingsOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIDistributionOptionPanel.cs" />
     <Compile Include="UI\Panels\UIGroupPanel.cs" />
     <Compile Include="UI\Panels\UIOptionPanel.cs" />
     <Compile Include="UI\PreviewRenderer.cs" />
@@ -152,10 +153,6 @@
     <EmbeddedResource Include="Resources\Distributions\LineDistributionFocused.png" />
     <EmbeddedResource Include="Resources\Distributions\LineDistributionHovered.png" />
     <EmbeddedResource Include="Resources\Distributions\LineDistributionPressed.png" />
-    <EmbeddedResource Include="Resources\Distributions\MineDistribution.png" />
-    <EmbeddedResource Include="Resources\Distributions\MineDistributionFocused.png" />
-    <EmbeddedResource Include="Resources\Distributions\MineDistributionHovered.png" />
-    <EmbeddedResource Include="Resources\Distributions\MineDistributionPressed.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Distributions\DistributionDisabled.png" />
@@ -174,6 +171,12 @@
     <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionFocused.png" />
     <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionHovered.png" />
     <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionPressed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistribution.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionFocused.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionHovered.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionPressed.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
