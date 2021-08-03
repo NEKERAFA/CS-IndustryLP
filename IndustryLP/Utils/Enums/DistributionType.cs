@@ -2,6 +2,6 @@
 {
     internal enum DistributionType
     {
-        GRID, LINE, MINE
+        GRID, LINE, FOREST
     }
 }
