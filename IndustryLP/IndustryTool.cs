@@ -389,7 +389,6 @@ namespace IndustryLP
             m_optionPanel.EnableTab(1);
             m_optionPanel.DisableTab(2);
             m_categoryPanel.EnableTab(0);
-            m_categoryPanel.selectedIndex = 0;
             m_scrollablePanel.Enable();
 
             if (m_distribution?.Type == DistributionType.GRID)
@@ -561,7 +560,7 @@ namespace IndustryLP
 
             // Sets the main tabs
             m_categoryPanel = GameObjectUtils.AddUIComponent<UICategoryOptionPanel>();
-            m_categoryPanel.relativePosition = new Vector3(604, 855);
+            m_categoryPanel.relativePosition = new Vector3(604, 854);
             m_categoryPanel.selectedIndex = 0;
             m_categoryPanel.Hide();
             m_categoryPanel.eventSelectedIndexChanged += OnChangeTabIndex;
@@ -591,6 +590,9 @@ namespace IndustryLP
             //mineDistribution = new MineDistribution();
         }
 
+        /// <summary>
+        /// Invoked when the main tool is updated
+        /// </summary>
         private void UpdateMainToolbar()
         {
             UITabstrip tabstrip = ToolsModifierControl.mainToolbar.component as UITabstrip;
@@ -604,6 +606,11 @@ namespace IndustryLP
             UpdatePosition(tabstrip, null);
         }
 
+        /// <summary>
+        /// Invoked when the main tool updates their position
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="p"></param>
         private void UpdatePosition(UIComponent c, UIComponent p)
         {
             UITabstrip tabstrip = c as UITabstrip;
@@ -616,6 +623,24 @@ namespace IndustryLP
 
             float newXPos = (tabstrip.parent.width - width) / 2;
             tabstrip.relativePosition = new Vector3(Mathf.Min(m_defaultXPos, newXPos), tabstrip.relativePosition.y);
+        }
+
+        /// <summary>
+        /// Invoked when the main tool updates the scrollable panel
+        /// </summary>
+        private void UpdateScrollablePanel()
+        {
+            if (m_categoryPanel.selectedIndex == 0)
+            {
+                switch (m_distribution.Type)
+                {
+                    case DistributionType.GRID:
+                        var panel = m_scrollablePanel as UIDistributionOptionPanel;
+                        panel.selectedItem = panel.itemsData[0];
+                        panel.Refresh();
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -696,10 +721,10 @@ namespace IndustryLP
                         SetGridDistribution();
                         break;
                     case UIDistributionItem.ItemType.Line:
-                        SetLineDistribution();
+                        //SetLineDistribution();
                         break;
                     case UIDistributionItem.ItemType.Forestal:
-                        SetForestalDistribution();
+                        //SetForestalDistribution();
                         break;
                 }
                 m_categoryPanel.EnableTab(1);
@@ -788,6 +813,11 @@ namespace IndustryLP
             m_action?.OnEnterController();
         }
 
+        /// <summary>
+        /// Invoked when the user clicks in a option button
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="tabIndex"></param>
         private void OnChangeTabIndex(UIComponent component, int tabIndex)
         {
             switch (tabIndex)
@@ -814,6 +844,8 @@ namespace IndustryLP
                     m_scrollablePanel.eventClicked += OnItemClickedRestrictionBuildingPanel;
                     break;
             }
+
+            UpdateScrollablePanel();
         }
 
         #endregion

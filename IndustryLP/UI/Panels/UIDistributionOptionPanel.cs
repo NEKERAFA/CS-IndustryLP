@@ -95,9 +95,15 @@ namespace IndustryLP.UI.Panels
         private static void DestroyScrollbars(UIComponent parent)
         {
             UIScrollbar[] scrollbars = parent.GetComponentsInChildren<UIScrollbar>();
-            foreach (UIScrollbar scrollbar in scrollbars)
+            foreach (var scrollbar in scrollbars)
             {
                 DestroyImmediate(scrollbar.gameObject);
+            }
+
+            UIArrowPanelButton[] arrows = parent.GetComponentsInChildren<UIArrowPanelButton>();
+            foreach (var arrow in arrows)
+            {
+                DestroyImmediate(arrow.gameObject);
             }
         }
 
