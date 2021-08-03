@@ -15,8 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClingoSharp.NativeWrapper",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configuration", "{99ADC3F9-D905-49A4-BBA3-F1A91E09ABA6}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\IndustryLP.CI.yml = .github\workflows\IndustryLP.CI.yml
 		install.ps1 = install.ps1
-		install.sh = install.sh
 	EndProjectSection
 EndProject
 Global

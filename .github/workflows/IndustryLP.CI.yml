@@ -13,9 +13,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.100
+          submodules: recursive
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
-        run: dotnet build
+        run: msbuild IndustryLP.sln /p:Configuration=Release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: IndustryLP
+          path:
+             bin\Release\IndustryLP.dll

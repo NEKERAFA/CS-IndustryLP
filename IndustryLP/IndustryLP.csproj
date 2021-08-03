@@ -58,53 +58,66 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions\MovingZoneAction.cs" />
+    <Compile Include="Actions\ToolAction.cs" />
+    <Compile Include="Actions\ZoningAction.cs" />
+    <Compile Include="DistributionDefinition\DistributionInfo.cs" />
+    <Compile Include="DistributionDefinition\DistributionThread.cs" />
+    <Compile Include="DistributionDefinition\GridDistribution.cs" />
+    <Compile Include="DistributionDefinition\GridDistributionInfo.cs" />
     <Compile Include="DomainDefinition\GeneratorThread.cs" />
     <Compile Include="DomainDefinition\Region.cs" />
     <Compile Include="DomainDefinition\Result.cs" />
-    <Compile Include="UI\Buttons\BuildSolutionButton.cs" />
-    <Compile Include="UI\Buttons\DownArrowButton.cs" />
-    <Compile Include="UI\Buttons\UpArrowButton.cs" />
-    <Compile Include="UI\GeneratorDialog.cs" />
-    <Compile Include="UI\GeneratorPanel.cs" />
-    <Compile Include="UI\ToolButton.cs" />
-    <Compile Include="Utils\BuildingUtils.cs" />
-    <Compile Include="Utils\Constants\ClingoConstants.cs" />
-    <Compile Include="Utils\Constants\ColorConstants.cs" />
-    <Compile Include="Utils\Enums\GenerationState.cs" />
-    <Compile Include="Utils\Enums\PointSelectionState.cs" />
-    <Compile Include="Utils\Enums\SelectionState.cs" />
-    <Compile Include="Tools\GeneratorTool.cs" />
-    <Compile Include="Tools\SelectionTool.cs" />
-    <Compile Include="Tools\ToolActionController.cs" />
-    <Compile Include="UI\Buttons\GenerateOptionsButton.cs" />
-    <Compile Include="Utils\GameObjectUtils.cs" />
-    <Compile Include="Utils\NetUtils.cs" />
-    <Compile Include="Utils\ResourceLoader.cs" />
-    <Compile Include="Utils\Constants\LibraryConstants.cs" />
-    <Compile Include="Utils\LoggerUtils.cs" />
-    <Compile Include="Utils\Constants\ResourceConstants.cs" />
-    <Compile Include="MainTool.cs" />
+    <Compile Include="IMainTool.cs" />
+    <Compile Include="IndustryTool.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Buttons\SelectionButton.cs" />
-    <Compile Include="UI\ToolPanel.cs" />
-    <Compile Include="Utils\SimulationUtils.cs" />
+    <Compile Include="UI\Buttons\UIBuildZoneButton.cs" />
+    <Compile Include="UI\Buttons\UIArrowPanelButton.cs" />
+    <Compile Include="UI\Buttons\UIMoveZoneButton.cs" />
+    <Compile Include="UI\Buttons\UIZoningButton.cs" />
+    <Compile Include="UI\Panels\Items\UIDistributionItem.cs" />
+    <Compile Include="UI\Panels\Items\UIBuildingItem.cs" />
+    <Compile Include="UI\Panels\Items\IItemData.cs" />
+    <Compile Include="UI\Panels\UICategoryOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIBuildingsOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIDistributionOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIGroupPanel.cs" />
+    <Compile Include="UI\Panels\UIOptionPanel.cs" />
+    <Compile Include="UI\PreviewRenderer.cs" />
+    <Compile Include="UI\Tabs\UIPreferenceTab.cs" />
+    <Compile Include="UI\Tabs\UIRestrictionTab.cs" />
+    <Compile Include="UI\Tabs\UIDistributionTab.cs" />
+    <Compile Include="UI\UIDistributionButton.cs" />
+    <Compile Include="UI\UIFastList.cs" />
+    <Compile Include="UI\UIOptionButton.cs" />
+    <Compile Include="UI\UITabButton.cs" />
+    <Compile Include="Utils\BuildingUtils.cs" />
+    <Compile Include="Utils\Constants\AssetTagList.cs" />
+    <Compile Include="Utils\Constants\ClingoConstants.cs" />
+    <Compile Include="Utils\Constants\ColorConstants.cs" />
+    <Compile Include="Utils\Constants\LibraryConstants.cs" />
+    <Compile Include="Utils\Constants\ResourceConstants.cs" />
+    <Compile Include="Utils\Enums\CellNeighbour.cs" />
+    <Compile Include="Utils\Enums\DistributionType.cs" />
+    <Compile Include="Utils\Enums\GenerationState.cs" />
+    <Compile Include="Utils\Enums\ZoningState.cs" />
+    <Compile Include="Utils\DistributionUtils.cs" />
+    <Compile Include="Utils\GameObjectUtils.cs" />
     <Compile Include="Utils\GUIUtils.cs" />
+    <Compile Include="Utils\ImageUtils.cs" />
+    <Compile Include="Utils\LoggerUtils.cs" />
+    <Compile Include="Utils\NetUtils.cs" />
+    <Compile Include="Utils\LocaleUtils.cs" />
+    <Compile Include="Utils\ResourceLoader.cs" />
+    <Compile Include="Utils\SimulationUtils.cs" />
+    <Compile Include="Utils\TerrainUtils.cs" />
+    <Compile Include="Utils\ThumbnailUtils.cs" />
     <Compile Include="Utils\Wrappers\NodeWrapper.cs" />
+    <Compile Include="Utils\Wrappers\ParcelWrapper.cs" />
     <Compile Include="Utils\Wrappers\RoadWrapper.cs" />
     <Compile Include="Utils\Wrappers\SegmentWrapper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\ButtonPushed.png" />
-    <EmbeddedResource Include="Resources\Icons\ButtonHover.png" />
-    <EmbeddedResource Include="Resources\Icons\ButtonNormal.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\Selection.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\Build.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClingoSharp\src\ClingoSharp.NativeWrapper\ClingoSharp.NativeWrapper.csproj">
@@ -121,11 +134,49 @@
     <None Include="DomainDefinition\logic_program\item_definition.lp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\DownArrow.png" />
-    <EmbeddedResource Include="Resources\Icons\UpArrow.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionDown.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionUp.png" />
+    <EmbeddedResource Include="Resources\Icons\ToolbarIconDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\ToolbarIconFocused.png" />
+    <EmbeddedResource Include="Resources\Icons\ToolbarIconHovered.png" />
+    <EmbeddedResource Include="Resources\Icons\ToolbarIconNormal.png" />
+    <EmbeddedResource Include="Resources\Icons\ToolbarIconPressed.png" />
+    <EmbeddedResource Include="Resources\Icons\ZoningOptionBuild.png" />
+    <EmbeddedResource Include="Resources\Icons\ZoningOptionMove.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\Options.png" />
+    <EmbeddedResource Include="Resources\Distributions\GridDistribution.png" />
+    <EmbeddedResource Include="Resources\Distributions\GridDistributionFocused.png" />
+    <EmbeddedResource Include="Resources\Distributions\GridDistributionHovered.png" />
+    <EmbeddedResource Include="Resources\Distributions\GridDistributionPressed.png" />
+    <EmbeddedResource Include="Resources\Distributions\LineDistribution.png" />
+    <EmbeddedResource Include="Resources\Distributions\LineDistributionFocused.png" />
+    <EmbeddedResource Include="Resources\Distributions\LineDistributionHovered.png" />
+    <EmbeddedResource Include="Resources\Distributions\LineDistributionPressed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Distributions\DistributionDisabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\SelectFilter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingPreference.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingPreferenceDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingPreferenceFocused.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingPreferenceHovered.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingPreferencePressed.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestriction.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionFocused.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionHovered.png" />
+    <EmbeddedResource Include="Resources\Icons\SubBarBuildingRestrictionPressed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistribution.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionFocused.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionHovered.png" />
+    <EmbeddedResource Include="Resources\Distributions\ForestalDistributionPressed.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,19 +5,6 @@ namespace IndustryLP.Utils
 {
     internal static class GameObjectUtils
     {
-        #region GameObject Utils
-
-        /// <summary>
-        /// Gets all old <see cref="MainTool"/> panels and destroy them
-        /// </summary>
-        public static void DestroyOldPanels()
-        {
-            var panel = GameObject.Find(MainTool.ObjectName);
-            Object.Destroy(panel);
-        }
-
-        #endregion
-
         #region GameObject Extensions
 
         /// <summary>
