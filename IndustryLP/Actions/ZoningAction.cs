@@ -105,7 +105,7 @@ namespace IndustryLP.Actions
 
         #endregion
 
-        #region Action Behaviour method
+        #region Action Behaviour Methods
 
         public override void OnStart(IMainTool mainTool)
         {

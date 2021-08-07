@@ -1,6 +1,6 @@
 ﻿namespace IndustryLP.Utils.Enums
 {
-    internal enum DistributionType
+    public enum DistributionType
     {
         GRID, LINE, FOREST
     }

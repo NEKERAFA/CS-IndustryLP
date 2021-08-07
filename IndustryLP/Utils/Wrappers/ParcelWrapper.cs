@@ -5,7 +5,7 @@ namespace IndustryLP.Utils.Wrappers
     /// <summary>
     /// This class wrappers about a zone parcel in in Cities: Skylines
     /// </summary>
-    internal class ParcelWrapper
+    public class ParcelWrapper
     {
         /// <summary>
         /// The id in the grid distribution

@@ -1,5 +1,6 @@
 ﻿using IndustryLP.Utils.Enums;
 using IndustryLP.Utils.Wrappers;
+using UnityEngine;
 
 namespace IndustryLP.DistributionDefinition
 {
@@ -23,6 +24,19 @@ namespace IndustryLP.DistributionDefinition
             }
 
             return -1;
+        }
+
+        public override ParcelWrapper FindById(ushort gridId)
+        {
+            foreach (var cell in Cells)
+            {
+                if (cell.GridId == gridId)
+                {
+                    return cell;
+                }
+            }
+
+            return null;
         }
 
         public override ParcelWrapper GetNext(CellNeighbour direction, ushort gridId)
@@ -56,6 +70,31 @@ namespace IndustryLP.DistributionDefinition
             }
 
             return null;
+        }
+
+        public override ParcelWrapper FindCell(Vector3 position, double? limit)
+        {
+            float currentDistance = float.MaxValue;
+            ParcelWrapper selectedCell = null;
+
+            foreach (var cell in Cells)
+            {
+                if (cell != null)
+                {
+                    var distance = Vector3.Distance(position, cell.Position);
+
+                    if ((limit == null) || (limit != null && distance <= limit))
+                    {
+                        if (distance < currentDistance)
+                        {
+                            selectedCell = cell;
+                            currentDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            return selectedCell;
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using ColossalFramework.Math;
+using IndustryLP.DistributionDefinition;
+using IndustryLP.Entities;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace IndustryLP
@@ -10,6 +13,9 @@ namespace IndustryLP
     {
         Quad3? Selection { get; }
         float? SelectionAngle { get; }
+        DistributionInfo Distribution { get; }
+        List<Cell> Preferences { get; }
+        List<Cell> Restrictions { get; }
 
         /// <summary>
         /// Intersects a ray with the terrain
@@ -45,5 +51,12 @@ namespace IndustryLP
         /// Sets build distribution as mine distribution
         /// </summary>
         void SetForestalDistribution();
+
+        /// <summary>
+        /// Ads a new preference to the grid
+        /// </summary>
+        /// <param name="gridId">The id in the grid</param>
+        /// <param name="building">The building that defines the preference</param>
+        void AddPreference(ushort gridId, BuildingInfo building);
     }
 }

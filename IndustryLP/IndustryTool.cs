@@ -3,6 +3,7 @@ using ColossalFramework.Math;
 using ColossalFramework.UI;
 using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
+using IndustryLP.Entities;
 using IndustryLP.Tools;
 using IndustryLP.UI.Panels;
 using IndustryLP.UI.Panels.Items;
@@ -10,6 +11,7 @@ using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -61,11 +63,6 @@ namespace IndustryLP
         /// Current action
         /// </summary>
         private ToolAction m_action = null;
-
-        /// <summary>
-        /// Current distribution
-        /// </summary>
-        private DistributionInfo m_distribution = null;
 
         private Vector3? m_mouseTerrainPosition = null;
         private bool m_mouseHoverToolbar = false;
@@ -202,6 +199,15 @@ namespace IndustryLP
 
         public float? SelectionAngle { get; set; } = null;
 
+        /// <summary>
+        /// Current distribution
+        /// </summary>
+        public DistributionInfo Distribution { get; set; } = null;
+
+        public List<Cell> Preferences { get; set; } = new List<Cell>();
+
+        public List<Cell> Restrictions { get; set; } = new List<Cell>();
+
         #endregion
 
         #region Unity Behaviour methods
@@ -331,6 +337,24 @@ namespace IndustryLP
 
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
+
+            if (Selection.HasValue)
+            {
+                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
+                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
+                foreach (var prefence in Preferences)
+                {
+                    Color buildingColor = BuildingUtils.GetColor(0, prefence.Building);
+                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, prefence.Position, prefence.Rotation, prefence.Building, buildingColor);
+                }
+
+                foreach (var restriction in Restrictions)
+                {
+                    Color buildingColor = BuildingUtils.GetColor(0, restriction.Building);
+                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, buildingColor);
+                }
+            }
         }
 
         /// <summary>
@@ -344,9 +368,25 @@ namespace IndustryLP
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
 
-            if (m_distribution != null)
+            if (Distribution != null)
             {
-                DistributionUtils.RenderSegments(cameraInfo, ColorConstants.SelectionColor, m_distribution.Road);
+                DistributionUtils.RenderSegments(cameraInfo, ColorConstants.SelectionColor, Distribution.Road);
+            }
+
+            if (Selection.HasValue)
+            {
+                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
+                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
+                foreach (var prefence in Preferences)
+                {
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, prefence.Position, prefence.Rotation, prefence.Building, ColorConstants.PreferenceColor);
+                }
+
+                foreach (var restriction in Restrictions)
+                {
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, ColorConstants.PreferenceColor);
+                }
             }
         }
 
@@ -368,9 +408,9 @@ namespace IndustryLP
         /// <inheritdoc/>
         public void CancelZoning()
         {
-            if (m_distribution != null)
+            if (Distribution != null)
             {
-                m_distribution = null;
+                Distribution = null;
             }
 
             m_optionPanel.DisableTab(1);
@@ -391,10 +431,10 @@ namespace IndustryLP
             m_categoryPanel.EnableTab(0);
             m_scrollablePanel.Enable();
 
-            if (m_distribution?.Type == DistributionType.GRID)
+            if (Distribution?.Type == DistributionType.GRID)
             {
-                var distributionThread = new GridDistribution();
-                m_distribution = distributionThread.Generate(Selection.Value);
+                var distributionThread = new GridDistributionThread();
+                Distribution = distributionThread.Generate(Selection.Value);
                 m_categoryPanel.EnableTab(1);
                 m_categoryPanel.EnableTab(2);
             }
@@ -419,7 +459,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = gridDistribution.Generate(Selection.Value);
+                Distribution = gridDistribution.Generate(Selection.Value);
             }
         }
 
@@ -428,7 +468,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = lineDistribution.Generate(Selection.Value);
+                Distribution = lineDistribution.Generate(Selection.Value);
             }
         }
 
@@ -437,8 +477,23 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = forestalDistribution.Generate(Selection.Value);
+                Distribution = forestalDistribution.Generate(Selection.Value);
             }
+        }
+
+        /// <inheritdoc/>
+        public void AddPreference(ushort gridId, BuildingInfo building)
+        {
+            var parcel = Distribution.FindById(gridId);
+            Preferences.Add(new Cell
+            {
+                Building = building,
+                Position = parcel.Position,
+                Rotation = parcel.Rotation
+            });
+
+            m_action.OnLeftController();
+            m_action = null;
         }
 
         #endregion
@@ -585,7 +640,7 @@ namespace IndustryLP
         /// </summary>
         private void SetupDistributions()
         {
-            gridDistribution = new GridDistribution();
+            gridDistribution = new GridDistributionThread();
             //lineDistribution = new LineDistribution();
             //mineDistribution = new MineDistribution();
         }
@@ -632,7 +687,7 @@ namespace IndustryLP
         {
             if (m_categoryPanel.selectedIndex == 0)
             {
-                switch (m_distribution.Type)
+                switch (Distribution.Type)
                 {
                     case DistributionType.GRID:
                         var panel = m_scrollablePanel as UIDistributionOptionPanel;
@@ -744,6 +799,14 @@ namespace IndustryLP
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
                 LoggerUtils.Log($"Clicked on {prefab.name} preference");
+
+                m_optionPanel.selectedIndex = -1;
+                m_action?.OnLeftController();
+                var oldAction = m_action;
+                m_action = new AddPreferenceAction(prefab as BuildingInfo);
+                m_action.OnStart(this);
+                m_action.OnChangeController(oldAction);
+                m_action.OnEnterController();
             }
         }
 

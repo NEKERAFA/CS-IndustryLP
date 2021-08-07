@@ -1,11 +1,12 @@
 ﻿using ColossalFramework.Math;
+using IndustryLP.Utils;
 using IndustryLP.Utils.Wrappers;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace IndustryLP.DistributionDefinition
 {
-    internal class GridDistribution : DistributionThread
+    internal class GridDistributionThread : DistributionThread
     {
         private Bezier3 GenerateSegment(Vector3 startPos, Vector3 startDir, Vector3 endPos, Vector3 endDir)
         {
@@ -63,17 +64,19 @@ namespace IndustryLP.DistributionDefinition
             var subdivisionsCount = Mathf.Ceil(length / 80);
             var subdivisionsLength = length / subdivisionsCount;
             var subdivisions = new List<Bezier3>() { };
+            var startDir = (end - start).normalized;
+            var endDir = (start - end).normalized;
 
             var position = start;
-            for (int i = 0; i <= subdivisionsCount; i++)
+            for (int i = 0; i < subdivisionsCount; i++)
             {
                 var next = Vector3.MoveTowards(position, end, subdivisionsLength);
-                var startDir = (next - start).normalized;
-                var endDir = (start - next).normalized;
                 var segment = GenerateSegment(position, startDir, next, endDir);
                 subdivisions.Add(segment);
                 position = next;
             }
+
+            subdivisions.Add(GenerateSegment(position, startDir, end, endDir));
 
             return subdivisions;
         }
@@ -113,24 +116,95 @@ namespace IndustryLP.DistributionDefinition
 
             // Generate secondary roads
             List<Bezier3> lastLeftRoadBranch = null, lastRightRoadBranch = null;
-            
-            foreach(var position in upRoad)
-            {
-                var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
 
-                var leftRoadBranch = GenerateRoad(position.d, position.d + left * roadLength);
+            var offsetX = 0;
+            var offsetY = 0;
+            var id = (ushort)0;
+
+            var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
+
+            for (var posY = 0; posY < upRoad.Count - 1; posY++)
+            {
+                var position = upRoad[posY];
+
+                var leftRoadBranch = GenerateRoad(position.d + left * roadLength, position.d);
                 info.Road.AddRange(leftRoadBranch);
 
                 if (lastLeftRoadBranch != null)
                 {
-                    for (int pos = 1; pos < leftRoadBranch.Count; pos++)
+                    for (int pos = 0; pos < lastLeftRoadBranch.Count - 1; pos++)
                     {
-                        var startPos = lastLeftRoadBranch[pos].a;
-                        var endPos = leftRoadBranch[pos].a;
-                        var startDir = (endPos - startPos).normalized;
-                        var endDir = (startPos - endPos).normalized;
+                        LoggerUtils.Log("Line: ", pos);
 
-                        info.Road.Add(GenerateSegment(startPos, startDir, endPos, endDir));
+                        // Gets the vertices of the plot
+                        var startPos = lastLeftRoadBranch[pos].a;
+                        
+                        Vector3? endPos = null;
+                        if (pos < leftRoadBranch.Count)
+                        {
+                            endPos = leftRoadBranch[pos].a;
+                        }
+
+                        if (endPos.HasValue)
+                        {
+                            var startDir = (endPos.Value - startPos).normalized;
+                            var endDir = (startPos - endPos.Value).normalized;
+                            var row = lastLeftRoadBranch.Count * 4;
+
+                            // Initialize all parcels
+                            /*if (pos == 0)
+                            {
+                                for (var i = 0; i < row; i++)
+                                {
+                                    info.Cells.Add(null);
+                                }
+                            }*/
+
+                            Vector3? startNextPos = null;
+                            if (pos + 1 < lastLeftRoadBranch.Count)
+                            {
+                                startNextPos = lastLeftRoadBranch[pos + 1].a;
+                            }
+
+                            // Gets interpolation points
+                            if (startNextPos.HasValue)
+                            {
+                                var a1 = Vector3.Lerp(startPos, startNextPos.Value, 0.333333333333f) - startPos;
+                                var b1 = Vector3.Lerp(startPos, startNextPos.Value, 0.666666666666f) - startPos;
+                                var c1 = Vector3.Lerp(startPos, endPos.Value, 0.333333333333f) - startPos;
+                                var d1 = Vector3.Lerp(startPos, endPos.Value, 0.666666666666f) - startPos;
+
+                                // Generate the cells
+                                LoggerUtils.Log("Cell: ", pos, offsetX, row, offsetY);
+                                info.Cells.Add(new ParcelWrapper
+                                {
+                                    GridId = id++,
+                                    Position = a1 + c1 + startPos
+                                });
+
+                                info.Cells.Add(new ParcelWrapper
+                                {
+                                    GridId = id++,
+                                    Position = b1 + c1 + startPos
+                                });
+
+                                info.Cells.Add(new ParcelWrapper
+                                {
+                                    GridId = id++,
+                                    Position = a1 + d1 + startPos
+                                });
+
+                                info.Cells.Add(new ParcelWrapper
+                                {
+                                    GridId = id++,
+                                    Position = b1 + d1 + startPos
+                                });
+                            }
+
+
+                            // Generate the road
+                            info.Road.Add(GenerateSegment(startPos, startDir, endPos.Value, endDir));
+                        }
                     }
                 }
 

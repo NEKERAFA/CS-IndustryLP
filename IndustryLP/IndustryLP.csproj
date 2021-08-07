@@ -58,16 +58,18 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions\AddPreferenceAction.cs" />
     <Compile Include="Actions\MovingZoneAction.cs" />
     <Compile Include="Actions\ToolAction.cs" />
     <Compile Include="Actions\ZoningAction.cs" />
     <Compile Include="DistributionDefinition\DistributionInfo.cs" />
     <Compile Include="DistributionDefinition\DistributionThread.cs" />
-    <Compile Include="DistributionDefinition\GridDistribution.cs" />
+    <Compile Include="DistributionDefinition\GridDistributionThread.cs" />
     <Compile Include="DistributionDefinition\GridDistributionInfo.cs" />
     <Compile Include="DomainDefinition\GeneratorThread.cs" />
     <Compile Include="DomainDefinition\Region.cs" />
     <Compile Include="DomainDefinition\Result.cs" />
+    <Compile Include="Entities\Cell.cs" />
     <Compile Include="IMainTool.cs" />
     <Compile Include="IndustryTool.cs" />
     <Compile Include="ModInfo.cs" />
