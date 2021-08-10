@@ -71,30 +71,5 @@ namespace IndustryLP.DistributionDefinition
 
             return null;
         }
-
-        public override ParcelWrapper FindCell(Vector3 position, double? limit)
-        {
-            float currentDistance = float.MaxValue;
-            ParcelWrapper selectedCell = null;
-
-            foreach (var cell in Cells)
-            {
-                if (cell != null)
-                {
-                    var distance = Vector3.Distance(position, cell.Position);
-
-                    if ((limit == null) || (limit != null && distance <= limit))
-                    {
-                        if (distance < currentDistance)
-                        {
-                            selectedCell = cell;
-                            currentDistance = distance;
-                        }
-                    }
-                }
-            }
-
-            return selectedCell;
-        }
     }
 }

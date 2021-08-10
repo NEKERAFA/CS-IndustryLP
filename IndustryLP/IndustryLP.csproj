@@ -58,7 +58,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\AddPreferenceAction.cs" />
+    <Compile Include="Actions\AddBuildingAction.cs" />
     <Compile Include="Actions\MovingZoneAction.cs" />
     <Compile Include="Actions\ToolAction.cs" />
     <Compile Include="Actions\ZoningAction.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="Utils\GUIUtils.cs" />
     <Compile Include="Utils\ImageUtils.cs" />
     <Compile Include="Utils\LoggerUtils.cs" />
+    <Compile Include="Utils\MathUtils.cs" />
     <Compile Include="Utils\NetUtils.cs" />
     <Compile Include="Utils\LocaleUtils.cs" />
     <Compile Include="Utils\ResourceLoader.cs" />

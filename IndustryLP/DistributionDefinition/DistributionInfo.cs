@@ -37,7 +37,10 @@ namespace IndustryLP.DistributionDefinition
         /// <param name="position">The position to search</param>
         /// <param name="limit">The closest distance to find cells</param>
         /// <returns></returns>
-        public abstract ParcelWrapper FindCell(Vector3 position, double? limit);
+        public ParcelWrapper FindCell(Vector3 position, double? limit)
+        {
+            return Utils.MathUtils.FindNeighbour(Cells, position, limit);
+        }
 
         public abstract ParcelWrapper FindById(ushort gridId);
     }

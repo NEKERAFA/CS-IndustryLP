@@ -179,28 +179,31 @@ namespace IndustryLP.DistributionDefinition
                                 info.Cells.Add(new ParcelWrapper
                                 {
                                     GridId = id++,
-                                    Position = a1 + c1 + startPos
+                                    Position = a1 + c1 + startPos,
+                                    Rotation = Vector3.Angle(Vector3.forward, (startPos - startNextPos.Value).normalized) * Mathf.Deg2Rad
                                 });
 
                                 info.Cells.Add(new ParcelWrapper
                                 {
                                     GridId = id++,
-                                    Position = b1 + c1 + startPos
+                                    Position = b1 + c1 + startPos,
+                                    Rotation = Vector3.Angle(Vector3.forward, (startNextPos.Value - startPos).normalized) * Mathf.Deg2Rad
                                 });
 
                                 info.Cells.Add(new ParcelWrapper
                                 {
                                     GridId = id++,
-                                    Position = a1 + d1 + startPos
+                                    Position = a1 + d1 + startPos,
+                                    Rotation = Vector3.Angle(Vector3.forward, (startPos - startNextPos.Value).normalized) * Mathf.Deg2Rad
                                 });
 
                                 info.Cells.Add(new ParcelWrapper
                                 {
                                     GridId = id++,
-                                    Position = b1 + d1 + startPos
+                                    Position = b1 + d1 + startPos,
+                                    Rotation = Vector3.Angle(Vector3.forward, (startNextPos.Value - startPos).normalized) * Mathf.Deg2Rad
                                 });
                             }
-
 
                             // Generate the road
                             info.Road.Add(GenerateSegment(startPos, startDir, endPos.Value, endDir));

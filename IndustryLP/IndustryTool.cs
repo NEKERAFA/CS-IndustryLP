@@ -274,6 +274,9 @@ namespace IndustryLP
                 m_action.OnLeftController();
                 m_action = null;
             }
+
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <summary>
@@ -316,6 +319,13 @@ namespace IndustryLP
                     m_action?.OnRightMouseIsUp(m_mouseTerrainPosition.Value);
                 }
             }
+            else
+            {
+                if (Input.GetMouseButtonUp(1))
+                {
+                    RemoveBuilding(m_mouseTerrainPosition.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -343,16 +353,22 @@ namespace IndustryLP
                 var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
                 Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
 
-                foreach (var prefence in Preferences)
+                foreach (var preference in Preferences)
                 {
-                    Color buildingColor = BuildingUtils.GetColor(0, prefence.Building);
-                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, prefence.Position, prefence.Rotation, prefence.Building, buildingColor);
+                    Color buildingColor = BuildingUtils.GetColor(0, preference.Building);
+                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, buildingColor);
+#if DEBUG
+                    DrawForwardDirection(preference);
+#endif
                 }
 
                 foreach (var restriction in Restrictions)
                 {
                     Color buildingColor = BuildingUtils.GetColor(0, restriction.Building);
                     BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, buildingColor);
+#if DEBUG
+                    DrawForwardDirection(restriction);
+#endif
                 }
             }
         }
@@ -378,9 +394,9 @@ namespace IndustryLP
                 var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
                 Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
 
-                foreach (var prefence in Preferences)
+                foreach (var preference in Preferences)
                 {
-                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, prefence.Position, prefence.Rotation, prefence.Building, ColorConstants.PreferenceColor);
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, ColorConstants.PreferenceColor);
                 }
 
                 foreach (var restriction in Restrictions)
@@ -419,6 +435,8 @@ namespace IndustryLP
             m_categoryPanel.DisableTab(1);
             m_categoryPanel.DisableTab(2);
             m_scrollablePanel.Disable();
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <inheritdoc/>
@@ -438,6 +456,9 @@ namespace IndustryLP
                 m_categoryPanel.EnableTab(1);
                 m_categoryPanel.EnableTab(2);
             }
+
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <inheritdoc/>
@@ -494,6 +515,15 @@ namespace IndustryLP
 
             m_action.OnLeftController();
             m_action = null;
+        }
+
+        public void RemoveBuilding(Vector3 mousePosition)
+        {
+            var cell = Utils.MathUtils.FindNeighbour(Preferences, mousePosition, 20);
+            if (cell != null)
+            {
+                Preferences.Remove(cell);
+            }
         }
 
         #endregion
@@ -803,7 +833,7 @@ namespace IndustryLP
                 m_optionPanel.selectedIndex = -1;
                 m_action?.OnLeftController();
                 var oldAction = m_action;
-                m_action = new AddPreferenceAction(prefab as BuildingInfo);
+                m_action = new AddBuildingAction(prefab as BuildingInfo);
                 m_action.OnStart(this);
                 m_action.OnChangeController(oldAction);
                 m_action.OnEnterController();
@@ -911,6 +941,34 @@ namespace IndustryLP
             UpdateScrollablePanel();
         }
 
-        #endregion
+#if DEBUG
+        private void DrawForwardDirection(Cell building)
+        {
+            var start = building.Position + Vector3.up * 10;
+            var dir = new Vector3(0, 0, 40);
+            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
+            var end = rotate * dir + building.Position + Vector3.up * 10;
+            DrawLine(start, end, new Color32(255, 0, 0, 255));
+        }
+
+        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.2f)
+        {
+            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
+            lr.transform.position = start;
+            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
+            lr.hideFlags = HideFlags.HideAndDontSave;
+            lr.startColor = color;
+            lr.startWidth = 2;
+            lr.SetPosition(0, start);
+            lr.endColor = color;
+            lr.endWidth = 2;
+            lr.SetPosition(1, end);
+            Destroy(lr.gameObject, duration);
+
+            LoggerUtils.Log(start, end);
+        }
+#endif
+
+    #endregion
     }
 }

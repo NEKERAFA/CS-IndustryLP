@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IndustryLP.Actions
 {
-    internal class AddPreferenceAction : ToolAction
+    internal class AddBuildingAction : ToolAction
     {
         #region Attribute
 
@@ -17,7 +17,7 @@ namespace IndustryLP.Actions
 
         #region Constructor
 
-        public AddPreferenceAction(BuildingInfo building)
+        public AddBuildingAction(BuildingInfo building)
         {
             m_building = building;
         }
