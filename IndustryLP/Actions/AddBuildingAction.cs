@@ -73,7 +73,7 @@ namespace IndustryLP.Actions
         {
             base.OnRenderOverlay(cameraInfo, mousePosition);
 
-            foreach (var cell in m_mainTool.Distribution.Cells)
+            foreach (var cell in m_mainTool.Distribution.Parcels)
             {
                 RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, ColorConstants.PointerColor, cell.Position, m_snappingCellId.HasValue && m_snappingCellId == cell.GridId ? 20f : 10f, -1f, 1280f, false, true);
             }

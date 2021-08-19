@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using static IndustryLP.Utils.MathUtils;
+﻿using static IndustryLP.Utils.MathUtils;
 
 namespace IndustryLP.Entities
 {

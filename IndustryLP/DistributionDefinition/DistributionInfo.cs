@@ -1,4 +1,5 @@
 ﻿using ColossalFramework.Math;
+using IndustryLP.Entities;
 using IndustryLP.Utils.Enums;
 using IndustryLP.Utils.Wrappers;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace IndustryLP.DistributionDefinition
         /// <summary>
         /// The buildable cells in the distribution
         /// </summary>
-        public List<ParcelWrapper> Cells { get; set; }
+        public List<ParcelWrapper> Parcels { get; set; }
 
         public DistributionType Type { get; set; }
 
@@ -39,9 +40,11 @@ namespace IndustryLP.DistributionDefinition
         /// <returns></returns>
         public ParcelWrapper FindCell(Vector3 position, double? limit)
         {
-            return Utils.MathUtils.FindNeighbour(Cells, position, limit);
+            return Utils.MathUtils.FindNeighbour(Parcels, position, limit);
         }
 
         public abstract ParcelWrapper FindById(ushort gridId);
+
+        public abstract Tuple<int> GetGridPosition(ushort gridId);
     }
 }

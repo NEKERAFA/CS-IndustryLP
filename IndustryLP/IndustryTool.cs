@@ -10,8 +10,10 @@ using IndustryLP.UI.Panels.Items;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
+using IndustryLP.Utils.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -69,6 +71,11 @@ namespace IndustryLP
         private bool m_mouseHoverOptionPanel = false;
         private bool m_mouseHoverScrollablePanel = false;
         private float m_defaultXPos;
+
+#if DEBUG
+        private Dictionary<ParcelWrapper, GUIUtils.UITextDebug> lblParcels = new Dictionary<ParcelWrapper, GUIUtils.UITextDebug>();
+#endif
+
 
         #region Actions
 
@@ -318,10 +325,8 @@ namespace IndustryLP
                 {
                     m_action?.OnRightMouseIsUp(m_mouseTerrainPosition.Value);
                 }
-            }
-            else
-            {
-                if (Input.GetMouseButtonUp(1))
+
+                if (Input.GetMouseButtonUp(1) && (Preferences.Any() || Restrictions.Any()))
                 {
                     RemoveBuilding(m_mouseTerrainPosition.Value);
                 }
@@ -382,7 +387,27 @@ namespace IndustryLP
             base.RenderOverlay(cameraInfo);
 
             if (m_mouseTerrainPosition.HasValue)
-                m_action?.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
+            {
+                if (m_action != null)
+                {
+                    m_action.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
+                }
+                else
+                {
+                    var cell = Utils.MathUtils.FindNeighbour(Preferences, m_mouseTerrainPosition.Value, 20);
+                    if (cell != null)
+                    {
+                        RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, ColorConstants.PreferenceColor, cell.Position, 40f, -1f, 1280f, false, true);
+                    }
+
+                    cell = Utils.MathUtils.FindNeighbour(Restrictions, m_mouseTerrainPosition.Value, 20);
+                    if (cell != null)
+                    {
+                        RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, ColorConstants.RestrictionColor, cell.Position, 40f, -1f, 1280f, false, true);
+                    }
+                }
+
+            }
 
             if (Distribution != null)
             {
@@ -404,6 +429,20 @@ namespace IndustryLP
                     BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, ColorConstants.PreferenceColor);
                 }
             }
+
+#if DEBUG
+            if (lblParcels.Any())
+            {
+                var mainView = UIView.GetAView();
+
+                foreach (var lbl in lblParcels)
+                {
+                    if (!lbl.Value.isVisible) lbl.Value.Show();
+                    var pos = Camera.main.WorldToScreenPoint(lbl.Key.Position) / mainView.inputScale;
+                    lbl.Value.relativePosition = mainView.ScreenPointToGUI(pos) - new Vector2(lbl.Value.width / 2f, lbl.Value.height / 2f);
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -427,6 +466,15 @@ namespace IndustryLP
             if (Distribution != null)
             {
                 Distribution = null;
+
+#if DEBUG
+                foreach (var lbl in lblParcels.Values)
+                {
+                    DestroyImmediate(lbl.gameObject);
+                }
+
+                lblParcels.Clear();
+#endif
             }
 
             m_optionPanel.DisableTab(1);
@@ -455,6 +503,16 @@ namespace IndustryLP
                 Distribution = distributionThread.Generate(Selection.Value);
                 m_categoryPanel.EnableTab(1);
                 m_categoryPanel.EnableTab(2);
+
+#if DEBUG
+                foreach (var parcel in Distribution.Parcels)
+                {
+                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                    lbl.Hide();
+                    lbl.SetText(Convert.ToString((int)parcel.GridId));
+                    lblParcels[parcel] = lbl;
+                }
+#endif
             }
 
             Preferences.Clear();
@@ -480,7 +538,27 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
+#if DEBUG
+                if (lblParcels.Any())
+                {
+                    foreach (var lbl in lblParcels.Values)
+                    {
+                        DestroyImmediate(lbl.gameObject);
+                    }
+                }
+#endif
+
                 Distribution = gridDistribution.Generate(Selection.Value);
+
+#if DEBUG
+                foreach (var parcel in Distribution.Parcels)
+                {
+                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                    lbl.Hide();
+                    lbl.SetText(Convert.ToString((int)parcel.GridId));
+                    lblParcels[parcel] = lbl;
+                }
+#endif
             }
         }
 
@@ -522,7 +600,7 @@ namespace IndustryLP
             var cell = Utils.MathUtils.FindNeighbour(Preferences, mousePosition, 20);
             if (cell != null)
             {
-                Preferences.Remove(cell);
+                LoggerUtils.Log("Removed", Preferences.Remove(cell));
             }
         }
 
@@ -951,7 +1029,7 @@ namespace IndustryLP
             DrawLine(start, end, new Color32(255, 0, 0, 255));
         }
 
-        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.2f)
+        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
         {
             var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
             lr.transform.position = start;
@@ -964,8 +1042,15 @@ namespace IndustryLP
             lr.endWidth = 2;
             lr.SetPosition(1, end);
             Destroy(lr.gameObject, duration);
+        }
 
-            LoggerUtils.Log(start, end);
+        private void DrawText(Vector2 pos, string msg, Color color, float duration = 1f)
+        {
+            var text = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+            text.relativePosition = pos;
+            text.SetText(msg);
+            text.color = color;
+            Destroy(text.gameObject, duration);
         }
 #endif
 
