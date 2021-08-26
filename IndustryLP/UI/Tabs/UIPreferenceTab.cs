@@ -1,5 +1,4 @@
-﻿using ColossalFramework.UI;
-using IndustryLP.Utils.Constants;
+﻿using IndustryLP.Utils.Constants;
 
 namespace IndustryLP.UI.Tabs
 {

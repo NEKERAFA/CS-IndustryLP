@@ -3,13 +3,16 @@ using ColossalFramework.Math;
 using ColossalFramework.UI;
 using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
-using IndustryLP.Tools;
+using IndustryLP.Entities;
 using IndustryLP.UI.Panels;
 using IndustryLP.UI.Panels.Items;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
+using IndustryLP.Utils.Wrappers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -62,21 +65,22 @@ namespace IndustryLP
         /// </summary>
         private ToolAction m_action = null;
 
-        /// <summary>
-        /// Current distribution
-        /// </summary>
-        private DistributionInfo m_distribution = null;
-
         private Vector3? m_mouseTerrainPosition = null;
         private bool m_mouseHoverToolbar = false;
         private bool m_mouseHoverOptionPanel = false;
         private bool m_mouseHoverScrollablePanel = false;
         private float m_defaultXPos;
 
+#if DEBUG
+        private Dictionary<ParcelWrapper, GUIUtils.UITextDebug> lblParcels = new Dictionary<ParcelWrapper, GUIUtils.UITextDebug>();
+#endif
+
+
         #region Actions
 
         private ToolAction m_zoningAction;
         private ToolAction m_movingZoneAction;
+        private ToolAction m_buildingAction;
 
         #endregion
 
@@ -121,8 +125,9 @@ namespace IndustryLP
                         ResourceConstants.SubBarRestrictionFocused,
                         ResourceConstants.SubBarRestrictionHovered,
                         ResourceConstants.SubBarRestrictionPressed,
-                        ResourceConstants.SubBarRestrictionDisabled
-                };
+                        ResourceConstants.SubBarRestrictionDisabled,
+                        ResourceConstants.BuildNow
+                    };
 
                     m_iconAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.IconAtlasName, iconsNames, ResourceConstants.IconsPath);
 
@@ -149,7 +154,8 @@ namespace IndustryLP
                         defaultAtlas[ResourceConstants.SubBarDistributionDisabled].texture,
                         defaultAtlas[ResourceConstants.SubBarDistributionFocused].texture,
                         defaultAtlas[ResourceConstants.SubBarDistributionHovered].texture,
-                        defaultAtlas[ResourceConstants.SubBarDistributionPressed].texture
+                        defaultAtlas[ResourceConstants.SubBarDistributionPressed].texture,
+                        defaultAtlas[ResourceConstants.Loading].texture
                     };
 
                     // Add resources
@@ -201,6 +207,15 @@ namespace IndustryLP
         public Quad3? Selection { get; set; } = null;
 
         public float? SelectionAngle { get; set; } = null;
+
+        /// <summary>
+        /// Current distribution
+        /// </summary>
+        public DistributionInfo Distribution { get; set; } = null;
+
+        public List<Parcel> Preferences { get; set; } = new List<Parcel>();
+
+        public List<Parcel> Restrictions { get; set; } = new List<Parcel>();
 
         #endregion
 
@@ -268,6 +283,9 @@ namespace IndustryLP
                 m_action.OnLeftController();
                 m_action = null;
             }
+
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <summary>
@@ -309,6 +327,11 @@ namespace IndustryLP
                 {
                     m_action?.OnRightMouseIsUp(m_mouseTerrainPosition.Value);
                 }
+
+                if (Input.GetMouseButtonUp(1) && (Preferences.Any() || Restrictions.Any()))
+                {
+                    RemoveBuilding(m_mouseTerrainPosition.Value);
+                }
             }
         }
 
@@ -331,6 +354,30 @@ namespace IndustryLP
 
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
+
+            if (Selection.HasValue)
+            {
+                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
+                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
+                foreach (var preference in Preferences)
+                {
+                    Color buildingColor = BuildingUtils.GetColor(0, preference.Building);
+                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, buildingColor);
+#if DEBUG
+                    DrawForwardDirection(preference);
+#endif
+                }
+
+                foreach (var restriction in Restrictions)
+                {
+                    Color buildingColor = BuildingUtils.GetColor(0, restriction.Building);
+                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, buildingColor);
+#if DEBUG
+                    DrawForwardDirection(restriction);
+#endif
+                }
+            }
         }
 
         /// <summary>
@@ -342,12 +389,62 @@ namespace IndustryLP
             base.RenderOverlay(cameraInfo);
 
             if (m_mouseTerrainPosition.HasValue)
-                m_action?.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
-
-            if (m_distribution != null)
             {
-                DistributionUtils.RenderSegments(cameraInfo, ColorConstants.SelectionColor, m_distribution.Road);
+                if (m_action != null)
+                {
+                    m_action.OnRenderOverlay(cameraInfo, m_mouseTerrainPosition.Value);
+                }
+                else
+                {
+                    var cell = Utils.MathUtils.FindNeighbour(Preferences, m_mouseTerrainPosition.Value, 20);
+                    if (cell != null)
+                    {
+                        RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, ColorConstants.PreferenceColor, cell.Position, 40f, -1f, 1280f, false, true);
+                    }
+
+                    cell = Utils.MathUtils.FindNeighbour(Restrictions, m_mouseTerrainPosition.Value, 20);
+                    if (cell != null)
+                    {
+                        RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, ColorConstants.RestrictionColor, cell.Position, 40f, -1f, 1280f, false, true);
+                    }
+                }
+
             }
+
+            if (Distribution != null)
+            {
+                DistributionUtils.RenderSegments(cameraInfo, ColorConstants.SelectionColor, Distribution.Road);
+            }
+
+            if (Selection.HasValue)
+            {
+                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
+                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+
+                foreach (var preference in Preferences)
+                {
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, ColorConstants.PreferenceColor);
+                }
+
+                foreach (var restriction in Restrictions)
+                {
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, ColorConstants.PreferenceColor);
+                }
+            }
+
+#if DEBUG
+            if (lblParcels.Any())
+            {
+                var mainView = UIView.GetAView();
+
+                foreach (var lbl in lblParcels)
+                {
+                    if (!lbl.Value.isVisible) lbl.Value.Show();
+                    var pos = Camera.main.WorldToScreenPoint(lbl.Key.Position) / mainView.inputScale;
+                    lbl.Value.relativePosition = mainView.ScreenPointToGUI(pos) - new Vector2(lbl.Value.width / 2f, lbl.Value.height / 2f);
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -368,9 +465,18 @@ namespace IndustryLP
         /// <inheritdoc/>
         public void CancelZoning()
         {
-            if (m_distribution != null)
+            if (Distribution != null)
             {
-                m_distribution = null;
+                Distribution = null;
+
+#if DEBUG
+                foreach (var lbl in lblParcels.Values)
+                {
+                    DestroyImmediate(lbl.gameObject);
+                }
+
+                lblParcels.Clear();
+#endif
             }
 
             m_optionPanel.DisableTab(1);
@@ -379,6 +485,8 @@ namespace IndustryLP
             m_categoryPanel.DisableTab(1);
             m_categoryPanel.DisableTab(2);
             m_scrollablePanel.Disable();
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <inheritdoc/>
@@ -391,13 +499,26 @@ namespace IndustryLP
             m_categoryPanel.EnableTab(0);
             m_scrollablePanel.Enable();
 
-            if (m_distribution?.Type == DistributionType.GRID)
+            if (Distribution?.Type == DistributionType.GRID)
             {
-                var distributionThread = new GridDistribution();
-                m_distribution = distributionThread.Generate(Selection.Value);
+                var distributionThread = new GridDistributionThread();
+                Distribution = distributionThread.Generate(Selection.Value);
                 m_categoryPanel.EnableTab(1);
                 m_categoryPanel.EnableTab(2);
+
+#if DEBUG
+                foreach (var parcel in Distribution.Parcels)
+                {
+                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                    lbl.Hide();
+                    lbl.SetText(Convert.ToString((int)parcel.GridId));
+                    lblParcels[parcel] = lbl;
+                }
+#endif
             }
+
+            Preferences.Clear();
+            Restrictions.Clear();
         }
 
         /// <inheritdoc/>
@@ -419,7 +540,29 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = gridDistribution.Generate(Selection.Value);
+#if DEBUG
+                if (lblParcels.Any())
+                {
+                    foreach (var lbl in lblParcels.Values)
+                    {
+                        DestroyImmediate(lbl.gameObject);
+                    }
+                }
+#endif
+
+                Distribution = gridDistribution.Generate(Selection.Value);
+
+#if DEBUG
+                foreach (var parcel in Distribution.Parcels)
+                {
+                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                    lbl.Hide();
+                    lbl.SetText(Convert.ToString((int)parcel.GridId));
+                    lblParcels[parcel] = lbl;
+                }
+#endif
+
+                m_optionPanel.EnableTab(2);
             }
         }
 
@@ -428,7 +571,7 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = lineDistribution.Generate(Selection.Value);
+                Distribution = lineDistribution.Generate(Selection.Value);
             }
         }
 
@@ -437,7 +580,32 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-                m_distribution = forestalDistribution.Generate(Selection.Value);
+                Distribution = forestalDistribution.Generate(Selection.Value);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void AddPreference(ushort gridId, BuildingInfo building)
+        {
+            var parcel = Distribution.FindById(gridId);
+            Preferences.Add(new Parcel
+            {
+                GridId = gridId,
+                Building = building,
+                Position = parcel.Position,
+                Rotation = parcel.Rotation
+            });
+
+            m_action.OnLeftController();
+            m_action = null;
+        }
+
+        public void RemoveBuilding(Vector3 mousePosition)
+        {
+            var cell = Utils.MathUtils.FindNeighbour(Preferences, mousePosition, 20);
+            if (cell != null)
+            {
+                LoggerUtils.Log("Removed", Preferences.Remove(cell));
             }
         }
 
@@ -578,6 +746,8 @@ namespace IndustryLP
             m_zoningAction.OnStart(this);
             m_movingZoneAction = new MovingZoneAction();
             m_movingZoneAction.OnStart(this);
+            m_buildingAction = new BuildingAction();
+            m_buildingAction.OnStart(this);
         }
 
         /// <summary>
@@ -585,7 +755,7 @@ namespace IndustryLP
         /// </summary>
         private void SetupDistributions()
         {
-            gridDistribution = new GridDistribution();
+            gridDistribution = new GridDistributionThread();
             //lineDistribution = new LineDistribution();
             //mineDistribution = new MineDistribution();
         }
@@ -632,7 +802,7 @@ namespace IndustryLP
         {
             if (m_categoryPanel.selectedIndex == 0)
             {
-                switch (m_distribution.Type)
+                switch (Distribution.Type)
                 {
                     case DistributionType.GRID:
                         var panel = m_scrollablePanel as UIDistributionOptionPanel;
@@ -744,6 +914,14 @@ namespace IndustryLP
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
                 LoggerUtils.Log($"Clicked on {prefab.name} preference");
+
+                m_optionPanel.selectedIndex = -1;
+                m_action?.OnLeftController();
+                var oldAction = m_action;
+                m_action = new AddBuildingAction(prefab as BuildingInfo);
+                m_action.OnStart(this);
+                m_action.OnChangeController(oldAction);
+                m_action.OnEnterController();
             }
         }
 
@@ -804,6 +982,9 @@ namespace IndustryLP
                 case 1:
                     m_action = m_movingZoneAction;
                     break;
+                case 2:
+                    m_action = m_buildingAction;
+                    break;
                 default:
                     m_action = null;
                     break;
@@ -848,6 +1029,41 @@ namespace IndustryLP
             UpdateScrollablePanel();
         }
 
-        #endregion
+#if DEBUG
+        private void DrawForwardDirection(Parcel building)
+        {
+            var start = building.Position + Vector3.up * 10;
+            var dir = new Vector3(0, 0, 40);
+            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
+            var end = rotate * dir + building.Position + Vector3.up * 10;
+            DrawLine(start, end, new Color32(255, 0, 0, 255));
+        }
+
+        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
+        {
+            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
+            lr.transform.position = start;
+            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
+            lr.hideFlags = HideFlags.HideAndDontSave;
+            lr.startColor = color;
+            lr.startWidth = 2;
+            lr.SetPosition(0, start);
+            lr.endColor = color;
+            lr.endWidth = 2;
+            lr.SetPosition(1, end);
+            Destroy(lr.gameObject, duration);
+        }
+
+        private void DrawText(Vector2 pos, string msg, Color color, float duration = 1f)
+        {
+            var text = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+            text.relativePosition = pos;
+            text.SetText(msg);
+            text.color = color;
+            Destroy(text.gameObject, duration);
+        }
+#endif
+
+    #endregion
     }
 }

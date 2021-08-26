@@ -287,6 +287,10 @@
         /// </summary>
         public static string SubBarBackgroundPressed => "SubBarButtonBasePressed";
 
+        public static string BuildNow => "Build";
+
+        public static string Loading => "loading_icon";
+
         /// <summary>
         /// Name of the atlas
         /// </summary>

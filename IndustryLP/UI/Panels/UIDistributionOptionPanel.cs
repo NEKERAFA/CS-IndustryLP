@@ -37,13 +37,13 @@ namespace IndustryLP.UI.Panels
             panel.zOrder = zOrder;
 
             // Left / Right buttons
-            var arrow = panel.parent.AddUIComponent<UIArrowPanelButton>();
-            arrow.Initialize(UIArrowPanelButton.Direction.Left);
+            var arrow = panel.parent.AddUIComponent<UIArrowScrollablePanelButton>();
+            arrow.Initialize(UIArrowScrollablePanelButton.Direction.Left);
             arrow.relativePosition = new Vector2(16, 0);
             panel.leftArrow = arrow;
 
-            arrow = panel.parent.AddUIComponent<UIArrowPanelButton>();
-            arrow.Initialize(UIArrowPanelButton.Direction.Right);
+            arrow = panel.parent.AddUIComponent<UIArrowScrollablePanelButton>();
+            arrow.Initialize(UIArrowScrollablePanelButton.Direction.Right);
             arrow.relativePosition = new Vector2(811, 0);
             panel.rightArrow = arrow;
 
@@ -100,7 +100,7 @@ namespace IndustryLP.UI.Panels
                 DestroyImmediate(scrollbar.gameObject);
             }
 
-            UIArrowPanelButton[] arrows = parent.GetComponentsInChildren<UIArrowPanelButton>();
+            UIArrowScrollablePanelButton[] arrows = parent.GetComponentsInChildren<UIArrowScrollablePanelButton>();
             foreach (var arrow in arrows)
             {
                 DestroyImmediate(arrow.gameObject);

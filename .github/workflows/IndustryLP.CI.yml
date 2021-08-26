@@ -15,12 +15,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: setup-msbuild
+      - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Build
+      - name: Build project
         run: msbuild IndustryLP.sln /p:Configuration=Release
-      - uses: actions/upload-artifact@v2
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: IndustryLP
           path:
-             bin\Release\IndustryLP.dll
+             IndustryLP\bin\Release\IndustryLP.dll

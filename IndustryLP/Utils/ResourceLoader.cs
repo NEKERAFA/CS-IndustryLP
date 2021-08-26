@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using ColossalFramework.UI;
+﻿using ColossalFramework.UI;
+using System.Reflection;
 using UnityEngine;
 
 namespace IndustryLP.Utils

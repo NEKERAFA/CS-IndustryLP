@@ -1,6 +1,5 @@
 ﻿using ColossalFramework.Math;
 using ColossalFramework.UI;
-using IndustryLP.Tools;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
@@ -435,9 +434,6 @@ namespace IndustryLP.Actions
             return new Quad3(a1, b1, c1, d1);
         }
 
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         /// Rota un quad
@@ -446,7 +442,7 @@ namespace IndustryLP.Actions
         /// <param name="rotation"></param>
         /// <param name="axis"></param>
         /// <returns></returns>
-        public Quad3 RotateQuad(Quad3 quad, float rotation, Vector3 axis)
+        private Quad3 RotateQuad(Quad3 quad, float rotation, Vector3 axis)
         {
             var midPoint = Vector3.Lerp(quad.a, quad.c, 0.5f);
             var rotate = Quaternion.AngleAxis(rotation, axis);

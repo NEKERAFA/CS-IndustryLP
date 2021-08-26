@@ -38,5 +38,9 @@ namespace IndustryLP.Utils.Constants
         /// White color, <c>RGBA(255, 255, 255, 255)</c>
         /// </summary>
         public static Color WhiteColor => new Color32(255, 255, 255, 255);
+
+        public static Color PreferenceColor => new Color32(16, 32, 255, 255);
+
+        public static Color RestrictionColor => new Color32(192, 0, 0, 255);
     }
 }
