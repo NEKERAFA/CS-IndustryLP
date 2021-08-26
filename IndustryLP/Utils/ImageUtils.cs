@@ -1,7 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.UI;
 using IndustryLP.Utils.Constants;
-using System.Linq;
 using UnityEngine;
 
 namespace IndustryLP.Utils

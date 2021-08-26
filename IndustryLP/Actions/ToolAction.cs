@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace IndustryLP.Tools
+namespace IndustryLP.Actions
 {
     /// <summary>
     /// Represents an action

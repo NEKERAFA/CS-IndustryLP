@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace IndustryLP.UI.RestrictionButtons
 {
-    internal class UIArrowPanelButton : UIButton
+    internal class UIArrowScrollablePanelButton : UIButton
     {
         public enum Direction { Left, Right }
 

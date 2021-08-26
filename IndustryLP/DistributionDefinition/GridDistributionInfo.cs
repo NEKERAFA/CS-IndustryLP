@@ -1,61 +1,51 @@
-﻿using IndustryLP.Utils.Enums;
+﻿using IndustryLP.Entities;
+using IndustryLP.Utils.Enums;
 using IndustryLP.Utils.Wrappers;
+using System;
+using System.Linq;
 
 namespace IndustryLP.DistributionDefinition
 {
     internal class GridDistributionInfo : DistributionInfo
     {
-        public int Rows { get; set; }
-
-        public int Columns { get; set; }
-
-        private int FindByGridId(ushort gridId)
+        public override ParcelWrapper FindById(ushort gridId)
         {
-            int pos = 0;
-            foreach (var cell in Cells)
-            {
-                if (cell.GridId == gridId)
-                {
-                    return pos;
-                }
-
-                pos++;
-            }
-
-            return -1;
+            return Parcels.FirstOrDefault(parcel => parcel.GridId == gridId);
         }
 
         public override ParcelWrapper GetNext(CellNeighbour direction, ushort gridId)
         {
-            int pos = FindByGridId(gridId);
+            var pos = GetGridPosition(gridId);
 
-            int row = pos / Columns;
-            int column = pos % Columns;
-
-            if (pos >= 0)
+            if (direction == CellNeighbour.UP && pos.First < Rows)
             {
-                if (direction == CellNeighbour.UP && row < Rows)
-                {
-                    return Cells[pos + Columns];
-                }
+                return FindById(Convert.ToUInt16(gridId + Columns));
+            }
 
-                if (direction == CellNeighbour.DOWN && row > 0)
-                {
-                    return Cells[pos - Columns];
-                }
+            if (direction == CellNeighbour.DOWN && pos.First > 0)
+            {
+                return FindById(Convert.ToUInt16(gridId - Columns));
+            }
 
-                if (direction == CellNeighbour.RIGHT && column < Columns)
-                {
-                    return Cells[pos + 1];
-                }
+            if (direction == CellNeighbour.RIGHT && pos.Second < Columns)
+            {
+                return FindById(Convert.ToUInt16(gridId + 1));
+            }
 
-                if (direction == CellNeighbour.LEFT && column > 0)
-                {
-                    return Cells[pos - 1];
-                }
+            if (direction == CellNeighbour.LEFT && pos.Second > 0)
+            {
+                return FindById(Convert.ToUInt16(gridId - 1));
             }
 
             return null;
+        }
+
+        public override Tuple<int> GetGridPosition(ushort gridId)
+        {
+            int row = gridId / Columns;
+            int column = gridId % Columns;
+
+            return new Tuple<int>(row, column);
         }
     }
 }

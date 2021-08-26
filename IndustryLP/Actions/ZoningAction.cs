@@ -1,6 +1,5 @@
 ﻿using ColossalFramework.Math;
 using ColossalFramework.UI;
-using IndustryLP.Tools;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using IndustryLP.Utils.Enums;
@@ -105,7 +104,7 @@ namespace IndustryLP.Actions
 
         #endregion
 
-        #region Action Behaviour method
+        #region Action Behaviour Methods
 
         public override void OnStart(IMainTool mainTool)
         {

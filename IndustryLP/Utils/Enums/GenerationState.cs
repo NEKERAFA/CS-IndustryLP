@@ -6,7 +6,6 @@
     internal enum GenerationState
     {
         None,
-        ShowingPopup,
         GeneratingSolutions,
         GeneratedSolutions
     }
