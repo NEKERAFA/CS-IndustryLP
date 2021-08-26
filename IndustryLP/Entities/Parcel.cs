@@ -2,8 +2,9 @@
 
 namespace IndustryLP.Entities
 {
-    public class Cell : EntityPosition
+    public class Parcel : EntityPosition
     {
+        public ushort GridId { get; set; }
         public float Rotation { get; set; }
         public BuildingInfo Building { get; set; }
     }

@@ -24,6 +24,10 @@ namespace IndustryLP.DistributionDefinition
 
         public DistributionType Type { get; set; }
 
+        public int Rows { get; set; }
+
+        public int Columns { get; set; }
+
         /// <summary>
         /// Finds the adjacent neighbour following the distribution
         /// </summary>

@@ -4,7 +4,6 @@ using ColossalFramework.UI;
 using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
 using IndustryLP.Entities;
-using IndustryLP.Tools;
 using IndustryLP.UI.Panels;
 using IndustryLP.UI.Panels.Items;
 using IndustryLP.Utils;
@@ -81,6 +80,7 @@ namespace IndustryLP
 
         private ToolAction m_zoningAction;
         private ToolAction m_movingZoneAction;
+        private ToolAction m_buildingAction;
 
         #endregion
 
@@ -125,8 +125,9 @@ namespace IndustryLP
                         ResourceConstants.SubBarRestrictionFocused,
                         ResourceConstants.SubBarRestrictionHovered,
                         ResourceConstants.SubBarRestrictionPressed,
-                        ResourceConstants.SubBarRestrictionDisabled
-                };
+                        ResourceConstants.SubBarRestrictionDisabled,
+                        ResourceConstants.BuildNow
+                    };
 
                     m_iconAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.IconAtlasName, iconsNames, ResourceConstants.IconsPath);
 
@@ -153,7 +154,8 @@ namespace IndustryLP
                         defaultAtlas[ResourceConstants.SubBarDistributionDisabled].texture,
                         defaultAtlas[ResourceConstants.SubBarDistributionFocused].texture,
                         defaultAtlas[ResourceConstants.SubBarDistributionHovered].texture,
-                        defaultAtlas[ResourceConstants.SubBarDistributionPressed].texture
+                        defaultAtlas[ResourceConstants.SubBarDistributionPressed].texture,
+                        defaultAtlas[ResourceConstants.Loading].texture
                     };
 
                     // Add resources
@@ -211,9 +213,9 @@ namespace IndustryLP
         /// </summary>
         public DistributionInfo Distribution { get; set; } = null;
 
-        public List<Cell> Preferences { get; set; } = new List<Cell>();
+        public List<Parcel> Preferences { get; set; } = new List<Parcel>();
 
-        public List<Cell> Restrictions { get; set; } = new List<Cell>();
+        public List<Parcel> Restrictions { get; set; } = new List<Parcel>();
 
         #endregion
 
@@ -559,6 +561,8 @@ namespace IndustryLP
                     lblParcels[parcel] = lbl;
                 }
 #endif
+
+                m_optionPanel.EnableTab(2);
             }
         }
 
@@ -584,8 +588,9 @@ namespace IndustryLP
         public void AddPreference(ushort gridId, BuildingInfo building)
         {
             var parcel = Distribution.FindById(gridId);
-            Preferences.Add(new Cell
+            Preferences.Add(new Parcel
             {
+                GridId = gridId,
                 Building = building,
                 Position = parcel.Position,
                 Rotation = parcel.Rotation
@@ -741,6 +746,8 @@ namespace IndustryLP
             m_zoningAction.OnStart(this);
             m_movingZoneAction = new MovingZoneAction();
             m_movingZoneAction.OnStart(this);
+            m_buildingAction = new BuildingAction();
+            m_buildingAction.OnStart(this);
         }
 
         /// <summary>
@@ -975,6 +982,9 @@ namespace IndustryLP
                 case 1:
                     m_action = m_movingZoneAction;
                     break;
+                case 2:
+                    m_action = m_buildingAction;
+                    break;
                 default:
                     m_action = null;
                     break;
@@ -1020,7 +1030,7 @@ namespace IndustryLP
         }
 
 #if DEBUG
-        private void DrawForwardDirection(Cell building)
+        private void DrawForwardDirection(Parcel building)
         {
             var start = building.Position + Vector3.up * 10;
             var dir = new Vector3(0, 0, 40);

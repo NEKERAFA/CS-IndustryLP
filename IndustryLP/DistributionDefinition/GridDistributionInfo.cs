@@ -8,10 +8,6 @@ namespace IndustryLP.DistributionDefinition
 {
     internal class GridDistributionInfo : DistributionInfo
     {
-        public int Rows { get; set; }
-
-        public int Columns { get; set; }
-
         public override ParcelWrapper FindById(ushort gridId)
         {
             return Parcels.FirstOrDefault(parcel => parcel.GridId == gridId);

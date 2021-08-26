@@ -150,7 +150,7 @@ namespace IndustryLP.DomainDefinition
                 if (symbol.Name.Equals("parcel"))
                 {
                     var arguments = symbol.Arguments;
-                    LoggerUtils.Log($"{symbol} - ({arguments[0].Number}, {arguments[1].Number}, {arguments[2].Number})");
+                    LoggerUtils.Log($"{symbol} - ({arguments[0].Number}, {arguments[1].Number}, {arguments[2].String})");
                     region.Parcels[arguments[0].Number, arguments[1].Number] = arguments[2].String;
                 }
             }
@@ -166,11 +166,13 @@ namespace IndustryLP.DomainDefinition
             {
                 var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
 
-                if (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric)
+                if (prefab != null && prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric)
                 {
-                    parcels.Append($"str_parcel({prefab.name}). ");
+                    parcels.AppendLine($"str_parcel(\"{prefab.name}\").");
                 }
             }
+
+            LoggerUtils.Log("Parcels", parcels.ToString().Replace("\n", "\\n"));
 
             m_program.Add("base", new List<string>(), parcels.ToString());
         }
@@ -181,7 +183,7 @@ namespace IndustryLP.DomainDefinition
 
             foreach (var preference in preferences)
             {
-                strPreferences.Append($"parcel({preference.Row}, {preference.Column}, {preference.Name}). ");
+                strPreferences.AppendLine($"parcel({preference.Row}, {preference.Column}, \"{preference.Name}\").");
             }
 
             m_program.Add("base", new List<string>(), strPreferences.ToString());
@@ -193,7 +195,7 @@ namespace IndustryLP.DomainDefinition
 
             foreach (var restriction in restrictions)
             {
-                strRestrictions.AppendLine($":- parcel({restriction.Row}, {restriction.Column}, {restriction.Name}).");
+                strRestrictions.AppendLine($":- parcel({restriction.Row}, {restriction.Column}, \"{restriction.Name}\").");
             }
 
             m_program.Add("base", new List<string>(), strRestrictions.ToString());
@@ -288,6 +290,10 @@ namespace IndustryLP.DomainDefinition
                     //LoggerUtils.Log("Finished!");
                     IsFinished = true;
                 }
+            }
+            else if (!IsAlive)
+            {
+                m_program.Dispose();
             }
         }
 

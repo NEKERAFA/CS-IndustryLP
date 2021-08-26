@@ -14,8 +14,8 @@ namespace IndustryLP
         Quad3? Selection { get; }
         float? SelectionAngle { get; }
         DistributionInfo Distribution { get; }
-        List<Cell> Preferences { get; }
-        List<Cell> Restrictions { get; }
+        List<Parcel> Preferences { get; }
+        List<Parcel> Restrictions { get; }
 
         /// <summary>
         /// Intersects a ray with the terrain
