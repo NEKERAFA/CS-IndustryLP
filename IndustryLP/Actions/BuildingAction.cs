@@ -71,6 +71,44 @@ namespace IndustryLP.Actions
             }
         }
 
+        public override void OnRenderGeometry(RenderManager.CameraInfo cameraInfo, Vector3 mousePosition)
+        {
+            if (m_panel?.Solution > 0 && m_generator?.Count > 0)
+            {
+                var selection = m_mainTool.Selection.Value;
+                var midPoint = Vector3.Lerp(selection.a, selection.c, 0.5f);
+                var matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
+                var solution = m_generator.GetSolution(m_panel.Solution - 1);
+
+                for (var row = 0; row < m_rows; row++)
+                {
+                    for (var column = 0; column < m_columns; column++)
+                    {
+                        var building = solution?.Parcels[row, column];
+                        if (!string.IsNullOrEmpty(building))
+                        {
+                            var prefab = PrefabCollection<BuildingInfo>.FindLoaded(building);
+                            if (prefab == null)
+                            {
+                                LoggerUtils.Warning("Prefab not found", building);
+                            }
+                            else
+                            {
+                                var gridId = m_mainTool.Distribution.GetId(row, column);
+                                var parcel = m_mainTool.Distribution.FindById(gridId);
+                                if (parcel != null)
+                                {
+                                    var color = BuildingUtils.GetColor(gridId, prefab);
+
+                                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, parcel.Position, parcel.Rotation, prefab, color);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region Private methods

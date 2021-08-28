@@ -110,10 +110,10 @@ namespace IndustryLP.DistributionDefinition
         {
             var parcels = new List<ParcelWrapper>();
 
-            var a1 = Vector3.Lerp(plot.a, plot.b, 1f/3f) - plot.a;
-            var b1 = Vector3.Lerp(plot.a, plot.b, 2f/3f) - plot.a;
-            var c1 = Vector3.Lerp(plot.a, plot.d, 1f/3f) - plot.a;
-            var d1 = Vector3.Lerp(plot.a, plot.d, 2f/3f) - plot.a;
+            var a1 = Vector3.Lerp(plot.a, plot.b, 2f/8f) - plot.a;
+            var b1 = Vector3.Lerp(plot.a, plot.b, 6f/8f) - plot.a;
+            var c1 = Vector3.Lerp(plot.a, plot.d, 2f/8f) - plot.a;
+            var d1 = Vector3.Lerp(plot.a, plot.d, 6f/8f) - plot.a;
 
             LoggerUtils.Log(offsetX, offsetY, columns);
 

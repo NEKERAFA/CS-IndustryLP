@@ -3,7 +3,7 @@
     internal class Region
     {
         public int Rows { get; set; }
-        public int Cols { get; set; }
+        public int Columns { get; set; }
         public string[,] Parcels { get; set; }
     }
 }
