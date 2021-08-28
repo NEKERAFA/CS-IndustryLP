@@ -2,16 +2,16 @@
 %%% Se generan las parcelas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-0 { parcel(X, Y, S) : str_parcel(S) } 1 :- row(X), col(Y).
+0 { parcel(X, Y, S) : str_parcel(S) } 1 :- row(X), column(Y).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Comprobaciones
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-sell_parcel(X, Y) :- row(X), col(Y), str_parcel(S), parcel(X, Y, S).
+sell_parcel(X, Y) :- row(X), column(Y), str_parcel(S), parcel(X, Y, S).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Restricciones
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- row(X), col(Y), not sell_parcel(X, Y).
+:- row(X), column(Y), not sell_parcel(X, Y).

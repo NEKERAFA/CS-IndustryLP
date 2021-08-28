@@ -50,5 +50,7 @@ namespace IndustryLP.DistributionDefinition
         public abstract ParcelWrapper FindById(ushort gridId);
 
         public abstract Tuple<int> GetGridPosition(ushort gridId);
+
+        public abstract ushort GetId(int row, int column);
     }
 }

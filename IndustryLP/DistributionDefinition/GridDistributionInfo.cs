@@ -3,6 +3,7 @@ using IndustryLP.Utils.Enums;
 using IndustryLP.Utils.Wrappers;
 using System;
 using System.Linq;
+using UnityEngine;
 
 namespace IndustryLP.DistributionDefinition
 {
@@ -42,10 +43,15 @@ namespace IndustryLP.DistributionDefinition
 
         public override Tuple<int> GetGridPosition(ushort gridId)
         {
-            int row = gridId / Columns;
-            int column = gridId % Columns;
+            int row = gridId % Columns;
+            int column = Convert.ToInt32(Mathf.Floor(Convert.ToSingle(gridId) / Convert.ToSingle(Columns)));
 
             return new Tuple<int>(row, column);
+        }
+
+        public override ushort GetId(int row, int column)
+        {
+            return Convert.ToUInt16(row + column * Columns);
         }
     }
 }

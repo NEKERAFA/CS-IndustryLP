@@ -4,6 +4,7 @@ using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -77,7 +78,7 @@ namespace IndustryLP.DomainDefinition
         {
             try
             {
-                m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"cols={m_cols}" });
+                m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"columns={m_cols}" });
 
                 LoggerUtils.Log("Loading definition files");
 
@@ -136,10 +137,10 @@ namespace IndustryLP.DomainDefinition
             var region = new Region()
             {
                 Rows = m_program.GetConst("rows").Number,
-                Cols = m_program.GetConst("cols").Number,
+                Columns = m_program.GetConst("columns").Number,
             };
 
-            region.Parcels = new string[region.Rows, region.Cols];
+            region.Parcels = new string[region.Rows, region.Columns];
 
             var atoms = model.GetSymbols(shown: true);
 
@@ -150,8 +151,18 @@ namespace IndustryLP.DomainDefinition
                 if (symbol.Name.Equals("parcel"))
                 {
                     var arguments = symbol.Arguments;
-                    LoggerUtils.Log($"{symbol} - ({arguments[0].Number}, {arguments[1].Number}, {arguments[2].String})");
-                    region.Parcels[arguments[0].Number, arguments[1].Number] = arguments[2].String;
+                    if (arguments.Count == 3)
+                    {
+                        var row = arguments[0].Number;
+                        var column = arguments[1].Number;
+                        var parcel = arguments[2].String;
+                        LoggerUtils.Log($"{symbol} - ({row}, {column}, {parcel})");
+                        region.Parcels[row, column] = parcel;
+                    }
+                    else
+                    {
+                        LoggerUtils.Error("parcel must be 3 argumen");
+                    }
                 }
             }
 
@@ -225,8 +236,9 @@ namespace IndustryLP.DomainDefinition
                 LoadProgram();
 
                 LoadStringParcels();
-                LoadPreferences(preferences);
-                LoadRestrictions(restrictions);
+                
+                if (preferences.Any()) LoadPreferences(preferences);
+                if (restrictions.Any()) LoadRestrictions(restrictions);
 
                 SolveProgram();
 
