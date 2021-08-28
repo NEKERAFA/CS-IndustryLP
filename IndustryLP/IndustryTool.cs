@@ -355,7 +355,7 @@ namespace IndustryLP
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
 
-            if (Selection.HasValue)
+            if (Selection.HasValue && m_action != m_buildingAction)
             {
                 var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
                 Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
