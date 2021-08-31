@@ -1,10 +1,24 @@
 \section{Videojuegos de construcción de ciudades}
 
-Es un género dentro de los videojuegos de simulación, en el que los jugadores actúan como planificadores y líderes generales de una ciudad o pueblo, mirándola desde arriba, y siendo responsables de su crecimiento y estrategia de gestión. Los jugadores eligen la ubicación de los edificios y las características de gestión de la ciudad, como los salarios y las prioridades de trabajo, haciendo que la ciudad se desarrolle en consecuencia. \\
+Los videojuegos de construcción de ciudades es un género dentro de los videojuegos de simulación, en el que los jugadores actúan como planificadores y líderes generales de una ciudad o pueblo, mirándola desde arriba, y siendo responsables de su crecimiento y estrategia de gestión. Los jugadores eligen la ubicación de los edificios y las características de gestión de la ciudad, como los salarios y las prioridades de trabajo, haciendo que la ciudad se desarrolle en consecuencia. \\
 
-El exponente de este género es la serie de juegos de \textit{SimCity\texttrademark}, creados por el desarrollador de videojuegos Will Wright y padre de la saga \textit{The Sims\texttrademark}. Fue lanzado en 1989 y desde entonces, ha plateado las bases y ha servido de inspiración al resto de videojuegos dentro de este ámbito. A pesar de su fama, algunas malas decisiones en su última gran entrega (SimCity\texttrademark 2013) han hecho que haya perdido parte de su popularidad en favor de otros títulos.
+El exponente de este género es la serie de juegos de \simcityit (Figura \ref{fig:simcity}), creados por el desarrollador de videojuegos Will Wright y padre de la saga \textit{The Sims\texttrademark}. Fue lanzado en 1989 y desde entonces, ha plateado las bases y ha servido de inspiración al resto de videojuegos dentro de este ámbito. A pesar de su fama, algunas malas decisiones en su última gran entrega (\simcityit\textit{2013}) han hecho que haya perdido parte de su popularidad en favor de otros títulos. \\
 
-Otro título dentro de este género es \textit{Cities: Skylines\textcopyright}, desarrollado por la productora filandesa \textit{Colossal Order}, y publicado por la editorial de videojuegos indie \textit{Paradox Interactive AB}. Pertenece a la serie de \textit{Cities in Motion\textcopyright}. Una de sus principales bazas con respecto a otros de su género es la simulación realista de tráfico, poniendo el foco en un sistema para entender los problemas en el diseño de la ciudad, y el uso de sistemas de transporte público para remediar problemas de congestión, que se ven potenciados en distintas expansiones del juego. Otra gran baza es que es altamente personalizable, pudiendo agregar desde mapas hasta modelos de objetos realistas, como edificios que existen en la realidad, coches de marcas conocidas, etc. Esto hace que esté entre el top 10 de títulos con más contenido creado por la comunidad del Workshop de Steam. En este proyecto vamos a utilizar esta característica de este título para poder crear un añadido que nos permita ejecutar nuestro programa lógico dentro del videojuego, y publicarlo posteriormente en Steam.
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=12em]{images/SimCity}
+	\label{fig:simcity}
+	\caption{Pantalla del juego \simcityit}
+\end{figure}
+
+Otro título dentro de este género es \citiesit, desarrollado por la productora filandesa \textit{Colossal Order}, y publicado por la editorial de videojuegos indie \textit{Paradox Interactive AB}. Pertenece a la serie de \textit{Cities in Motion\textcopyright}. Una de sus principales bazas con respecto a otros de su género es la simulación realista de tráfico, poniendo el foco en un sistema para entender los problemas en el diseño de la ciudad, y el uso de sistemas de transporte público para remediar problemas de congestión, que se ven potenciados en distintas expansiones del juego. Otra gran baza es que es altamente personalizable, pudiendo agregar desde mapas (Figura \ref{fig:cities}) hasta modelos de objetos realistas, como edificios que existen en la realidad, coches de marcas conocidas, etc. Esto hace que esté entre el top 10 de títulos con más contenido creado por la comunidad del \textit{Workshop} de \textit{Steam}, la plataforma por referencia de compra de videojuegos en formato digital. En este proyecto vamos a utilizar esta característica de este título para poder crear un añadido que nos permita ejecutar nuestro programa lógico dentro del videojuego, y publicarlo posteriormente en \textit{Steam}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=12em]{images/CitiesCoruna}
+	\label{fig:cities}
+	\caption{Recreación de A Coruña en \citiesit}
+\end{figure}
 
 \section{Tecnologías}
 
@@ -12,7 +26,7 @@ Debido a las exigencias a la hora de desarrollar el proyecto, se ha optado por e
 
 \subsection{Answer Set Programming}\label{subsec:asp}
 
-\textit{Answer Set Programming} (ASP) \cite{asp} es un paradigma enfocado a la resolución declarativa de problemas difíciles, combinando un lenguaje simple con el que modelar los problemas lógicos y herramientas de alto rendimiento para la resolución de estos. \textit{Answer Set Programming} está basado en modelos estables \cite{stablemodels}, que usa para definir la semántica declarativa mediante programas lógicos normales. A esto se añade a que incorpora lógica no monótona \cite{nonmonotonic}, que añade razonamiento por defecto. Con esto, \textit{Answer Set Programming} permite resolver problemas \textit{NP-hard} de forma uniforme. \\
+\asp (ASP) es un paradigma enfocado a la resolución declarativa de problemas difíciles, combinando un lenguaje simple con el que modelar los problemas lógicos y herramientas de alto rendimiento para la resolución de estos. \asp está basado en modelos estables \cite{stablemodels}, que usa para definir la semántica declarativa mediante programas lógicos normales. A esto se añade a que incorpora lógica no monótona \cite{nonmonotonic}, que añade razonamiento por defecto. Con esto, \asp permite resolver problemas \textit{NP-hard} de forma uniforme. \\
 
 Una regla de programación lógica tiene el siguiente aspecto:
 
@@ -69,16 +83,22 @@ Para ello, se necesita que los programas lógicos estén expresados con variable
 	\centering
 	\includegraphics[height=4em]{images/ASP}
 	\label{fig:asp}
-	\caption{Ejemplo de ejecución de ASP}
+	\caption{Ejemplo de ejecución de \asp}
 \end{figure}
 
-Unas de las herramientas más importantes de ASP son la de Potassco\footnote{http://potassco.org}, la cual son un conjunto de herramientas para ASP desarrolladas en la Universidad de Postdam. Contienen las herramientas fundamentales como un grounder llamado \textit{gringo}; un solver que es \textit{clasp}; y una herramienta que agluntina todo el sistema ASP, \textit{clingo}. Así mismo, añade más funcionalidades al lenguaje ASP, como puede ser al resolución iterativa, debido a que permite embeber otros lenguajes como Lua, el cual está explicado en la Sección \ref{subsec:lua}, o Python, que pueden interactuar con el programa escrito en ASP mediante la interfaz o \textit{API built-in} de clingo. \\
+Unas de las herramientas más importantes de \asp son la de Potassco\footnote{http://potassco.org}, la cual son un conjunto de herramientas para \asp desarrolladas en la Universidad de Postdam. Contienen las herramientas fundamentales como un \textit{grounder} llamado \textit{gringo}; un \textit{solver} que es \textit{clasp}; y una herramienta que aglutina todo el sistema \asp, \textit{clingo}. Así mismo, añade más funcionalidades al lenguaje \asp, como puede ser al resolución iterativa, debido a que permite embeber otros lenguajes como Lua o Python, que pueden interactuar con el programa escrito en \asp mediante la interfaz o \textit{API built-in} de \textit{clingo}. \\
 
-Estas herramientas serán claves a la hora de realizar este proyecto, ya que, como veremos más adelante, qué debido a la naturaleza de ASP, serán la base sobre la que se construirá todo el proyecto.
+Estas herramientas serán claves a la hora de realizar este proyecto, ya que, como veremos más adelante, qué debido a la naturaleza de \asp, serán la base sobre la que se construirá todo el proyecto.
 
 \subsection{.NET Framework}
 
-TODO...
+\textit{.NET Framework}\footnote{https://dotnet.microsoft.com/download/dotnet-framework} es un \textit{Framework} o entorno de desarrollo publicado por \textit{Microsoft} para el sistema operativo \textit{Microsoft Windows}. El software diseñado para ser ejecutado en \textit{.NET Framework} está escrito en \textit{Common Intermediate Language} o CIL, que es ejecutado en una entorno virtual llamado \textit{Common Language Runtime}. Esta máquina virtual implementa técnicas de recolección de memoria, seguridad y manejo de hilos de ejecución, además de que el software es compilado a código máquina en tiempo de ejecución, obteniendo un mejor rendimiento que otros sistemas con máquina virtual como \textit{Java}, en donde la implementación de referencia cuenta con una máquina virtual basada en \textit{Stack}.\\
+
+Uno de los principios de este \textit{Framework} es que es independiente del lenguaje de programación usado, pudiéndose programar en C/C++, Java, C\#, F\# o J\#. Estos tres últimos lenguajes también han sido diseñados por \textit{Microsoft}, y fueron creados dentro del estándar de \textit{.NET Framework} para cubrir diferentes necesidades (lenguaje imperativo y funcional en cada uno de los dos primeros casos, y una reimplementación del lenguaje \textit{Java} en el último caso). En este proyecto usaremos en especial el lenguaje de programación C\#, ya que al ser principalmente un lenguaje imperativo y de propósito general, nos permitirá desarrollar todo el código de este proyecto. \\
+
+Debido a que \textit{.NET Framework} es un entorno solo disponible para el sistema operativo \textit{Microsoft Windows}, salieron varios proyectos que se ofrecen como alternativa para ser multiplataforma, como \textit{CrossNet}, \textit{DotGNU}\footnote{http://www.dotgnu.org/}, o \textit{Mono}\footnote{https://www.mono-project.com/}. En la actualidad el proyecto más usado es este último, que es desarrollado por el programador Miguel de Icaza, conocido por crear los proyectos GNOME y Xamarin (de la cual parte Mono). Es por eso que muchos proyectos que usan como lenguaje de programación C\# y que quieren ser multiplataforma se basan en Mono y no en \textit{.NET Framework}. Uno de ellos es el motor de desarrollo de videojuegos \textit{Unity}, que es uno de los más importantes en la actualidad, y, en nuestro caso, sobre el que está programado \citiesit. Cabe destacar que en los últimos años, \textit{Microsoft} desarrollo un \textit{Framework} multiplataforma y de código abierto llamado \textit{.NET Core}\footnote{https://dotnet.microsoft.com/download/dotnet}, el cual implementa todas las características principales de \textit{.NET Framework}, y que a partir de Noviembre de 2020 pasó a llamarse \textit{.NET}, siendo este último el sucesor de \textit{.NET Framework}. \\
+
+Otra de las características de \textit{.NET Framework} que nos servirán para este proyecto es la posibilidad de manejar código nativo (bibliotecas compiladas a código máquina) con código escrito en C\#. Esto nos ha servido a la hora de poder usar las herramientas de Potassco, tal y como comentamos en la sección \ref{subsec:arquitectura}; ya que estas herramientas están escritas en C/C++, y en la actualidad no hay ninguna biblioteca que nos permita usarlas en código escrito para C\#.
 
 \section{Herramientas}
 
@@ -90,13 +110,13 @@ TODO
 
 \subsection{Git}
 
-Git\footnote{https://git-scm.com} es un sistema de control de versiones distribuido y de código abierto creado para la gestión de código fuente y desarrollo de software. Fue creado por Linus Trovalds como una alternativa libre y gratuita a BitKeeper para el desarrollo del kernel Linux por la comunidad. Está enfocado en la rapidez y eficiencia al procesar proyectos grandes, la integridad de datos, la seguridad mediante autentificación criptográfica y el fuerte soporte de un flujo de trabajo no lineal y distribuido. \\
+\textit{Git}\footnote{https://git-scm.com} es un sistema de control de versiones distribuido y de código abierto creado para la gestión de código fuente y desarrollo de software. Fue creado por Linus Trovalds como una alternativa libre y gratuita a \textit{BitKeeper} para el desarrollo del kernel \textit{Linux} por la comunidad. Está enfocado en la rapidez y eficiencia al procesar proyectos grandes, la integridad de datos, la seguridad mediante autentificación criptográfica y el fuerte soporte de un flujo de trabajo no lineal y distribuido. \\
 
-Debido a estas características, Git es uno de los sistemas de control de versiones más importantes hoy en día, por lo que ha permitido que existan servicios de alojamiento en linea que incluyen esta herramienta:
+Debido a estas características, \textit{Git} es uno de los sistemas de control de versiones más importantes hoy en día, por lo que ha permitido que existan servicios de alojamiento en linea que incluyen esta herramienta:
 
 \begin{itemize}
-	\item GitLab\footnote{https://gitlab.com}, creado por dos programadores ucranianos y que hoy en día es gestionado por GitLab Inc. Es usado por organizaciones como Sony, IBM, NASA, CERN o GNOME Foundation. Permite realizar gratuitamente repositorios privados, gestionar grupos y realizar rastreo de \textit{issues} y funcionalidades de CI/CD.
+	\item GitLab\footnote{https://gitlab.com}, creado por dos programadores ucranianos y que hoy en día es gestionado por \textit{GitLab Inc}. Es usado por organizaciones como Sony, IBM, NASA, CERN o GNOME Foundation. Permite realizar gratuitamente repositorios privados, gestionar grupos y realizar rastreo de \textit{issues} y funcionalidades de CI/CD.
 	\item Phabricator\footnote{https://www.phacility.com}, creado por Facebook como herramienta interna que integra también Mercurial y Subversion. Actualmente es de código abierto y lo usan empresas como Blender, Cisco Systems, Dropbox o KDE.
 	\item Bitbucket\footnote{https://bitbucket.org}, creado por Atlassian. Este sistema integra Mercurial desde sus inicios y Git desde 2011, y está pensado para ser integrado con el resto de productos como Atlassian como Jira, Confluence y Bamboo.
-	\item GitHub\footnote{https://www.github.com}, creado por tres estudiantes estadounidenses, hoy en día es gestionado por GitHub Inc. empresa que fue adquirida por Microsoft en 2018. Permite realizar rastreo de \textit{bugs}, wikis, gestión de tareas y petición de funcionalidades. Es usado por empresas como Microsoft, Google, Travis CI, Bitnami, DigitalOcean y Unreal Engine. Con la popularidad de GitHub nacieron varios servicios, como el Education Program, que permite a estudiantes el acceso gratuito a herramientas de GitHub y de partners; Gist, que permite usar GitHub como un hosting de \textit{snippets} y GitHub Marketplace, que permite comprar servicios con los que aumentar las funcionalidades en los proyectos y que muchos de ellos son gestionados por partners.
+	\item GitHub\footnote{https://www.github.com}, creado por tres estudiantes estadounidenses, hoy en día es gestionado por \textit{GitHub Inc}. empresa que fue adquirida por \textit{Microsoft} en 2018. Permite realizar rastreo de \textit{bugs}, wikis, gestión de tareas y petición de funcionalidades. Es usado por empresas como Microsoft, Google, Travis CI, Bitnami, DigitalOcean y Unreal Engine. Con la popularidad de \textit{GitHub} nacieron varios servicios, como el \textit{Education Program}, que permite a estudiantes el acceso gratuito a herramientas de \textit{GitHub} y de partners; Gist, que permite usar \text{GitHub} como un hosting de \textit{snippets}; \textit{GitHub Marketplace}, que permite comprar servicios con los que aumentar las funcionalidades en los proyectos y que muchos de ellos son gestionados por partners; y \text{GitHub Actions} un sistema de automatización \textit{CI/CD} para construir, lanzar test y desplegar proyectos dentro de GitHub. Nosotros usaremos este servicio para retener el código fuente y montar el sistema de automatización \textit{CI/CD}.
 \end{itemize}
