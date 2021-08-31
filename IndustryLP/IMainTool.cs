@@ -58,5 +58,12 @@ namespace IndustryLP
         /// <param name="gridId">The id in the grid</param>
         /// <param name="building">The building that defines the preference</param>
         void AddPreference(ushort gridId, BuildingInfo building);
+
+        /// <summary>
+        /// Ads a new restriction to the grid
+        /// </summary>
+        /// <param name="gridId"></param>
+        /// <param name="building"></param>
+        void AddRestriction(ushort gridId, BuildingInfo building);
     }
 }

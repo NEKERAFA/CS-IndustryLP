@@ -4,6 +4,7 @@ using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -82,8 +83,12 @@ namespace IndustryLP.DomainDefinition
 
                 LoggerUtils.Log("Loading definition files");
 
-                m_program.Load(ClingoConstants.ItemDefinitionFile);
-                m_program.Load(ClingoConstants.IndustryGeneratorFile);
+                var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
+
+                foreach (var file in files)
+                {
+                    m_program.Load(file);
+                }
             }
             catch (Exception ex)
             {

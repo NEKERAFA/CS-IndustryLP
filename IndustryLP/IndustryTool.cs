@@ -354,30 +354,6 @@ namespace IndustryLP
 
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
-
-            if (Selection.HasValue && m_action != m_buildingAction)
-            {
-                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
-                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
-
-                foreach (var preference in Preferences)
-                {
-                    Color buildingColor = BuildingUtils.GetColor(0, preference.Building);
-                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, buildingColor);
-#if DEBUG
-                    DrawForwardDirection(preference);
-#endif
-                }
-
-                foreach (var restriction in Restrictions)
-                {
-                    Color buildingColor = BuildingUtils.GetColor(0, restriction.Building);
-                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, buildingColor);
-#if DEBUG
-                    DrawForwardDirection(restriction);
-#endif
-                }
-            }
         }
 
         /// <summary>
@@ -497,6 +473,7 @@ namespace IndustryLP
             m_optionPanel.EnableTab(1);
             m_optionPanel.DisableTab(2);
             m_categoryPanel.EnableTab(0);
+            m_categoryPanel.selectedIndex = 0;
             m_scrollablePanel.Enable();
 
             if (Distribution?.Type == DistributionType.GRID)
@@ -596,8 +573,21 @@ namespace IndustryLP
                 Rotation = parcel.Rotation
             });
 
-            m_action.OnLeftController();
-            m_action = null;
+            OnChangeSelectedIndex(null, m_optionPanel.selectedIndex);
+        }
+
+        public void AddRestriction(ushort gridId, BuildingInfo building)
+        {
+            var parcel = Distribution.FindById(gridId);
+            Restrictions.Add(new Parcel
+            {
+                GridId = gridId,
+                Building = building,
+                Position = parcel.Position,
+                Rotation = parcel.Rotation
+            });
+
+            OnChangeSelectedIndex(null, m_optionPanel.selectedIndex);
         }
 
         public void RemoveBuilding(Vector3 mousePosition)
@@ -918,7 +908,7 @@ namespace IndustryLP
                 m_optionPanel.selectedIndex = -1;
                 m_action?.OnLeftController();
                 var oldAction = m_action;
-                m_action = new AddBuildingAction(prefab as BuildingInfo);
+                m_action = new AddBuildingAction(prefab as BuildingInfo, AddBuildingAction.ActionType.Preference);
                 m_action.OnStart(this);
                 m_action.OnChangeController(oldAction);
                 m_action.OnEnterController();
@@ -937,6 +927,14 @@ namespace IndustryLP
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
                 LoggerUtils.Log($"Clicked on {prefab.name} restriction");
+
+                m_optionPanel.selectedIndex = -1;
+                m_action?.OnLeftController();
+                var oldAction = m_action;
+                m_action = new AddBuildingAction(prefab as BuildingInfo, AddBuildingAction.ActionType.Restriction);
+                m_action.OnStart(this);
+                m_action.OnChangeController(oldAction);
+                m_action.OnEnterController();
             }
         }
 
@@ -1028,42 +1026,6 @@ namespace IndustryLP
 
             UpdateScrollablePanel();
         }
-
-#if DEBUG
-        private void DrawForwardDirection(Parcel building)
-        {
-            var start = building.Position + Vector3.up * 10;
-            var dir = new Vector3(0, 0, 40);
-            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
-            var end = rotate * dir + building.Position + Vector3.up * 10;
-            DrawLine(start, end, new Color32(255, 0, 0, 255));
-        }
-
-        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
-        {
-            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
-            lr.transform.position = start;
-            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
-            lr.hideFlags = HideFlags.HideAndDontSave;
-            lr.startColor = color;
-            lr.startWidth = 2;
-            lr.SetPosition(0, start);
-            lr.endColor = color;
-            lr.endWidth = 2;
-            lr.SetPosition(1, end);
-            Destroy(lr.gameObject, duration);
-        }
-
-        private void DrawText(Vector2 pos, string msg, Color color, float duration = 1f)
-        {
-            var text = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            text.relativePosition = pos;
-            text.SetText(msg);
-            text.color = color;
-            Destroy(text.gameObject, duration);
-        }
-#endif
-
     #endregion
     }
 }
