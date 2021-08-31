@@ -1,0 +1,13 @@
+set terminal pdf font "serif"
+set output 'bioma-size.pdf'
+set datafile separator ","
+set decimalsign ','
+set output 'bioma-size.pdf'
+set datafile separator ";"
+set decimalsign ','
+set boxwidth 0.9
+set auto x
+set style data histogram
+set style fill solid
+set style histogram cluster gap 1
+plot "bioma-size.dat" using 2:xtic(1) ti col lc rgb "#ff0000"
