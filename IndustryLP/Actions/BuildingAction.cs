@@ -14,9 +14,10 @@ namespace IndustryLP.Actions
     {
         #region Attributes
 
-        private IMainTool m_mainTool = null;
-        private UIGeneratorOptionPanel m_panel = null;
-        private BuildThread m_generator = null;
+        private IMainTool m_mainTool;
+        private UIGeneratorOptionPanel m_panel;
+        private UIGenerationDialog m_dialog;
+        private BuildThread m_generator;
         private int m_rows;
         private int m_columns;
 
@@ -34,6 +35,10 @@ namespace IndustryLP.Actions
         {
             base.OnStart(mainTool);
             m_mainTool = mainTool;
+
+            m_dialog = GameObjectUtils.AddUIComponent<UIGenerationDialog>();
+            var screen = UIView.GetAView().GetScreenResolution();
+            m_dialog.relativePosition = new Vector2((screen.x / 2f) - 150f, (screen.y / 2f) - 150f);
         }
 
         public override void OnEnterController()
@@ -41,9 +46,7 @@ namespace IndustryLP.Actions
             base.OnEnterController();
             m_rows = m_mainTool.Distribution.Rows;
             m_columns = m_mainTool.Distribution.Columns;
-            m_panel = SetupPanel();
-            m_generator = SetupBuildThread();
-            CurrentState = GenerationState.GeneratingSolutions;
+            CurrentState = GenerationState.None;
         }
 
         public override void OnLeftController()
@@ -116,7 +119,7 @@ namespace IndustryLP.Actions
         private UIGeneratorOptionPanel SetupPanel()
         {
             var panel = GameObjectUtils.AddUIComponent<UIGeneratorOptionPanel>();
-            panel.relativePosition = new Vector3(791, 847); ;
+            panel.relativePosition = new Vector3(791, 847); 
             panel.OnClickPreviousSolution += OnChangeSolution;
             panel.OnClickNextSolution += OnChangeSolution;
             return panel;

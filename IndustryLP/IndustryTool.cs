@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace IndustryLP
 {
@@ -298,7 +299,7 @@ namespace IndustryLP
             m_mouseTerrainPosition = TerrainUtils.GetTerrainMousePosition();
 
             // Checks if mouse is over UI
-            if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
+            if (IsPointerOverUIView())
             {
                 m_action?.OnUpdate(m_mouseTerrainPosition.Value);
 
@@ -1026,6 +1027,18 @@ namespace IndustryLP
 
             UpdateScrollablePanel();
         }
+
+        private bool IsPointerOverUIView()
+        {
+            var eventData = new PointerEventData(EventSystem.current)
+            {
+                position = new Vector2(Input.mousePosition.x, Input.mousePosition.y)
+            };
+            var result = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, result);
+            return result.Any(r => r.gameObject.GetComponent<UIComponent>() != null);
+        }
+
     #endregion
     }
 }

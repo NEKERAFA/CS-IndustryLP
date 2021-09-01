@@ -55,48 +55,24 @@ namespace IndustryLP.UI.Panels
             m_solutionsLbl.relativePosition = new Vector2(166 - m_solutionsLbl.width, 16f - (m_solutionLbl.height / 2f));
             m_spinner = SetupSpinner();
             m_upButton = SetupUpButton();
-            //m_upButton.Disable();
+            m_upButton.Disable();
             m_upButton.eventClicked += OnUpClick;
             m_downButton = SetupDownButton();
-            //m_downButton.Disable();
+            m_downButton.Disable();
             m_downButton.eventClicked += OnDownClick;
             m_buildSolutionButton = SetupBuildSolutionButton();
-            //m_buildSolutionButton.Disable();
+            m_buildSolutionButton.Disable();
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
 
-            if (m_solutionLbl != null)
-            {
-                Destroy(m_solutionLbl.gameObject);
-                m_solutionLbl = null;
-            }
-
-            if (m_solutionsLbl != null)
-            {
-                Destroy(m_solutionsLbl.gameObject);
-                m_solutionsLbl = null;
-            }
-
-            if (m_spinner != null)
-            {
-                Destroy(m_spinner.gameObject);
-                m_spinner = null;
-            }
-
-            if (m_upButton != null)
-            {
-                Destroy(m_upButton.gameObject);
-                m_upButton = null;
-            }
-
-            if (m_downButton != null)
-            {
-                Destroy(m_downButton.gameObject);
-                m_downButton = null;
-            }
+            if (m_solutionLbl != null) Destroy(m_solutionLbl.gameObject);
+            if (m_solutionsLbl != null) Destroy(m_solutionsLbl.gameObject);
+            if (m_spinner != null) Destroy(m_spinner.gameObject);
+            if (m_upButton != null) Destroy(m_upButton.gameObject);
+            if (m_downButton != null) Destroy(m_downButton.gameObject);
         }
 
         public override void Update()
