@@ -1,0 +1,135 @@
+\section{Videojuegos de construcción de ciudades}
+
+Los videojuegos de construcción de ciudades es un género dentro de los videojuegos de simulación, en el que los jugadores actúan como planificadores y líderes generales de una ciudad o pueblo, mirándola desde arriba, y siendo responsables de su crecimiento y estrategia de gestión. Los jugadores eligen la ubicación de los edificios y las características de gestión de la ciudad, como los salarios y las prioridades de trabajo, haciendo que la ciudad se desarrolle en consecuencia. \\
+
+El exponente de este género es la serie de juegos de SimCity\texttrademark\footnote{https://www.ea.com/es-es/games/simcity}\xspace (Figura \ref{fig:simcity}), creados por el desarrollador de videojuegos Will Wright y padre de la saga The Sims\texttrademark. Fue lanzado en 1989 y desde entonces, ha plateado las bases y ha servido de inspiración al resto de videojuegos dentro de este ámbito. A pesar de su fama, algunas malas decisiones en su última gran entrega (SimCity\texttrademark\xspace 2013) han hecho que haya perdido parte de su popularidad en favor de otros títulos. \\
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=12em]{images/SimCity}
+	\label{fig:simcity}
+	\caption{Pantalla del juego SimCity\texttrademark}
+\end{figure}
+
+Otro título dentro de este género es \cities\footnote{https://www.citiesskylines.com/}, desarrollado por la productora filandesa Colossal Order, y publicado por la editorial de videojuegos indie Paradox Interactive AB. Pertenece a la serie de Cities in Motion\textcopyright. Una de sus principales bazas con respecto a otros de su género es la simulación realista de tráfico, poniendo el foco en un sistema para entender los problemas en el diseño de la ciudad, y el uso de sistemas de transporte público para remediar problemas de congestión, que se ven potenciados en distintas expansiones del juego. Otra gran baza es que es altamente personalizable, pudiendo agregar desde mapas (Figura \ref{fig:cities}) hasta modelos de objetos realistas, como edificios que existen en la realidad, coches de marcas conocidas, etc. Esto hace que esté entre el top 10 de títulos con más contenido creado por la comunidad del Workshop de Steam\footnote{https://steamcommunity.com/app/255710/workshop}, la plataforma por referencia de compra de videojuegos en formato digital. En este proyecto vamos a utilizar esta característica de este título para poder crear un añadido que nos permita ejecutar nuestro programa lógico dentro del videojuego, y publicarlo posteriormente en Steam.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=12em]{images/CitiesCoruna}
+	\label{fig:cities}
+	\caption{Recreación de A Coruña en \cities}
+\end{figure}
+
+\section{Tecnologías}
+
+Debido a las exigencias a la hora de desarrollar el proyecto, se ha optado por elegir un lenguaje de programación lógico sobre el que realizar la base declarativa del proyecto, ya que nos permitirá expresar las reglas de generación del mapa de forma matemática. También se ha escogido un segundo lenguaje multipropósito que nos permitirá desarrollar el plug-in que conectará nuestro programa lógico con el videojuego en cuestión.
+
+\subsection{Answer Set Programming}\label{subsec:asp}
+
+\asp (ASP) es un paradigma enfocado a la resolución declarativa de problemas difíciles, combinando un lenguaje simple con el que modelar los problemas lógicos y herramientas de alto rendimiento para la resolución de estos. \asp está basado en modelos estables \cite{stablemodels}, que usa para definir la semántica declarativa mediante programas lógicos normales. A esto se añade a que incorpora lógica no monótona \cite{nonmonotonic}, que añade razonamiento por defecto. Con esto, \asp permite resolver problemas \textit{NP-hard} de forma uniforme. \\
+
+Una regla de programación lógica tiene el siguiente aspecto:
+
+\begin{equation}
+	\underbrace{p}_{\text{\normalsize Cabeza}} \leftarrow \underbrace{q_1, \dotsc, q_m , \textit{not } q_{m+1} ,\dotsc, \textit{not } q_n}_{\text{\normalsize Cola}}.
+\end{equation}
+
+\hspace{1em}
+
+o, en formato texto:
+
+\begin{lstlisting}[label=lst:qreached]
+p :- q1, ... , qm, not qm1, ..., not qn.
+\end{lstlisting}
+
+en donde $p$ y todos los $q_i$ son átomos, que son los elementos que pueden ser ciertos o falsos y los literales pueden ser tanto un átomo $s$ y su negación ($\text{not } s$). Intuitivamente, una regla es una justificación que establece o deriva que $p$ es verdad \textit{si} todos sus átomos a la derecha de la flecha $\leftarrow$ son ciertos. Por ejemplo, si suponemos la regla
+
+\begin{equation}\label{eq:light}
+	\textit{light\_on} \leftarrow \textit{power\_on}, \textit{not } broken.
+\end{equation}
+
+informalmente significa que se puede afirmar que la luz está encendida si se puede establecer que hay electricidad y no hay razón de pensar que la lámpara. Puede existir reglas que no tengan cuerpo,  como por ejemplo:
+
+\begin{equation}\label{eq:power}
+	\textit{power\_on} \leftarrow.
+\end{equation}
+
+Estas reglas se llaman hechos, ya que la cabeza es incondicionalmente cierta. Normalmente se omite la flecha $\leftarrow$. Los programas lógicos son una colección finita de reglas, en donde se expresa la ``justificación'' de un conjunto de átomos que pueden ser establecidos. Es importante señalar que \textit{not} no es el operador estándar de negación ($\lnot$), si no que significa que algo ``no es derivable''. Esto es lo que se llama negación por defecto \cite{negation}. Pensando en las dos reglas presentadas en \ref{eq:light} y \ref{eq:power}, \textit{power\_on} se puede derivar ya que es un hecho (\ref{eq:light}), mientras que \textit{broken} no porque no hay ninguna regla que lo derive. Esto nos permite derivar \textit{light\_on} (\ref{eq:power}), el cual sería el modelo estable. \\
+
+Existe otro tipo de reglas, las cuales no tiene cabeza, es decir,
+
+\begin{equation}
+	\leftarrow B.
+\end{equation}
+
+Estas reglas se llaman \textit{constrains} o restricciones, y sirven para indicar que satisfacer \textit{B} es una contradicción. Así mismo es común que programas lógicos contengan el par de reglas
+
+\begin{align}
+	a &\leftarrow B, \textit{not } \bar{a}.\\
+	\bar{a} &\leftarrow B, \textit{not } a.
+\end{align}
+
+en donde ni \textit{a} ni $\bar{a}$ aparecen en la cabeza de cualquier otra regla del programa, y B es una conjunción de literales. Esta regla aparece cuando se quiere referir tanto a un átomo \textit{a} como a su negación (estándar). Para representar este último, se introduce el nuevo átomo $\bar{a}$ y se incluye las dos reglas. Intuitivamente el rol de las reglas es seleccionar en caso de que \textit{B} se satisfaga. Estas reglas se pueden escribir como una regla \textit{choise} de la forma
+
+\begin{align}
+	\{a\} \leftarrow B.
+\end{align}
+
+En resumen, los problemas lógicos se reducen al cómputo de los modelos estables de un programa lógico dado, lo cual se hace mediante herramientas llamadas \textit{solvers}, que se encargan de utilizar diferentes técnicas para obtener un modelo estable final. \\
+
+Para ello, se necesita que los programas lógicos estén expresados con variables libres. Como la forma de expresar un programa lógico en ASP es mediante un lenguaje de alto nivel con ciudadanos de primer orden, muchas de las variables están ligadas. Es por eso que, antes de resolver el programa, se usa unas herramientas llamadas \textit{grounders}, que permiten transformar el programa a su equivalente con variables libres. En la Figura \ref{fig:asp} se muestra el ciclo de ejecución de un programa ASP. \\
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=4em]{images/ASP}
+	\label{fig:asp}
+	\caption{Ejemplo de ejecución de \asp}
+\end{figure}
+
+Unas de las herramientas más importantes de \asp son la de Potassco\footnote{http://potassco.org}, la cual son un conjunto de herramientas para \asp desarrolladas en la Universidad de Postdam. Contienen las herramientas fundamentales como un grounder llamado Gringo; un solver que es Clasp; y una herramienta que aglutina todo el sistema \asp, Clingo. Así mismo, añade más funcionalidades al lenguaje \asp, como puede ser al resolución iterativa, debido a que permite embeber otros lenguajes como Lua o Python, que pueden interactuar con el programa escrito en \asp mediante la interfaz o \textit{API built-in} de Clingo. \\
+
+Estas herramientas serán claves a la hora de realizar este proyecto, ya que, como veremos más adelante, qué debido a la naturaleza de \asp, serán la base sobre la que se construirá todo el proyecto.
+
+\subsection{.NET Framework}
+
+.NET Framework\footnote{https://dotnet.microsoft.com/download/dotnet-framework} es un Framework o entorno de desarrollo publicado por Microsoft para el sistema operativo Microsoft Windows. El software diseñado para ser ejecutado en .NET Framework está escrito en \textit{Common Intermediate Language} o CIL, que es ejecutado en una entorno virtual llamado \textit{Common Language Runtime}, tal y como se muestra en la Figura \ref{fig:cli}. Esta máquina virtual implementa técnicas de recolección de memoria, seguridad y manejo de hilos de ejecución, además de que el software es compilado a código máquina en tiempo de ejecución, obteniendo un mejor rendimiento que otros sistemas con máquina virtual como Java, en donde la implementación de referencia cuenta con una máquina virtual basada en stack. \\
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=6em]{images/arquitectura-cli}
+	\label{fig:cli}
+	\caption{Arquitectura de .NET Framework}
+\end{figure}
+
+Uno de los principios de este Framework es que es independiente del lenguaje de programación usado, pudiéndose programar en C/C++, Java, C\#, F\# o J\#. Estos tres últimos lenguajes también han sido diseñados por Microsoft, y fueron creados dentro del estándar de .NET Framework para cubrir diferentes necesidades (lenguaje imperativo y funcional en cada uno de los dos primeros casos, y una reimplementación del lenguaje Java en el último caso). En este proyecto usaremos en especial el lenguaje de programación C\#, ya que al ser principalmente un lenguaje imperativo y de propósito general, nos permitirá desarrollar todo el código de este proyecto. \\
+
+Debido a que .NET Framework es un entorno solo disponible para el sistema operativo Microsoft Windows, salieron varios proyectos que se ofrecen como alternativa para ser multiplataforma, como CrossNet, DotGNU\footnote{http://www.dotgnu.org/}, o Mono\footnote{https://www.mono-project.com/}. En la actualidad el proyecto más usado es este último, que es desarrollado por el programador Miguel de Icaza, conocido por crear los proyectos GNOME y Xamarin (de la cual parte Mono). Es por eso que muchos proyectos que usan como lenguaje de programación C\# y que quieren ser multiplataforma se basan en Mono y no en .NET Framework. Uno de ellos es el motor de desarrollo de videojuegos Unity, que es uno de los más importantes en la actualidad, y, en nuestro caso, sobre el que está programado \cities. Cabe destacar que en los últimos años, Microsoft desarrollo un Framework multiplataforma y de código abierto llamado .NET Core\footnote{https://dotnet.microsoft.com/download/dotnet}, el cual implementa todas las características principales de .NET Framework. A partir de Noviembre de 2020 pasó a llamarse .NET, siendo este último el sucesor de .NET Framework. \\
+
+Otra de las características de .NET Framework que nos servirán para este proyecto es la posibilidad de manejar código nativo (bibliotecas compiladas a código máquina) con código escrito en C\#. Esto nos ha servido a la hora de poder usar las herramientas de Potassco, tal y como comentamos en la sección \ref{subsec:arquitectura}; ya que estas herramientas están escritas en C/C++, y en la actualidad no hay ninguna biblioteca que nos permita usarlas en código escrito para C\#.
+
+\section{Herramientas}
+
+Aparte de las tecnologías usadas para la construcción del proyecto, se ha usado distintas herramientas que nos han servido a la hora de elaborar y desarrollar el sistema planteado.
+
+\subsection{Microsoft Visual Studio}
+
+Microsoft Visual Studio\footnote{https://visualstudio.microsoft.com/es} es un Entorno de Desarrollo Integrado o IDE creado por Microsoft y disponible solo para el sistema operativo Microsoft Windows. Fue pensado en su inicio para desarrollar con las tecnologías Visual de Microsoft, como Visual C++, Visual J++ o Visual Basic, pero finalmente se ha convertido en el IDE de facto para desarrollar en las tecnologías .NET. Implementa tecnologías de autocompletado inteligente (IntelliSense\texttrademark), así como de desarrollo de software (Azure DevOps mediante un plugin llamado Team Explorer), debugging, despliegue de sistemas basados en web, herramientas para el diseño de interfaces gráficas y diseño de esquemas de base de datos. Incluido a esto, se puede extender las funcionalidades de Microsot Visual Studio mediante \textit{plug-ins}, que están escritos en CIL, y que se puedes descargar desde Visual Studio Galery (un repositorio centralizado de Microsoft). \\
+
+Existe varias versiones de este editor: Enterprise, que está pensada para empresas que necesiten el despliegue en varios equipos; Professional, que está pensada para grupos con hasta 5 equipos; y Community, que solo permite una licencia única y es la gratuita. Además, existe una versión gratuita, de código libre y multiplataforma llamada Visual Studio Code, que está basado en Electron, un Frameworkd para crear aplicaciones nativas con tecnologías Web. \\
+
+Es debido a la fuerte integración que tiene con las tecnologías .NET, y que tanto .NET Framework como Microsoft Visual Studio está disponible en Microsoft Windows; que usaremos este IDE como una de las herramientas principales para el desarrollo de este proyecto.
+
+\subsection{Git}
+
+Git\footnote{https://git-scm.com} es un sistema de control de versiones distribuido y de código abierto creado para la gestión de código fuente y desarrollo de software. Fue creado por Linus Trovalds como una alternativa libre y gratuita a BitKeeper para el desarrollo del kernel Linux por la comunidad. Está enfocado en la rapidez y eficiencia al procesar proyectos grandes, la integridad de datos, la seguridad mediante autentificación criptográfica y el fuerte soporte de un flujo de trabajo no lineal y distribuido. \\
+
+Debido a estas características, \textit{Git} es uno de los sistemas de control de versiones más importantes hoy en día, por lo que ha permitido que existan servicios de alojamiento en linea que incluyen esta herramienta:
+
+\begin{itemize}
+	\item GitLab\footnote{https://gitlab.com}, creado por dos programadores ucranianos y que hoy en día es gestionado por GitLab Inc. Es usado por organizaciones como Sony, IBM, NASA, CERN o GNOME Foundation. Permite realizar gratuitamente repositorios privados, gestionar grupos y realizar rastreo de \textit{issues} y funcionalidades de CI/CD.
+	\item Phabricator\footnote{https://www.phacility.com}, creado por Facebook como herramienta interna que integra también Mercurial y Subversion. Actualmente es de código abierto y lo usan empresas como Blender, Cisco Systems, Dropbox o KDE.
+	\item Bitbucket\footnote{https://bitbucket.org}, creado por Atlassian. Este sistema integra Mercurial desde sus inicios y Git desde 2011, y está pensado para ser integrado con el resto de productos como Atlassian como Jira, Confluence y Bamboo.
+	\item GitHub\footnote{https://www.github.com}, creado por tres estudiantes estadounidenses, hoy en día es gestionado por GitHub Inc. empresa que fue adquirida por Microsoft en 2018. Permite realizar rastreo de \textit{bugs}, wikis, gestión de tareas y petición de funcionalidades. Es usado por empresas como Microsoft, Google, Travis CI, Bitnami, DigitalOcean y Unreal Engine. Con la popularidad de GitHub nacieron varios servicios, como el Education Program, que permite a estudiantes el acceso gratuito a herramientas de GitHub y de partners; Gist, que permite usar GitHub como un hosting de \textit{snippets}; GitHub Marketplace, que permite comprar servicios con los que aumentar las funcionalidades en los proyectos y que muchos de ellos son gestionados por partners; y GitHub Actions, un sistema de automatización \textit{CI/CD} para construir, lanzar test y desplegar proyectos dentro de GitHub.
+\end{itemize}
+
+Nosotros usaremos este último servicio como servidor de control de versiones y para montar el sistema de automatización \textit{CI/CD}.
