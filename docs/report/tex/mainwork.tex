@@ -2,12 +2,50 @@ En este capítulo se detalla cada uno de los puntos llevados a cabo para la real
 
 \section{Propuesta}
 
-El trabajo propuesto tiene como objetivo la creación de un elemento software funcional que, usando el paradigma lógico explicado en la Sección \ref{subsec:asp}, permita la generación de un área que contenga una planificación de un polígono industrial que pueda ser generado y jugado dentro del mapa de \cities. Así mismo incluirá una interfaz gráfica interactuable que permitan al usuario marcar que zonas del terreno deben generarse y cuales no, indicando su contenido antes de lanzar el proceso de generación.
+El trabajo propuesto tiene como objetivo la creación de un elemento software funcional que, usando el paradigma lógico explicado en la Sección \ref{subsec:asp}, permita la generación de un área que contenga una planificación de un polígono industrial que pueda ser generado y jugado dentro del mapa de \cities. Así mismo incluirá una interfaz gráfica interactuable que permitan al usuario marcar que zonas del terreno deben generarse y cuales no, indicando su contenido antes de lanzar el proceso de generación. \\
 
-\subsubsection{Tipos de industria}
+Antes de proceder a explicar como se ha llevado a cabo, procederemos a explicar como funciona la industria en \cities.
+
+\subsubsection{Definición de Industria}
 \label{subsubsec:terrain}
 
-TODO...
+Una de las principales mecánicas en \cities es la de crear zonas de los diferentes tipos de edificios que se construir en las zonas adyacentes a las carreteras, tal y como se muestra en la Figura \ref{fig:zoneo}. Estas zonas se dividen en una cuadrícula de 5 de ancho a lo largo de la carretera, en donde cada celda es de 8x8 metros. En estas zonas se pueden definir los siguientes tipos descritos a continuación.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=\textwidth]{images/zoneo}
+	\caption{Ejemplo de definición de zonas. En la azul las zonas comerciales y en verde las residenciales.}
+	\label{fig:zoneo}
+\end{figure}
+
+\begin{itemize}
+	\item \textbf{Residencial}: Corresponde a las casas donde la gente vivirá.
+	\item \textbf{Comercial}: Se refiere a las tiendas y otros servicios que venden los productos creados por la industria o que son exportados.
+	\item \textbf{Industrial}: Las zonas industriales proveen trabajo a los ciudadanos y crean los productos de consumo para los edificios comerciales.
+	\item \textbf{Oficinas}: Las zonas de oficina dan trabajo solo a ciudadanos con alto nivel de estudios. Además no producen ni contaminación, ni tráfico, ni productos de consumo.
+	\item \textbf{Servicios}: En esta categoría entran los edificios que no se pueden crear mediante zonas, si no que se fijan su construcción. Pertenecen al gobierno y dan servicios a los ciudadanos, como parques, cuarteles de policía, estaciones de buses, etc.
+\end{itemize}
+
+En este proyecto nos centraremos en las zonas industriales. Son una de las zonas que aumentan el tráfico intensamente, por lo que su planificación debe ser rigurosa. Las zonas industriales se dividen en varios tipos dependiendo de los recursos naturales que puedan usar, que pueden ser renovables (suelo fértil) o no renovables (petroleo y minerales).
+
+\begin{itemize}
+	\item \textbf{Genérica}: No tiene una especialización, por lo que corresponde a edificios genéricos. Es una de las más contaminantes pero es la base de la cadena de suministro en \cities. Proveen de trabajos para personas de estudios bajos.
+	\item \textbf{Granjas}: Necesitan de suelo fértil (que es renovable) para producir recursos sin producir contaminación. Solo da trabajo para ciudadanos con nivel de estudios bajo.
+	\item \textbf{Bosques}: No contamina el suelo pero genera un nivel de ruido significante. Consume también más electricidad que la industria genérica. También da trabajo para gente con nivel de estudios bajo.
+	\item \textbf{Petróquímica}: Usa el suelo que contiene petróleo (que no es renovable) para producir combustible. Genera ingresos por impuestos altos, así como altos niveles de polución y consumo alto de energía.
+	\item \textbf{Minera}: Usa zonas con minerales (recurso no renovable) para producir carbón. Produce menos polución e ingresos que la petroquímica pero usa más energía que la industria genérica.
+\end{itemize}
+
+Desde el lanzamiento de la expansión \textit{Industries}, se agregó un sistema producción, en donde se pueden procesar los recursos naturales hasta obtener productos de consumo de lujo. Para ello existen cinco tipos de edificios: extractores, procesadores, factorías, auxiliares y almacenes. Los edificios auxiliares dan zonas para que los trabajadores vivan y ofrecen mantenimiento, mientras que los almacenes sirven para guardar cada uno de los productos de cada una de las etapas.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=\textwidth]{images/industries}
+	\caption{Interfaz de gestión de recursos de la expansión \textit{Industries}}
+	\label{fig:industry}
+\end{figure}
+
+Además, desde la expansión de \textit{Sunset Harbor} existe la industria pesquera, que agrega como recurso natural el pescado. Siguiendo el sistema de producción agregado en \textit{Industries}, este se puede procesar hasta obtener productos de consumo que se puedan exportar o vender en comercios. Dependiendo de la profundidad y el flujo del agua, se generará uno de los cuatro tipos de pescados: anchoas, atún, salmón y marisco. La polución en el agua provoca que desaparezcan este recurso del agua.
 
 \section{Proceso de ingeniería}
 
@@ -19,16 +57,16 @@ En este capítulo se explica el proceso que se ha seguido para realizar el proye
 A pesar de que en un primer se ha pensado que para la planificación de este proyecto se usaría la metodología de desarrollo SCRUM\cite{Schwaber:2001:ASD:559553}\cite{Schwaber:2004:APM:984028}, finalmente se ha optado por usar una amalgama entre distintas metodologías de desarrollo en espiral. Esto es debido a que SCRUM tiene unas características básicas que no se han tenido en cuenta a la hora de diseñar y desarrollar el proyecto, por lo que no sería correcto decir que se ha utilizado este tipo de metodología ágil:
 
 \begin{itemize}
-	\item \textbf{Flujo de trabajo}: El trabajo se divide en varias iteraciones entre una y cuatro semanas llamadas \textit{Sprint}, en donde en cada una de ellas se obtiene un incremento funcional del producto. Al comienzo de cada iteración se realiza una reunión en donde se identifican las tareas a realizar en esa iteración, realizando una estimación de todas; durante la realización de la iteración se realiza cada día una pequeña reunión en donde se comunica el estado actual; y, al finalizar una iteración se realiza una reunión que sirve como retrospectiva y alimentación para la próxima iteración. \\
+	\item \textbf{Flujo de trabajo}: El trabajo se divide en varias iteraciones entre una y cuatro semanas llamadas \textit{Sprint}, en donde en cada una de ellas se obtiene un incremento funcional del producto. Al comienzo de cada iteración se realiza una reunión en donde se identifican las tareas a realizar en esa iteración, realizando una estimación de todas; durante la realización de la iteración se realiza cada día una pequeña reunión en donde se comunica el estado actual; y, al finalizar una iteración se realiza una reunión que sirve como retrospectiva y alimentación para la próxima iteración.
 	
 	A la hora de realizar este proyecto, a pesar de que se ha dividido en varias iteraciones, realizando una reunión al principio de estos, y en cada iteración se finaliza con un producto funcional, el resto de elementos de la metodología SCRUM no se han llevado a cabo en la práctica.
 	
-	\item \textbf{Gestión de riesgos}: Uno de lo puntos de desarrollo con una metodología ágil es la de mantener una gestión de temprana de riesgos para evitar una gran desviación de la planificación. Esto se realiza mediante un panel que presenta listado ordenado de las tareas a realizar en el desarrollo total del proyecto, llamado \textit{Product backlog}. Estas tareas son las que estiman su duración y se incluyen en otro listado de tareas a realizar en cada iteración, llamado \textit{Sprint backlog}. Con esto se puede obtener una gráfica de evolución del proyecto llamado \textit{Burn down chart}, pudiendo detectar desviaciones y sobreasignaciones de forma visual debido a que también se marca el trabajo ideal de proyecto. \\
+	\item \textbf{Gestión de riesgos}: Uno de lo puntos de desarrollo con una metodología ágil es la de mantener una gestión de temprana de riesgos para evitar una gran desviación de la planificación. Esto se realiza mediante un panel que presenta listado ordenado de las tareas a realizar en el desarrollo total del proyecto, llamado \textit{Product backlog}. Estas tareas son las que estiman su duración y se incluyen en otro listado de tareas a realizar en cada iteración, llamado \textit{Sprint backlog}. Con esto se puede obtener una gráfica de evolución del proyecto llamado \textit{Burn down chart}, pudiendo detectar desviaciones y sobreasignaciones de forma visual debido a que también se marca el trabajo ideal de proyecto.
 	
 	Para este proyecto no se ha usado ninguno de estos elementos porque no se ha realizado un seguimiento exhaustivo del mismo a causa de la escasa experiencia de alumno a la hora de realizar una planificación y estimación del proyecto, sobre todo a la hora de seguir y diseñar un proyecto con una metodología de desarrollo ágil.
 \end{itemize}
 
-Debido a todos estos factores expuestos, se podría indicar que la metodología usada finalmente está más cerca de una basada en modelos de prototipos en donde se tiene en cuenta que cada prototipo resultante de una iteración es un modelo funcional del mismo, y en donde es revisado en la reunión de la siguiente iteración sin estar presente el cliente final, si no que solo con el director del proyecto. También en esta reunión se definen las tareas a realizar para el desarrollo del proyecto de cara a la nueva iteración. \\
+Debido a todos estos factores expuestos, se podría indicar que la metodología usada finalmente está más cerca de una basada en modelos de prototipos en donde se tiene en cuenta que cada prototipo resultante de una iteración es un modelo funcional del mismo, y en donde es revisado en la reunión de la siguiente iteración sin estar presente el cliente final, si no que solo con el director del proyecto. También en esta reunión se definen las tareas a realizar para el desarrollo del proyecto de cara a la nueva iteración.
 
 \subsection{Gestión del proyecto}
 \label{subsec:gestion}
