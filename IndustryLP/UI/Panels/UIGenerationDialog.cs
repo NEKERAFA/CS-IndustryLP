@@ -21,7 +21,7 @@ namespace IndustryLP.UI.Panels
 
         #region Properties
 
-        public static string ObjectName => LibraryConstants.UIPrefix + "_GeneratorDialog";
+        public static string ObjectName => LibraryConstants.UIPrefix + "_GeneratioDialog";
 
         /// <summary>
         /// Callback invoked when the dialog will be closed
@@ -76,6 +76,18 @@ namespace IndustryLP.UI.Panels
             SetupAccept();
         }
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            DestroyImmediate(m_title);
+            DestroyImmediate(m_solutionsLbl);
+            DestroyImmediate(m_solutionsInput);
+            DestroyImmediate(m_advancedLbl);
+            DestroyImmediate(m_advancedInput);
+            DestroyImmediate(m_generateBtn);
+        }
+
         #endregion
 
         #region Panel Behaviour
@@ -88,7 +100,7 @@ namespace IndustryLP.UI.Panels
         private void SetupTitle()
         {
             // Text
-            m_title = GUIUtils.CreateTitle(this, "GENERATE OPTIONS", new Vector2(300, 31),
+            m_title = GUIUtils.CreateTitle(this, "GENERATION OPTIONS", new Vector2(300, 32),
                 (UIComponent c, UIMouseEventParameter p) =>
                 {
                     Hide();
@@ -101,18 +113,23 @@ namespace IndustryLP.UI.Panels
         /// </summary>
         private void SetupOptions()
         {
-            // Text
+            // Solution
             m_solutionsLbl = GUIUtils.CreateLabel(this, "Solutions:");
-            m_solutionsLbl.relativePosition = new Vector2(10, 39);
+            m_solutionsLbl.relativePosition = new Vector2(10, 40);
 
-            // Input
-            m_solutionsInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.UnsignedInteger, "2");
-            m_solutionsInput.relativePosition = new Vector2(290 - m_solutionsInput.width, 39);
+            // Input Solution
+            m_solutionsInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.UnsignedInteger, "64");
+            m_solutionsInput.relativePosition = new Vector2(290 - m_solutionsInput.width, 40);
 
-
-            // Text
+            // Advanced Edition
             m_advancedLbl = GUIUtils.CreateLabel(this, "Advanced Edition:");
-            m_advancedLbl.relativePosition = new Vector2(10, 42 + m_solutionsLbl.height);
+            m_advancedLbl.relativePosition = new Vector2(10, 63);
+
+            // Input Advanced Edition
+            m_advancedInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.String, ":- parcel(X, Y, \"Cargoyard\").");
+            m_advancedInput.multiline = true;
+            m_advancedInput.relativePosition = new Vector2(10, 84);
+            m_advancedInput.size = new Vector2(280, 176);
         }
 
         /// <summary>
@@ -123,9 +140,16 @@ namespace IndustryLP.UI.Panels
             // Accept button
             m_generateBtn = GUIUtils.CreateButton(this, "Generate", true);
             m_generateBtn.width = 100;
-            m_generateBtn.relativePosition = new Vector2(190, 47 + m_solutionsInput.height);
+            m_generateBtn.relativePosition = new Vector2(290 - m_generateBtn.width, 290 - m_generateBtn.height);
             if (OnClickAcceptButton != null)
-                m_generateBtn.eventClicked += OnClickAcceptButton;
+            {
+                m_generateBtn.eventClicked += (UIComponent c, UIMouseEventParameter p) =>
+                {
+                    OnClickAcceptButton?.Invoke(c, p);
+                    m_advancedInput.isInteractive = false;
+                    m_advancedInput.builtinKeyNavigation = false;
+                };
+            }
         }
 
         #endregion

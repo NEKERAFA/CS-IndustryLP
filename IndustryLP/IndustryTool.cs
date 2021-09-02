@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace IndustryLP
 {
@@ -299,7 +298,7 @@ namespace IndustryLP
             m_mouseTerrainPosition = TerrainUtils.GetTerrainMousePosition();
 
             // Checks if mouse is over UI
-            if (IsPointerOverUIView())
+            if (!IsPointerOverUIView())
             {
                 m_action?.OnUpdate(m_mouseTerrainPosition.Value);
 
@@ -449,7 +448,7 @@ namespace IndustryLP
 #if DEBUG
                 foreach (var lbl in lblParcels.Values)
                 {
-                    DestroyImmediate(lbl.gameObject);
+                    DestroyImmediate(lbl);
                 }
 
                 lblParcels.Clear();
@@ -472,27 +471,41 @@ namespace IndustryLP
             Selection = selection;
             SelectionAngle = angle;
             m_optionPanel.EnableTab(1);
-            m_optionPanel.DisableTab(2);
             m_categoryPanel.EnableTab(0);
             m_categoryPanel.selectedIndex = 0;
             m_scrollablePanel.Enable();
 
-            if (Distribution?.Type == DistributionType.GRID)
+            if (Distribution != null)
             {
-                var distributionThread = new GridDistributionThread();
-                Distribution = distributionThread.Generate(Selection.Value);
-                m_categoryPanel.EnableTab(1);
-                m_categoryPanel.EnableTab(2);
+                m_optionPanel.EnableTab(2);
+                if (Distribution?.Type == DistributionType.GRID)
+                {
+                    var distributionThread = new GridDistributionThread();
+                    Distribution = distributionThread.Generate(Selection.Value);
+                    m_categoryPanel.EnableTab(1);
+                    m_categoryPanel.EnableTab(2);
 
 #if DEBUG
-                foreach (var parcel in Distribution.Parcels)
-                {
-                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-                    lbl.Hide();
-                    lbl.SetText(Convert.ToString((int)parcel.GridId));
-                    lblParcels[parcel] = lbl;
-                }
+                    foreach (var lbl in lblParcels.Values)
+                    {
+                        DestroyImmediate(lbl);
+                    }
+
+                    lblParcels.Clear();
+
+                    foreach (var parcel in Distribution.Parcels)
+                    {
+                        var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                        lbl.Hide();
+                        lbl.SetText(Convert.ToString((int)parcel.GridId));
+                        lblParcels[parcel] = lbl;
+                    }
 #endif
+                 }
+            }
+            else
+            {
+                m_optionPanel.DisableTab(2);
             }
 
             Preferences.Clear();
@@ -598,6 +611,11 @@ namespace IndustryLP
             {
                 LoggerUtils.Log("Removed", Preferences.Remove(cell));
             }
+        }
+
+        public void CancelGeneration()
+        {
+            m_optionPanel.selectedIndex = 1;
         }
 
         #endregion
@@ -1030,13 +1048,12 @@ namespace IndustryLP
 
         private bool IsPointerOverUIView()
         {
-            var eventData = new PointerEventData(EventSystem.current)
-            {
-                position = new Vector2(Input.mousePosition.x, Input.mousePosition.y)
-            };
-            var result = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(eventData, result);
-            return result.Any(r => r.gameObject.GetComponent<UIComponent>() != null);
+            var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
+
+            return m_mouseHoverOptionPanel || 
+                m_mouseHoverScrollablePanel || 
+                m_mouseHoverToolbar || 
+                (dialogPanel != null && dialogPanel.isVisible && dialogPanel.containsMouse);
         }
 
     #endregion

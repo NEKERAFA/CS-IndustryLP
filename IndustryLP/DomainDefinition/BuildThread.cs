@@ -227,7 +227,7 @@ namespace IndustryLP.DomainDefinition
         /// <param name="maxSolutions">The number of solutions that clingo will find. <c>0</c> for no limit</param>
         /// <param name="rows">The number of rows in the parcel</param>
         /// <param name="cols">The number of cols in the parcel</param>
-        public void StartProgram(int maxSolutions, int rows, int cols, List<BuildingAtom> preferences, List<BuildingAtom> restrictions)
+        public void StartProgram(int maxSolutions, int rows, int cols, List<BuildingAtom> preferences, List<BuildingAtom> restrictions, string program = null)
         {
             try
             {
@@ -244,6 +244,7 @@ namespace IndustryLP.DomainDefinition
                 
                 if (preferences.Any()) LoadPreferences(preferences);
                 if (restrictions.Any()) LoadRestrictions(restrictions);
+                if (!string.IsNullOrEmpty(program.Trim())) m_program.Add("base", new List<string>(), program);
 
                 SolveProgram();
 

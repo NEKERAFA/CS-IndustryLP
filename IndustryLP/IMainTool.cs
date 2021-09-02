@@ -65,5 +65,7 @@ namespace IndustryLP
         /// <param name="gridId"></param>
         /// <param name="building"></param>
         void AddRestriction(ushort gridId, BuildingInfo building);
+
+        void CancelGeneration();
     }
 }

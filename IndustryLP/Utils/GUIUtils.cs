@@ -174,9 +174,11 @@ namespace IndustryLP.Utils
             textField.cursorBlinkTime = 1;
             textField.normalBgSprite = "TextFieldPanel";
             textField.hoveredBgSprite = "TextFieldPanelHovered";
+            textField.opacity = 0.7f;
             textField.textColor = ColorConstants.WhiteColor;
             textField.disabledTextColor = ColorConstants.DisableColor;
             textField.color = ColorConstants.WhiteColor;
+            textField.padding = new RectOffset(2, 2, 2, 2);
 
             switch (type)
             {

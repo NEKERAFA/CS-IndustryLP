@@ -15,9 +15,9 @@ namespace IndustryLP.Actions
         #region Attributes
 
         private IMainTool m_mainTool;
-        private UIGeneratorOptionPanel m_panel;
-        private UIGenerationDialog m_dialog;
-        private BuildThread m_generator;
+        private UIGeneratorOptionPanel m_panel = null;
+        private UIGenerationDialog m_dialog = null;
+        private BuildThread m_generator = null;
         private int m_rows;
         private int m_columns;
 
@@ -27,6 +27,8 @@ namespace IndustryLP.Actions
 
         public GenerationState CurrentState { get; set; } = GenerationState.None;
 
+        public UIPanel DialogPanel => m_dialog;
+
         #endregion
 
         #region Action Behaviour methods
@@ -35,10 +37,6 @@ namespace IndustryLP.Actions
         {
             base.OnStart(mainTool);
             m_mainTool = mainTool;
-
-            m_dialog = GameObjectUtils.AddUIComponent<UIGenerationDialog>();
-            var screen = UIView.GetAView().GetScreenResolution();
-            m_dialog.relativePosition = new Vector2((screen.x / 2f) - 150f, (screen.y / 2f) - 150f);
         }
 
         public override void OnEnterController()
@@ -47,14 +45,19 @@ namespace IndustryLP.Actions
             m_rows = m_mainTool.Distribution.Rows;
             m_columns = m_mainTool.Distribution.Columns;
             CurrentState = GenerationState.None;
+            m_dialog = SetupDialog();
         }
 
         public override void OnLeftController()
         {
             base.OnLeftController();
-            Object.DestroyImmediate(m_panel.gameObject);
-            m_generator.Stop();
-            Object.DestroyImmediate(m_generator.gameObject);
+            if (m_dialog != null) Object.DestroyImmediate(m_dialog);
+            if (m_panel != null) Object.DestroyImmediate(m_panel);
+            if (m_generator != null)
+            {
+                m_generator.Stop();
+                Object.DestroyImmediate(m_generator);
+            }
             CurrentState = GenerationState.None;
         }
 
@@ -62,11 +65,23 @@ namespace IndustryLP.Actions
         {
             base.OnUpdate(mousePosition);
 
+            LoggerUtils.Log(CurrentState);
             if (CurrentState == GenerationState.GeneratingSolutions)
             {
-                m_panel.SetSolutions(m_generator.Count);
-
-                if (m_generator.IsFinished)
+                if (m_panel == null)
+                {
+                    m_panel = SetupPanel();
+                }
+                else if (m_generator != null)
+                {
+                    m_panel.SetSolutions(m_generator.Count);
+                }
+                
+                if (m_generator == null)
+                {
+                    m_generator = SetupBuildThread();
+                }
+                else if (m_generator.IsFinished)
                 {
                     CurrentState = GenerationState.GeneratedSolutions;
                     m_panel.StopLoading();
@@ -116,6 +131,18 @@ namespace IndustryLP.Actions
 
         #region Private methods
 
+        #region Setup UI
+
+        private UIGenerationDialog SetupDialog()
+        {
+            var dialog = GameObjectUtils.AddUIComponent<UIGenerationDialog>();
+            var screen = UIView.GetAView().GetScreenResolution();
+            dialog.relativePosition = new Vector2((screen.x / 2f) - 150f, (screen.y / 2f) - 150f);
+            dialog.OnCloseDialog += OnCloseDialog;
+            dialog.OnClickAcceptButton += OnAcceptDialog;
+            return dialog;
+        }
+
         private UIGeneratorOptionPanel SetupPanel()
         {
             var panel = GameObjectUtils.AddUIComponent<UIGeneratorOptionPanel>();
@@ -128,9 +155,26 @@ namespace IndustryLP.Actions
         private BuildThread SetupBuildThread()
         {
             var thread = GameObjectUtils.AddObjectWithComponent<BuildThread>();
-            thread.StartProgram(64, m_rows, m_columns, ConvertTo(m_mainTool.Preferences), ConvertTo(m_mainTool.Restrictions));
+            thread.StartProgram(m_dialog.Solutions, m_rows, m_columns, ConvertTo(m_mainTool.Preferences), ConvertTo(m_mainTool.Restrictions), m_dialog.AdvancedEdition);
             return thread;
         }
+
+        #endregion
+
+        #region Dialog events
+
+        private void OnCloseDialog(UIComponent component, UIMouseEventParameter eventParameter)
+        {
+            m_mainTool.CancelGeneration();
+        }
+
+        private void OnAcceptDialog(UIComponent component, UIMouseEventParameter eventParameter)
+        {
+            CurrentState = GenerationState.GeneratingSolutions;
+            m_dialog.Hide();
+        }
+
+        #endregion
 
         private void OnChangeSolution(UIComponent component, UIMouseEventParameter eventParameter)
         {
