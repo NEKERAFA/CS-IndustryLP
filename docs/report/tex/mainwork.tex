@@ -113,23 +113,27 @@ Una vez definidos los requisitos se ha procedido a realizar el diseño software 
 \subsection{Arquitectura software}
 \label{subsec:arquitectura}
 
-Este proyecto se ha dividido en dos componentes concretos, que cada uno realiza una funcionalidad distinta. Esto es debido a que las tecnologías que usa \textit{Cities: Skylines\textcopyright} y \textit{Clingo} son distintas. Para ello se ha hecho un wrapper de la API C de \textit{Clingo} (llamado Clingo\# o ClingoSharp) para poder usarla en proyectos en C\#, y un mod que implementa las interfaces de \textit{Cities: Skylines\textcopyright} (IndustryLP) y que sirve como conexión entre el juego y la herramienta de \textit{Answer Set Programming}. La arquitectura del sistema se resume en la Figura \ref{fig:arquitectura}. \\
+Este proyecto se ha dividido en dos tipos de arquitectura dada la naturaleza del problema. Esto es debido a que estamos implementando diferentes paradigmas, y cada una tiene su forma de diseñarse. \\
+
+Como primera parte vamos a analizar la arquitectura del software que se ejecuta dentro de \cities. Tal y como se puede ver en la Figura \ref{fig:arquitectura-mod}, este se ha divido en dos capas para permitir sus reusabilidad en distintos proyectos. En la primera capa tendríamos la interfaz del mod en si mismo. Este se basa en una arquitectura Modelo-Vista-Controlador (MVC), en donde el controlador se encargará de reaccionar antes los eventos de las vistas, que son la parte que el usuario manipula, y modificar el modelo, que son los datos que se guardan en memoria en este caso. \\
+
+Además, el controlador de la interfaz se conectará con el controlador del modulo ASP para hacer llamadas a Clingo y obtener el resultado de las preferencias, tal y como se explica en la sección \ref{subsubsec:generator}. Este módulo a su vez llama a la segunda capa, que se corresponde con un \textit{binding} o adaptación de la API en C de Clingo para el lenguaje de programación C\#. Este binding usa como referencia final la API en Python de Clingo\footnote{https://potassco.org/clingo/python-api/5.4}, la cual está dividida en módulos. Es por eso que nos hemos basado en una arquitectura de repositorios, en donde hay una fachada que llama a cada una los distintos componentes, que contienen como contexto la referencia a la biblioteca de Clingo, y los cuales a su vez llaman a otro componente que se encarga de hacer la llamada a la API en C de Clingo. \\
 
 \begin{figure}[!h]
 	\centering
-	\includegraphics[width=\textwidth]{images/arquitectura.pdf}
-	\caption{Arquitectura del sistema.}
-	\label{fig:arquitectura}
+	\includegraphics[width=\textwidth]{images/arquitectura-mod}
+	\caption{Arquitectura del mod de \cities}
+	\label{fig:arquitectura-mod}
 \end{figure}
 
-Cabe destacar que ClingoSharp se ejecuta en paralelo a IndustryLP, pudiendo este último enviar mensajes a ClingoSharp sin causar que la interfaz se congele, ademas de servir como recolector de errores que se puedan originar en nuestro programa lógico. Además, debido a que ClingoSharp funciona como wrapper de la API C de \textit{Clingo}, prevenimos la propagación de errores en el caso de que cambiase la API C de \textit{Clingo}, teniendo que cambiar solamente el componente ClingoSharp.NativeWrapper, tal y como se muestra en la Figura \ref{fig:clingosharp}. \\
+En la segunda parte analizaremos la arquitectura del programa lógico. Como ya comentamos en la sección \ref{subsec:asp}, para resolver un programa lógico necesitamos transformarlo a su equivalente con variables libres mediante un grounder, y obtener los modelos estables mediante un solver. Debido a que es un proceso de transformación se ha ideado el usar una arquitectura en \textit{pipeline}, en donde la salida de cada proceso es la entrada del siguiente. Tal y como se puede ver en la figura \ref{fig:arquitectura-asp}, se ha divido en una etapa de definición de constantes del sistema lógico, una etapa de definición del los tipos de parcelas (obteniendo previamente la información de los modelos existentes en \cities), una etapa de preferencias o restricciones del tipo o posición de las parcelas, una etapa de obtención de los modelos estables, y una última etapa de traducción de cada atomo del modelo estable a un modelo que pueda comprender \cities. Cada una de las etapas se explicarán en la sección \ref{subsubsec:generator}.
 
 \begin{figure}[!h]
 	\centering
-	\includegraphics[width=\textwidth]{images/clingosharp.pdf}
-	\caption{Arquitectura de ClingoSharp.}
-	\label{fig:clingosharp}
-\end{figure}\textbf{}
+	\includegraphics[width=\textwidth]{images/arquitectura-asp}
+	\caption{Arquitectura del programa lógico}
+	\label{fig:arquitectura-asp}
+\end{figure}
 
 \subsection{Casos de uso}
 \label{subsec:cases}
@@ -144,17 +148,44 @@ TODO
 \subsection{Diseño del programa lógico}
 \label{subsubsec:generator}
 
-Retornando a lo comentado en la Sección \ref{subsec:arquitectura}, una de las piezas fundamentales de este proyecto es la definición de un generador de póligonos industriales en formato declarativo. Este módulo está pensado mediante el paradigma de programación lógica que usa \textit{Answer Set Programming}, tal y como se expone en la Sección \ref{subsec:asp}. Con esto el objetivo de este generador es intentar dar un modelo declarativo basado en reglas que corresponda en mayor o menor medida con la definición de un polígono industrial. \\
+Retornando a lo comentado en la Sección \ref{subsec:arquitectura}, una de las piezas fundamentales de este proyecto es la definición de un generador de polígonos industriales en formato declarativo. Para ello usamos el paradigma de programación lógica, que usa la tecnología Answer Set Programming, tal y como se expone en la Sección \ref{subsec:asp}. Con esto, el objetivo de este generador es intentar dar un modelo declarativo basado en reglas que corresponda en mayor o menor medida con la definición de un polígono industrial. A continuación explicamos el diseño de cada una de las etapas que consta el sistema de generación.
 
-\subsubsection{Generación de edificios}
+\subsubsection{Constantes del sistema lógico}
+
+\subsubsection{Definición de los tipos de parcela}
 
 \begin{lstlisting}[label=lst:def]
 	asp code
 \end{lstlisting}
 
-TODO
+\subsubsection{Preferencias/Restricciones de parcelas}
+
+\subsubsection{Obtención de los modelos estables}
+
+\subsubsection{Traducción del modelo estable a un modelo 3D}
 
 \subsection{Implementación}
 \label{subsec:implementacion}
 
-TODO
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=\textwidth]{images/actions}
+	\caption{Acciones de la interfaz}
+	\label{fig:actions}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=\textwidth]{images/distribuciones}
+	\caption{Definición de las distribuciones}
+	\label{fig:distributions}
+\end{figure}
+
+Cabe destacar que cada una de las capas se ejecuta en paralelo, pudiendo este último enviar mensajes a ClingoSharp sin causar que la interfaz se congele, ademas de servir como recolector de errores que se puedan originar en nuestro programa lógico. Además, debido a que ClingoSharp funciona como wrapper de la API C de \textit{Clingo}, prevenimos la propagación de errores en el caso de que cambiase la API C de \textit{Clingo}, teniendo que cambiar solamente el componente ClingoSharp.NativeWrapper, tal y como se muestra en la Figura \ref{fig:clingosharp}. \\
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=\textwidth]{images/clingosharp.pdf}
+	\caption{Arquitectura de ClingoSharp}
+	\label{fig:clingosharp}
+\end{figure}
