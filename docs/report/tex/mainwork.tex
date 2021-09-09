@@ -143,11 +143,9 @@ Considerando las tareas descritas anteriormente, en la Tabla \ref{table:dedicaci
 
 \subsubsection{Coste y recursos}
 
-Para calcular el coste de los recursos humanos que ha supuesto este proyecto, aparte de las 363 horas totales se ha añadido un 10\% a mayores que incluye las reuniones de seguimiento por parte del director del proyecto. 
+Para calcular el coste de los recursos humanos que ha supuesto este proyecto, aparte de las 363 horas totales se ha añadido un 10\% a mayores que incluye las reuniones de seguimiento por parte del director del proyecto.\\ 
 
-\section{Análisis del software}
-
-Una vez definido el sistema y planificada su construcción, se ha realizado un análisis en donde se identifican los requisitos que debe cumplir el software una vez terminado el proyecto. Eso suma 37 horas al proyecto, dando un total de 400 horas total. Teniendo esto en cuenta, y siguiendo la Guía Salarial del Sector TI en Galicia \cite{guia_galicia}, se han estimado los costes que se pueden ver en la Tabla \ref{table:costehumano}.
+Eso suma 37 horas al proyecto, dando un total de 400 horas total. Teniendo esto en cuenta, y siguiendo la Guía Salarial del Sector TI en Galicia \cite{guia_galicia}, se han estimado los costes que se pueden ver en la Tabla \ref{table:costehumano}.
 
 \begin{table}[!h]
 	\centering
@@ -185,6 +183,10 @@ Una vez definido el sistema y planificada su construcción, se ha realizado un a
 Por otro lado, en la \ref{table:costematerial} se recoge la lista de recursos materiales y lógicos necesarios para el desarrollo de este proyecto. Para el caso de los recursos \textit{hardware} se ha tenido en cuenta el tiempo de uso para este proyecto con respecto a su vida útil, mientras para los recursos \textit{software}, se ha preferido por usar herramientas y bibliotecas de uso libre y gratuitas, de ahí que el coste no esté contado para el resultado final. \\
 
 Con todo esto se puede concluir que el coste total del proyecto asciende hasta \EUR{4349,66} en total.
+
+\section{Análisis del software}
+
+Una vez definido el sistema y planificada su construcción, se ha realizado un análisis en donde se identifican los requisitos que debe cumplir el software una vez terminado el proyecto.
 
 \subsection{Requisitos funcionales}
 \label{subsec:funcrequirements}
@@ -239,7 +241,7 @@ En la segunda parte analizaremos la arquitectura del programa lógico. Como ya c
 \subsection{Casos de uso}
 \label{subsec:cases}
 
-El sistema tiene en cuenta que se usará en todo momento por un único usuario, el cual llevará a cabo todas las funcionalidades propuestas en la Sección \ref{subsec:funcrequirements} a través de una interfaz gráfica. Estos requisistos funcionales se transforman, por tanto, en los casos de uso del sistema que se proponen en la Tabla \ref{fig:casos-uso1}
+El sistema tiene en cuenta que se usará en todo momento por un único usuario, el cual llevará a cabo todas las funcionalidades propuestas en la Sección \ref{subsec:funcrequirements} a través de una interfaz gráfica. Estos requisistos funcionales se transforman, por tanto, en los casos de uso del sistema que se proponen en la Tabla \ref{table:casos-uso1}
 
 \begin{figure}[!h]
 	\centering
@@ -301,6 +303,8 @@ Con las constantes ya definidas, se ha definido una regla para la generación de
 
 Con esto le decimos a Answer Set Programing que puede elegir cualquier combinación para cada parcela, incluyendo no generar una parcela de un tipo dato. Esto puede generar soluciones donde no existe parcelas, o donde para una parcela existen varias soluciones. Para restringir las soluciones a modelos estables en donde exista un solo átomo \texttt{parcel(X, Y, B)}, vamos a añadir un esquema de comprobación-restricción. Este esquema se basa en definir un átomo auxiliar que marque una comprobación concreta, y luego una restricción (una regla sin cabeza) para este átomo.
 
+\newpage
+
 \begin{lstlisting}[caption={Código para la generación de parcelas},captionpos=b,label=lst:parcel_def]
 % Generacion %
 0 { parcel(X, Y, B) : str_parcel(B) } 1 :- row(X), column(Y).
@@ -344,7 +348,9 @@ Uno de los resultados lógicos que podemos tener aquí es que el usuario ponga t
 	\label{fig:clingo-unsat}
 \end{figure}
 
-Otras formas de delimitar la generación es mediante las distancias y la topología de la generación. Esto nos permite hacer reglas más complejas en donde indiquemos restricciones más avanzadas, como que no queremos que dos tipos de edificios estén cerca, por ejemplo en el caso de que sea industria contaminante con industria verde. Para ello podemos usar algún algoritmo, como distancia de manhattan (tal y como se muestra en el Listado \ref{lts:manhattan_def}) o k-vecino más cercano. \\
+Otras formas de delimitar la generación es mediante las distancias y la topología de la generación. Esto nos permite hacer reglas más complejas en donde indiquemos restricciones más avanzadas, como que no queremos que dos tipos de edificios estén cerca, por ejemplo en el caso de que sea industria contaminante con industria verde. Para ello podemos usar algún algoritmo, como distancia de manhattan (tal y como se muestra en el Listado \ref{lst:manhattan_def}) o k-vecino más cercano. \\
+
+\newpage
 
 \begin{lstlisting}[caption={Cálculo de la distancia del taxista en Aswer Set Programing},captionpos=b,label=lst:manhattan_def]
 distance(S1, S2, |X1-X2|+|Y1-Y2|) :- parcel(X1, Y1, S1), parcel(X2, Y2, S2), X1 != X2, Y1 != Y2.
@@ -365,9 +371,9 @@ neighbour("Forestry 3x3", "Forestry 3x2").
 \subsection{Implementación}
 \label{subsec:implementacion}
 
-Una vez analizado el proyecto en cuestión, y explicado como funciona el programa lógico, pasaremos a detallar el diseño de los componentes principales de los sistemas creados para usar en \cities.
+Una vez analizado el proyecto en cuestión, y explicado como funciona el programa lógico, pasaremos a detallar el diseño de los componentes principales de los sistemas creados para usar en \cities. \\
 
-Primeramente empezaremos explicando como funcionan las diferentes acciones en \industrylp. Pensando en su reusabilidad, y que en un futuro el número de acciones pueda crecer, se ha pensado en implementarlas usando un patrón estrategia. Tal y como se muestra en la Figura \ref{fig:actions}, cada acción deriva de la clase \texttt{ToolAction}.
+Primeramente empezaremos explicando como funcionan las diferentes acciones en \industrylp. Pensando en su reusabilidad, y que en un futuro el número de acciones pueda crecer, se ha pensado en implementarlas usando un patrón estrategia. Tal y como se muestra en la Figura \ref{fig:actions}, cada acción deriva de la clase \texttt{ToolAction}.\\
 
 \begin{figure}[!h]
 	\centering
@@ -387,6 +393,8 @@ Esta clase abstracta define una serie de métodos comunes que corresponden al ci
 
 Es por eso que, dependiendo del estado en el que se encuentre el juego y la interfaz, la clase \texttt{IndustryTool} delegará en cada una de las acciones. Además, \texttt{IndustryTool} implementa la interfaz \texttt{IMainTool}, que define una serie de métodos que pueden usan las acciones para cambiar de estado o ejecutar otra acción, evitando así el acoplamiento entre \texttt{IndustryTool} y cada una de las acciones concretas. \\
 
+\newpage
+
 Con respecto a la generación de distribuciones, pensando también en la reusabilidad y en la implementación de nuevas topologías de parques industriales en un futuro, también se optó por usar un patrón de diseño, en este caso de \textit{Template Method}. El diseño de la generación de distribuciones se muestra en la Figura \ref{fig:distributions}.
 
 \begin{figure}[!h]
@@ -398,7 +406,7 @@ Con respecto a la generación de distribuciones, pensando también en la reusabi
 
 Aquí, existen dos clases abstractas: \texttt{DistributionThread}, que define los métodos para la ejecución del algoritmo de generación de la distribución, el cual a diferencia del problema principal, este está implementado de forma imperativa; y \texttt{DistributionInfo}, que contiene la información resultante de la generación del algoritmo, y que define métodos de navegación de parcelas según la distribución. \\
 
-En el caso del sistema que se encarga de conectar y ejecutar la biblioteca de Clingo, se ha optado por una arquitectura de tipo repositorio, tal y como se muestra en la Figura \ref{fig:clingosharp-repository}. Cada módulo de Clingo conecta con un módulo del componente \textit{ClingoSharp.NativeWrapper}, que se encargar de enlazar dinámicamente las funciones de la API en C con métodos internos de cada módulo. Estos módulos a su vez exponen funciones con tipos de datos manejados por C\# mediante interfaces, que derivan de una interfaz general llamada \texttt{IClingoModule}.
+En el caso del sistema que se encarga de conectar y ejecutar la biblioteca de Clingo, se ha optado por una arquitectura de tipo repositorio, tal y como se muestra en la Figura \ref{fig:clingosharp-repository}. Cada módulo de Clingo conecta con un módulo del componente \textit{ClingoSharp.NativeWrapper}, que se encargar de enlazar dinámicamente las funciones de la API en C con métodos internos de cada módulo. Estos módulos a su vez exponen funciones con tipos de datos manejados por C\# mediante interfaces, que derivan de una interfaz general llamada \texttt{IClingoModule}. \\
 
 \begin{figure}[!h]
 	\centering
@@ -407,9 +415,9 @@ En el caso del sistema que se encarga de conectar y ejecutar la biblioteca de Cl
 	\label{fig:clingosharp-repository}
 \end{figure}
 
-En el caso del componente \texttt{ClingoSharp.CoreService}, este implementa la clase \texttt{Repository}, que contiene una composición de cada uno de los módulos. Esto es debido a que antes se pasa a memoria la biblioteca en Clingo, haciendo uso de los servicios disponibles en cada sistema operativo y de .NET Framework. Una vez realizada la carga en memoria, se procede a cargar dinamicamente cada uno de los módulos marcados con la interfaz \texttt{IClingoModule} del componente \textit{ClingoSharp.NativeWrapper}, y que finalmente son expuestos por nuestro repositorio.
+En el caso del componente \texttt{ClingoSharp.CoreService}, este implementa la clase \texttt{Repository}, que contiene una composición de cada uno de los módulos. Esto es debido a que antes se pasa a memoria la biblioteca en Clingo, haciendo uso de los servicios disponibles en cada sistema operativo y de .NET Framework. Una vez realizada la carga en memoria, se procede a cargar dinamicamente cada uno de los módulos marcados con la interfaz \texttt{IClingoModule} del componente \textit{ClingoSharp.NativeWrapper}, y que finalmente son expuestos por nuestro repositorio. \\
 
-En la Figura \ref{fig:clingosharp} se muestran las dependencias de cada uno de los distintos módulos. A pesar de lo complicado que parece, la arquitectura en repositorio nos permite abstraer la parte de enlazado de nuestro programa con la biblioteca nativa de Clingo, del enlazado de cada uno de los diferentes punto de control de la biblioteca, además de exponer una API limpia de Clingo en C\#. Otro punto a favor de esta arquitectura es que también actúa como wrapper, permitiendo cambiar entre distintas versiones de la biblioteca nativa de Clingo sin cambiar nuestro código, así como de implementar otra biblioteca de Aswer Set Programming en C\#.
+En la Figura \ref{fig:clingosharp} se muestran las dependencias de cada uno de los distintos módulos. A pesar de lo complicado que parece, la arquitectura en repositorio nos permite abstraer la parte de enlazado de nuestro programa con la biblioteca nativa de Clingo, del enlazado de cada uno de los diferentes punto de control de la biblioteca, además de exponer una API limpia de Clingo en C\#. Otro punto a favor de esta arquitectura es que también actúa como wrapper, permitiendo cambiar entre distintas versiones de la biblioteca nativa de Clingo sin cambiar nuestro código, así como de implementar otra biblioteca de Aswer Set Programming en C\#. \\
 
 \begin{figure}[!h]
 	\centering
