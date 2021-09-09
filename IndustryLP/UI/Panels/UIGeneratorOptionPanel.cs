@@ -35,6 +35,8 @@ namespace IndustryLP.UI.Panels
 
         public MouseEventHandler OnClickPreviousSolution { get; set; }
 
+        public MouseEventHandler OnClickBuildSolution { get; set; }
+
         #endregion
 
         #region Unity Behaviour
@@ -62,6 +64,7 @@ namespace IndustryLP.UI.Panels
             m_downButton.eventClicked += OnDownClick;
             m_buildSolutionButton = SetupBuildSolutionButton();
             m_buildSolutionButton.Disable();
+            m_buildSolutionButton.eventClicked += OnBuildClick;
         }
 
         public override void OnDestroy()
@@ -218,6 +221,11 @@ namespace IndustryLP.UI.Panels
 
                 OnClickNextSolution(component, eventParam);
             }
+        }
+
+        private void OnBuildClick(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            OnClickBuildSolution(component, eventParam);
         }
 
         #endregion

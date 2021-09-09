@@ -1,8 +1,10 @@
-﻿using ColossalFramework.Globalization;
+﻿using ColossalFramework;
+using ColossalFramework.Globalization;
 using ColossalFramework.Math;
 using ColossalFramework.UI;
 using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
+using IndustryLP.DomainDefinition;
 using IndustryLP.Entities;
 using IndustryLP.UI.Panels;
 using IndustryLP.UI.Panels.Items;
@@ -616,6 +618,66 @@ namespace IndustryLP
         public void CancelGeneration()
         {
             m_optionPanel.selectedIndex = 1;
+        }
+
+        public void BuildGeneration(Region solution)
+        {
+            var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
+            var nodes = new List<NodeWrapper>();
+
+            foreach (var road in Distribution.Road)
+            {
+                var startNode = Utils.MathUtils.FindNeighbour(nodes, road.a, 0.1);
+                if (startNode == null)
+                {
+                    startNode = NetUtils.CreateNode(road.a, netPrefab);
+                    nodes.Add(startNode);
+                }
+
+                var endNode = Utils.MathUtils.FindNeighbour(nodes, road.d, 0.1);
+                if (endNode == null)
+                {
+                    endNode = NetUtils.CreateNode(road.d, netPrefab);
+                    nodes.Add(endNode);
+                }
+
+                NetUtils.CreateSegment(startNode, endNode, road, netPrefab);
+            }
+
+            LoggerUtils.Log(solution.Rows, solution.Columns);
+
+            for (var row = 0; row < solution.Rows; row++)
+            {
+                for (var column = 0; column < solution.Columns; column++)
+                {
+                    var building = solution.Parcels[row, column];
+                    if (string.IsNullOrEmpty(building?.Trim()))
+                    {
+                        var prefab = PrefabCollection<BuildingInfo>.FindLoaded(building);
+                        if (prefab == null)
+                        {
+                            LoggerUtils.Warning("Prefab not found", building);
+                        }
+                        else
+                        {
+                            var gridId = Distribution.GetId(row, column);
+                            var parcel = Distribution.FindById(gridId);
+                            if (parcel != null)
+                            {
+                                // Gets default randomizer
+                                var randomizer = SimulationUtils.GetRandomizer();
+
+                                if (!Singleton<BuildingManager>.instance.CreateBuilding(out ushort buildingId, ref randomizer, prefab, parcel.Position, parcel.Rotation, prefab.GetLength(), SimulationUtils.GetNewBuildIndex()))
+                                {
+                                    throw new Exception($"Cannot create building {building}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            enabled = false;
         }
 
         #endregion

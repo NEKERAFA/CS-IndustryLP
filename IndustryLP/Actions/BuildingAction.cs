@@ -149,6 +149,7 @@ namespace IndustryLP.Actions
             panel.relativePosition = new Vector3(791, 847); 
             panel.OnClickPreviousSolution += OnChangeSolution;
             panel.OnClickNextSolution += OnChangeSolution;
+            panel.OnClickBuildSolution += OnBuildSolution;
             return panel;
         }
 
@@ -189,6 +190,12 @@ namespace IndustryLP.Actions
                     LoggerUtils.Log($"[{i}, {j}] = {buildingName}");
                 }
             }
+        }
+
+        private void OnBuildSolution(UIComponent component, UIMouseEventParameter eventParameter)
+        {
+            var solution = m_generator.GetSolution(m_panel.Solution - 1);
+            m_mainTool.BuildGeneration(solution);
         }
 
         private List<BuildingAtom> ConvertTo(List<Parcel> parcels)

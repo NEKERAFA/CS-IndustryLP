@@ -1,5 +1,6 @@
 ﻿using ColossalFramework.Math;
 using IndustryLP.DistributionDefinition;
+using IndustryLP.DomainDefinition;
 using IndustryLP.Entities;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,6 +67,14 @@ namespace IndustryLP
         /// <param name="building"></param>
         void AddRestriction(ushort gridId, BuildingInfo building);
 
+        /// <summary>
+        /// Build a solution and closes the tool
+        /// </summary>
+        void BuildGeneration(Region solution);
+
+        /// <summary>
+        /// Cancel the current solution
+        /// </summary>
         void CancelGeneration();
     }
 }
