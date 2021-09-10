@@ -13,9 +13,9 @@ namespace IndustryLP.Utils
         /// Render a roads
         /// </summary>
         /// <param name="roads"></param>
-        public static void RenderSegments(RenderManager.CameraInfo cameraInfo, Color segmentColor, List<Bezier3> roads)
+        public static void RenderSegments(RenderManager.CameraInfo cameraInfo, Color segmentColor, List<Bezier3> roads, string roadName = "Basic Road")
         {
-            var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
+            var netPrefab = PrefabCollection<NetInfo>.FindLoaded(roadName);
 
             foreach (var road in roads)
             {

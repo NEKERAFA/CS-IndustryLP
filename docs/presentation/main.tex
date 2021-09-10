@@ -1,0 +1,269 @@
+\documentclass[10pt]{beamer}
+
+% ---- Packages ----
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{epsfig}
+\usepackage{graphics}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{noto}
+\usepackage{eurosym}
+\usepackage{epsfig}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+% ---- Configuration ----
+
+\usetheme{Madrid}
+\useinnertheme{circles}
+\usenavigationsymbolstemplate{}
+\setbeamertemplate{blocks}[rounded]
+
+\definecolor{UDCpink}{RGB}{214,30,140}
+\definecolor{UDCgray}{RGB}{100,100,100}
+
+\usecolortheme[named=UDCpink]{structure}
+
+\makeatletter
+\setbeamertemplate{title page}
+{
+	\vbox{}
+	\vspace{0.25em}
+	\begin{centering}
+		{\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}
+		\vspace{1em}
+		\begin{beamercolorbox}[sep=8pt,center,rounded=true]{title}
+			\usebeamerfont{title}\inserttitle\par%
+			\ifx\insertsubtitle\@empty%
+			\else%
+			\vspace{0.25em}
+			{\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+			\fi%     
+		\end{beamercolorbox}%
+		\vfill
+		\begin{beamercolorbox}[sep=8pt,center]{author}
+			\usebeamerfont{author}\insertauthor
+		\end{beamercolorbox}
+		\begin{beamercolorbox}[sep=8pt,center]{institute}
+			\usebeamerfont{institute}\insertinstitute
+		\end{beamercolorbox}
+		\begin{beamercolorbox}[sep=8pt,right]{date}
+			\itshape\usebeamerfont{date}\insertdate
+		\end{beamercolorbox}
+	\end{centering}
+	\vspace{0.25em}
+}
+\makeatother
+
+\lstdefinestyle{myLuastyle}
+{
+	language         = {[5.2]Lua},
+	commentstyle=\color{green},
+	keywordstyle=\color{blue}, 
+	basicstyle = \ttfamily \color{black} \footnotesize
+}
+
+\lstset{style=myLuastyle}
+
+% ---- Document ----
+
+\title[Generación mediante ASP]{Generación de Escenarios de un Videojuego 2D mediante Programación Lógica}
+\author[Rafael Alcalde Azpiazu]{\large Rafael Alcalde Azpiazu}
+\institute[UDC] % (optional)
+{
+	\normalsize
+	Grado en Ingeniería Informática \\
+	Mención en Computación \\
+	\vspace{1em}
+	Proyecto clásico de Ingeniería \\
+	Facultad de Informática \\
+	\vspace{1em}
+	Director: Pedro Cabalar \\
+}
+\date[]{A Coruña, \today}
+\titlegraphic{\includegraphics[height=2em]{images/logo.png}}
+
+\begin{document}
+	
+	\begin{frame}
+		\titlepage
+	\end{frame}
+
+	\section{Motivación}
+	\input{tex/motivation}
+	\input{tex/context}
+	
+	\begin{frame}
+	\frametitle{Índice}
+		\tableofcontents
+	\end{frame}
+	
+	\AtBeginSection[]
+	{
+	\begin{frame}
+	\frametitle{Índice}
+	\tableofcontents[currentsection]
+	\end{frame}
+	}
+	
+	\section{Answer Set Programming}
+	\input{tex/asp}
+	
+	\section{Demostración}
+	
+	\section{Trabajo desarrollado}
+	\input{tex/ingenieriasw}
+
+	\section{Evaluación}
+	\input{tex/evaluation}
+
+	\section{Conclusiones}
+	\input{tex/conclusions}
+
+	\begin{frame}
+		\vbox{}
+		\vspace{0.25em}
+		\begin{centering}
+			{\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}
+			\vspace{0.5em}
+			\begin{beamercolorbox}[sep=8pt,center,rounded=true]{title}
+				\usebeamerfont{title}\inserttitle\par%
+				\ifx\insertsubtitle\@empty%
+				\else%
+				\vspace{0.25em}
+				{\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+				\fi%     
+			\end{beamercolorbox}%
+			\vfill
+			\begin{beamercolorbox}[sep=8pt,center]{author}
+				\usebeamerfont{author}\insertauthor
+			\end{beamercolorbox}
+			\vspace{0.5em}
+			{\Large\textcolor{UDCpink}{¡Gracias por su atención!}\par}
+			\vspace{0.5em}
+			\begin{beamercolorbox}[sep=8pt,center]{institute}
+				\usebeamerfont{institute}\insertinstitute
+			\end{beamercolorbox}
+			\begin{beamercolorbox}[sep=8pt,right]{date}
+				\itshape\usebeamerfont{date}\insertdate
+			\end{beamercolorbox}
+		\end{centering}
+		\vspace{0.25em}
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Ejemplo de la biblioteca de Clingo}
+	
+	\begin{block}{Añadir restricciones al programa}
+		\ttfamily \footnotesize
+		
+		\#script(lua)
+		
+		\textbf{function} main(prog)
+		
+		\hspace{2em} \textit{\textendash\textendash Genero las regiones}
+		
+		\hspace{2em} \textbf{for} i = 0, c\_regions-1 \textbf{do}
+		
+		\hspace{4em} \textit{\textendash\textendash Hace grounding del programa lógico}
+		
+		\hspace{4em} prog:ground(\{\{''base'', \{\}\}, \{''generate'', \{i\}\}\})
+		
+		\hspace{4em} \textit{\textendash\textendash Obtengo un manejador de la solución}
+		
+		\hspace{4em} handle = prog:solve({yield=true})
+		
+		\vspace{1em}
+		
+		\hspace{4em} \textbf{local} restrictions = '' ''
+		
+		\hspace{4em} \textit{\textendash\textendash Recorre los modelos de la solución}
+		
+		\hspace{4em} \textbf{for} model \textbf{in} handle:iter() \textbf{do}
+		
+		\hspace{6em} \textit{\textendash\textendash Añado las restricciones}
+		
+		\hspace{6em} \textbf{if} \#restrictions \textasciitilde{}= 0 \textbf{then}
+		
+		\hspace{8em} prog1:load(''resources/restrictions.lp'')
+		
+		\hspace{6em} \textbf{end}
+		
+		\hspace{6em} ...
+		
+	\end{block}
+	\end{frame}
+	
+	\begin{frame}
+	\frametitle{Ejemplo de la biblioteca de Clingo}
+	
+	\begin{block}{Añadir restricciones al programa}
+	\ttfamily \footnotesize
+	
+	\hspace{6em} \textbf{for} m \textbf{in} handle:iter() \textbf{do}
+	
+	\hspace{8em} \textbf{for} row\_str, col\_str, contain \textbf{in} string.gmatch(tostring(model), 	''cell\%(p\%((\%d+),(\%d+)\%),(\%l+)\%)'') \textbf{do}
+	
+	\hspace{10em} \textbf{if} contain == "l"  \textbf{then}
+	
+	\hspace{12em} lands = lands .. '' land(p(''..row\_str..'',''..col\_str..'')).''
+	
+	\hspace{12em} restrictions = restrictions .. check\_restrictions(row, col, i)
+	
+	\hspace{10em} \textbf{end}
+	
+	\hspace{8em} \textbf{end}
+	
+	\vspace{1em}
+	
+	\hspace{8em} df = io.open(''resources/restrictions.lp'', ''w+'')
+	
+	\hspace{8em} df:write(restrictions)
+	
+	\hspace{8em} df:flush()
+	
+	\hspace{8em} df:close()
+	
+	\hspace{6em} \textbf{end}
+	
+	\hspace{4em} \textbf{end}
+	
+	\hspace{2em} \textbf{end}
+	
+	\textbf{end}
+	
+	\#end.
+	\end{block}
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Ejecución del módulo Clingo}
+	
+	\centering
+	\includegraphics[width=0.6\textwidth]{images/diagrama-secuencia.pdf}
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Ejemplo de generación 20x20}
+	
+	\centering
+	\includegraphics[width=0.6\textwidth]{images/ejemplo-20-20.png}
+	
+	\end{frame}
+
+	\begin{frame}
+	\frametitle{Ejemplo de generación 30x30}
+	
+	\centering
+	\includegraphics[width=0.6\textwidth]{images/ejemplo-30-30.png}
+	
+	\end{frame}
+
+\end{document}

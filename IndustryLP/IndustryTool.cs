@@ -1,8 +1,10 @@
-﻿using ColossalFramework.Globalization;
+﻿using ColossalFramework;
+using ColossalFramework.Globalization;
 using ColossalFramework.Math;
 using ColossalFramework.UI;
 using IndustryLP.Actions;
 using IndustryLP.DistributionDefinition;
+using IndustryLP.DomainDefinition;
 using IndustryLP.Entities;
 using IndustryLP.UI.Panels;
 using IndustryLP.UI.Panels.Items;
@@ -66,9 +68,6 @@ namespace IndustryLP
         private ToolAction m_action = null;
 
         private Vector3? m_mouseTerrainPosition = null;
-        private bool m_mouseHoverToolbar = false;
-        private bool m_mouseHoverOptionPanel = false;
-        private bool m_mouseHoverScrollablePanel = false;
         private float m_defaultXPos;
 
 #if DEBUG
@@ -263,6 +262,19 @@ namespace IndustryLP
                 m_action = m_zoningAction;
                 m_action.OnEnterController();
             }
+
+#if DEBUG
+            if (lblParcels.Any())
+            {
+                foreach (var lbl in lblParcels.Values)
+                {
+                    lbl.Hide();
+                    DestroyImmediate(lbl);
+                }
+
+                lblParcels.Clear();
+            }
+#endif
         }
 
         /// <summary>
@@ -298,7 +310,7 @@ namespace IndustryLP
             m_mouseTerrainPosition = TerrainUtils.GetTerrainMousePosition();
 
             // Checks if mouse is over UI
-            if (!m_mouseHoverOptionPanel && !m_mouseHoverScrollablePanel && !m_mouseHoverToolbar)
+            if (!IsPointerOverUIView())
             {
                 m_action?.OnUpdate(m_mouseTerrainPosition.Value);
 
@@ -354,30 +366,6 @@ namespace IndustryLP
 
             if (m_mouseTerrainPosition.HasValue)
                 m_action?.OnRenderGeometry(cameraInfo, m_mouseTerrainPosition.Value);
-
-            if (Selection.HasValue && m_action != m_buildingAction)
-            {
-                var midPoint = Vector3.Lerp(Selection.Value.a, Selection.Value.c, 0.5f);
-                Matrix4x4 matrixTRS = Matrix4x4.TRS(midPoint, Quaternion.AngleAxis(0, Vector3.down), Vector3.one);
-
-                foreach (var preference in Preferences)
-                {
-                    Color buildingColor = BuildingUtils.GetColor(0, preference.Building);
-                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, preference.Position, preference.Rotation, preference.Building, buildingColor);
-#if DEBUG
-                    DrawForwardDirection(preference);
-#endif
-                }
-
-                foreach (var restriction in Restrictions)
-                {
-                    Color buildingColor = BuildingUtils.GetColor(0, restriction.Building);
-                    BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, buildingColor);
-#if DEBUG
-                    DrawForwardDirection(restriction);
-#endif
-                }
-            }
         }
 
         /// <summary>
@@ -472,7 +460,7 @@ namespace IndustryLP
 #if DEBUG
                 foreach (var lbl in lblParcels.Values)
                 {
-                    DestroyImmediate(lbl.gameObject);
+                    DestroyImmediate(lbl);
                 }
 
                 lblParcels.Clear();
@@ -495,26 +483,41 @@ namespace IndustryLP
             Selection = selection;
             SelectionAngle = angle;
             m_optionPanel.EnableTab(1);
-            m_optionPanel.DisableTab(2);
             m_categoryPanel.EnableTab(0);
+            m_categoryPanel.selectedIndex = 0;
             m_scrollablePanel.Enable();
 
-            if (Distribution?.Type == DistributionType.GRID)
+            if (Distribution != null)
             {
-                var distributionThread = new GridDistributionThread();
-                Distribution = distributionThread.Generate(Selection.Value);
-                m_categoryPanel.EnableTab(1);
-                m_categoryPanel.EnableTab(2);
+                m_optionPanel.EnableTab(2);
+                if (Distribution?.Type == DistributionType.GRID)
+                {
+                    var distributionThread = new GridDistributionThread();
+                    Distribution = distributionThread.Generate(Selection.Value);
+                    m_categoryPanel.EnableTab(1);
+                    m_categoryPanel.EnableTab(2);
 
 #if DEBUG
-                foreach (var parcel in Distribution.Parcels)
-                {
-                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-                    lbl.Hide();
-                    lbl.SetText(Convert.ToString((int)parcel.GridId));
-                    lblParcels[parcel] = lbl;
-                }
+                    foreach (var lbl in lblParcels.Values)
+                    {
+                        DestroyImmediate(lbl);
+                    }
+
+                    lblParcels.Clear();
+
+                    foreach (var parcel in Distribution.Parcels)
+                    {
+                        var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+                        lbl.Hide();
+                        lbl.SetText(Convert.ToString((int)parcel.GridId));
+                        lblParcels[parcel] = lbl;
+                    }
 #endif
+                 }
+            }
+            else
+            {
+                m_optionPanel.DisableTab(2);
             }
 
             Preferences.Clear();
@@ -545,6 +548,7 @@ namespace IndustryLP
                 {
                     foreach (var lbl in lblParcels.Values)
                     {
+                        lbl.Hide();
                         DestroyImmediate(lbl.gameObject);
                     }
                 }
@@ -596,8 +600,21 @@ namespace IndustryLP
                 Rotation = parcel.Rotation
             });
 
-            m_action.OnLeftController();
-            m_action = null;
+            OnChangeSelectedIndex(null, m_optionPanel.selectedIndex);
+        }
+
+        public void AddRestriction(ushort gridId, BuildingInfo building)
+        {
+            var parcel = Distribution.FindById(gridId);
+            Restrictions.Add(new Parcel
+            {
+                GridId = gridId,
+                Building = building,
+                Position = parcel.Position,
+                Rotation = parcel.Rotation
+            });
+
+            OnChangeSelectedIndex(null, m_optionPanel.selectedIndex);
         }
 
         public void RemoveBuilding(Vector3 mousePosition)
@@ -607,6 +624,81 @@ namespace IndustryLP
             {
                 LoggerUtils.Log("Removed", Preferences.Remove(cell));
             }
+        }
+
+        public void CancelGeneration()
+        {
+            m_optionPanel.selectedIndex = 1;
+        }
+
+        public void BuildGeneration(Region solution)
+        {
+            var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
+            var nodes = new List<NodeWrapper>();
+
+            foreach (var road in Distribution.Road)
+            {
+                var startNode = Utils.MathUtils.FindNeighbour(nodes, road.a, 0.1);
+                if (startNode == null)
+                {
+                    startNode = NetUtils.CreateNode(road.a, netPrefab);
+                    nodes.Add(startNode);
+                }
+
+                var endNode = Utils.MathUtils.FindNeighbour(nodes, road.d, 0.1);
+                if (endNode == null)
+                {
+                    endNode = NetUtils.CreateNode(road.d, netPrefab);
+                    nodes.Add(endNode);
+                }
+
+                NetUtils.CreateSegment(startNode, endNode, road, netPrefab);
+            }
+
+            LoggerUtils.Log(solution.Rows, solution.Columns);
+
+            for (var row = 0; row < solution.Rows; row++)
+            {
+                for (var column = 0; column < solution.Columns; column++)
+                {
+                    var building = solution.Parcels[row, column];
+                    if (!string.IsNullOrEmpty(building?.Trim()))
+                    {
+                        var prefab = PrefabCollection<BuildingInfo>.FindLoaded(building);
+                        if (prefab == null)
+                        {
+                            LoggerUtils.Warning("Prefab not found", building);
+                        }
+                        else
+                        {
+                            var gridId = Distribution.GetId(row, column);
+                            var parcel = Distribution.FindById(gridId);
+                            if (parcel == null)
+                            {
+                                LoggerUtils.Warning("Parcel not found", gridId);
+                            }
+                            else
+                            {
+                                var simulationManager = Singleton<SimulationManager>.instance;
+
+                                LoggerUtils.Log("Creating building");
+
+                                var buildingManager = Singleton<BuildingManager>.instance;
+
+                                if (!buildingManager.CreateBuilding(out ushort buildingId, ref simulationManager.m_randomizer, prefab, parcel.Position, parcel.Rotation, 0, simulationManager.m_currentBuildIndex))
+                                {
+                                    throw new Exception($"Cannot create building {building}");
+                                }
+
+                                buildingManager.UpdateBuildingRenderer(buildingId, true);
+                                prefab.m_buildingAI.SetHistorical(buildingId, ref buildingManager.m_buildings.m_buffer[buildingId], true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            
         }
 
         #endregion
@@ -620,9 +712,6 @@ namespace IndustryLP
         {
             // Gets the main toolbar
             var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
-
-            mainToolbar.eventMouseEnter += OnMouseEnterToolbar;
-            mainToolbar.eventMouseLeave += OnMouseLeaveToolbar;
 
             // Gets the templates
             var mainButtonGameObject = UITemplateManager.GetAsGameObject("MainToolbarButtonTemplate");
@@ -677,7 +766,7 @@ namespace IndustryLP
             };
             if (!locale.Exists(key))
             {
-                locale.AddLocalizedString(key, "Work in progress...");
+                locale.AddLocalizedString(key, "Welcome to IndustryLP. This mod is a tool to declaratively generate an industrial polygon that is part of my master's dissertation.\nFor usage information, visit the mod page on Steam Workshop or GitHub.\n\nGitHub: https://github.com/NEKERAFA/CS-IndustryLP");
             }
         }
 
@@ -690,8 +779,6 @@ namespace IndustryLP
             m_optionPanel.relativePosition = new Vector2(474 - m_optionPanel.width, 949);
             m_optionPanel.selectedIndex = 0;
             m_optionPanel.eventSelectedIndexChanged += OnChangeSelectedIndex;
-            m_optionPanel.eventMouseEnter += OnMouseEnterOptionPanel;
-            m_optionPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
         }
 
         /// <summary>
@@ -722,8 +809,6 @@ namespace IndustryLP
             m_scrollablePanel = UIDistributionOptionPanel.Create(oldPanel);
             m_scrollablePanel.Disable();
             m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-            m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-            m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
             m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
 
             // Sets the main tabs
@@ -732,8 +817,6 @@ namespace IndustryLP
             m_categoryPanel.selectedIndex = 0;
             m_categoryPanel.Hide();
             m_categoryPanel.eventSelectedIndexChanged += OnChangeTabIndex;
-            m_categoryPanel.eventMouseEnter += OnMouseEnterOptionPanel;
-            m_categoryPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
 
         }
 
@@ -814,66 +897,6 @@ namespace IndustryLP
         }
 
         /// <summary>
-        /// Invoked when the mouse is hover the toolbar
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterToolbar(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverToolbar = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the toolbar
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveToolbar(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverToolbar = false;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse is hover the panel options
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverOptionPanel = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the panel options
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverOptionPanel = false;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse is hover the scrollable panel
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverScrollablePanel = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the scrollable panel
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverScrollablePanel = false;
-        }
-
-        /// <summary>
         /// Invoked when the user clicks on the distributions panel
         /// </summary>
         /// <param name="component"></param>
@@ -918,7 +941,7 @@ namespace IndustryLP
                 m_optionPanel.selectedIndex = -1;
                 m_action?.OnLeftController();
                 var oldAction = m_action;
-                m_action = new AddBuildingAction(prefab as BuildingInfo);
+                m_action = new AddBuildingAction(prefab as BuildingInfo, AddBuildingAction.ActionType.Preference);
                 m_action.OnStart(this);
                 m_action.OnChangeController(oldAction);
                 m_action.OnEnterController();
@@ -937,6 +960,14 @@ namespace IndustryLP
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
                 LoggerUtils.Log($"Clicked on {prefab.name} restriction");
+
+                m_optionPanel.selectedIndex = -1;
+                m_action?.OnLeftController();
+                var oldAction = m_action;
+                m_action = new AddBuildingAction(prefab as BuildingInfo, AddBuildingAction.ActionType.Restriction);
+                m_action.OnStart(this);
+                m_action.OnChangeController(oldAction);
+                m_action.OnEnterController();
             }
         }
 
@@ -1006,22 +1037,16 @@ namespace IndustryLP
                 case 0:
                     m_scrollablePanel = UIDistributionOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
                     break;
                 case 1:
                     m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedPreferenceBuildingPanel;
                     break;
                 case 2:
                     m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedRestrictionBuildingPanel;
                     break;
             }
@@ -1029,40 +1054,17 @@ namespace IndustryLP
             UpdateScrollablePanel();
         }
 
-#if DEBUG
-        private void DrawForwardDirection(Parcel building)
+        private bool IsPointerOverUIView()
         {
-            var start = building.Position + Vector3.up * 10;
-            var dir = new Vector3(0, 0, 40);
-            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
-            var end = rotate * dir + building.Position + Vector3.up * 10;
-            DrawLine(start, end, new Color32(255, 0, 0, 255));
-        }
+            var mainView = UIView.GetAView();
+            var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
 
-        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
-        {
-            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
-            lr.transform.position = start;
-            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
-            lr.hideFlags = HideFlags.HideAndDontSave;
-            lr.startColor = color;
-            lr.startWidth = 2;
-            lr.SetPosition(0, start);
-            lr.endColor = color;
-            lr.endWidth = 2;
-            lr.SetPosition(1, end);
-            Destroy(lr.gameObject, duration);
-        }
+            LoggerUtils.Log(mainView.ScreenPointToGUI(Input.mousePosition).y);
 
-        private void DrawText(Vector2 pos, string msg, Color color, float duration = 1f)
-        {
-            var text = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            text.relativePosition = pos;
-            text.SetText(msg);
-            text.color = color;
-            Destroy(text.gameObject, duration);
+            return (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
+                (m_scrollablePanel != null && m_scrollablePanel.isVisible && m_scrollablePanel.containsMouse) || 
+                (dialogPanel != null && dialogPanel.isVisible && dialogPanel.containsMouse);
         }
-#endif
 
     #endregion
     }

@@ -82,13 +82,13 @@ namespace IndustryLP.Utils
         /// Tries to create a new segment
         /// </summary>
         /// <param name="idStartNode">Id of start node</param>
-        /// <param name="startPosition">Position of start node</param>
+        /// <param name="startDirection">Direction of the first node</param>
         /// <param name="idEndNode">Id of end node</param>
-        /// <param name="endPosition">Position of end node</param>
+        /// <param name="endDirection">Direction of the last node</param>
         /// <param name="netPrefab">A <see cref="NetInfo"/> object</param>
         /// <param name="segmentId">The id of new segment</param>
         /// <returns>True if the segment is created, false otherwise.</returns>
-        public static bool TryCreateSegment(ushort idStartNode, Vector3 startPosition, ushort idEndNode, Vector3 endPosition, NetInfo netPrefab, out ushort segmentId)
+        public static bool TryCreateSegment(ushort idStartNode, Vector3 startDirection, ushort idEndNode, Vector3 endDirection, NetInfo netPrefab, out ushort segmentId)
         {
             // Gets managers
             var netManager = Singleton<NetManager>.instance;
@@ -98,16 +98,34 @@ namespace IndustryLP.Utils
 
             LoggerUtils.Log("Creating net");
 
-            var startDirection = endPosition - startPosition;
-            var endDirection = startPosition - endPosition;
-
-            if (startDirection.magnitude > 80)
-                LoggerUtils.Warning("The length of the segment is longer that the recommend (80 units)");
-
             var buildIndex = SimulationUtils.GetNewBuildIndex();
 
             // Create segment
-            return netManager.CreateSegment(out segmentId, ref randomizer, netPrefab, idStartNode, idEndNode, startDirection.normalized, endDirection.normalized, buildIndex, buildIndex, false);
+            return netManager.CreateSegment(out segmentId, ref randomizer, netPrefab, idStartNode, idEndNode, startDirection, endDirection, buildIndex, buildIndex, false);
+        }
+
+        /// <summary>
+        /// Tries to create a straight new segment
+        /// </summary>
+        /// <param name="idStartNode">Id of start node</param>
+        /// <param name="idEndNode">Id of end node</param>
+        /// <param name="netPrefab">A <see cref="NetInfo"/> object</param>
+        /// <param name="segmentId">The id of new segment</param>
+        /// <returns>True if the segment is created, false otherwise.</returns>
+        public static bool TryCreateSegment(ushort idStartNode, ushort idEndNode, NetInfo netPrefab, out ushort segmentId)
+        {
+            // Gets managers
+            var netManager = Singleton<NetManager>.instance;
+
+            // Gets positions and directions
+            var startPosition = netManager.m_nodes.m_buffer[idStartNode].m_position;
+            var endPosition = netManager.m_nodes.m_buffer[idEndNode].m_position;
+
+            var startDirection = (endPosition - startPosition).normalized;
+            var endDirection = (startPosition - endPosition).normalized;
+
+            // Create segment
+            return TryCreateSegment(idStartNode, startDirection, idEndNode, endDirection, netPrefab, out segmentId);
         }
 
         /// <summary>
@@ -120,7 +138,7 @@ namespace IndustryLP.Utils
         /// <exception cref="NetCreationException">When the node is not be created</exception>
         public static SegmentWrapper CreateSegment(NodeWrapper startNode, NodeWrapper endNode, NetInfo netPrefab)
         {
-            if (!TryCreateSegment(startNode.Id, startNode.Position, endNode.Id, endNode.Position, netPrefab, out ushort segmentId))
+            if (!TryCreateSegment(startNode.Id, endNode.Id, netPrefab, out ushort segmentId))
             {
                 var pos1 = $"({startNode.Position.x},{startNode.Position.y},{startNode.Position.z})";
                 var pos2 = $"({endNode.Position.x},{endNode.Position.y},{endNode.Position.z})";
@@ -173,6 +191,28 @@ namespace IndustryLP.Utils
             var endNode = CreateNode(endPosition, netPrefab);
 
             return CreateSegment(attachedNode, endNode, netPrefab);
+        }
+
+        public static SegmentWrapper CreateSegment(NodeWrapper startNode, NodeWrapper endNode, Bezier3 segment, NetInfo netPrefab)
+        {
+            var startDir = (segment.b - segment.a).normalized;
+            var endDir = (segment.c - segment.d).normalized;
+
+            if (!TryCreateSegment(startNode.Id, startDir, endNode.Id, endDir, netPrefab, out ushort segmentId))
+            {
+                var pos1 = $"({startNode.Position.x},{startNode.Position.y},{startNode.Position.z})";
+                var pos2 = $"({endNode.Position.x},{endNode.Position.y},{endNode.Position.z})";
+
+                throw new NetCreationException($"Cannot create road {netPrefab.name}. Error creating segment ({pos1},{pos2})");
+            }
+
+            return new SegmentWrapper
+            {
+                Id = segmentId,
+                StartPosition = startNode,
+                EndPosition = endNode,
+                Road = netPrefab
+            };
         }
 
         /// <summary>
@@ -350,7 +390,7 @@ namespace IndustryLP.Utils
             bezier.a = startPosition;
             bezier.d = endPosition;
 
-            NetSegment.CalculateMiddlePoints(bezier.a, startDirection.normalized,bezier.d, endDirection.normalized, false, false, out bezier.b, out bezier.c);
+            NetSegment.CalculateMiddlePoints(bezier.a, startDirection.normalized, bezier.d, endDirection.normalized, false, false, out bezier.b, out bezier.c);
 
             // Render road
             RenderManager.instance.OverlayEffect.DrawBezier(cameraInfo, roadColor, bezier, netPrefab.m_halfWidth * 4f / 3f, 100000f, -100000f, -1f, 1280f, false, true);

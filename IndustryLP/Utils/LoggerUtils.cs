@@ -48,13 +48,10 @@ namespace IndustryLP.Utils
 
             if (lastFrame != null) {
                 msg.Append(" - ");
-                msg.Append(lastFrame.GetFileName());
+                msg.Append(lastFrame.GetMethod().DeclaringType.FullName);
                 msg.Append(": ");
                 msg.Append(lastFrame.GetMethod().Name);
                 msg.Append(": ");
-                msg.Append(lastFrame.GetFileLineNumber());
-                msg.Append(":");
-                msg.Append(lastFrame.GetFileColumnNumber());
             }
 
             return msg.ToString();

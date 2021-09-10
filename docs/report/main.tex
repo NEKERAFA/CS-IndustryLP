@@ -1,0 +1,187 @@
+\documentclass[12pt, a4paper, titlepage, twoside, openright, spanish]{report}
+
+% ---- Packages ----
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage[dvips]{graphicx}
+\usepackage{epsfig}
+\usepackage[right]{eurosym}
+\usepackage{geometry}
+\usepackage{graphics}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{svg}
+\usepackage{adjustbox}
+\usepackage{threeparttable}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{pdfpages}
+\usepackage{xspace}
+\usepackage{makecell}
+\usepackage{fancyhdr}
+\usepackage[hidelinks,pdftex,
+		pdfauthor={Rafael Alcalde Azpiazu},
+		pdftitle={An Industrial Estate Generator Mod for the Videogame Cities: Skylines using Logic Programming},
+		pdfsubject={Trabajo de Fin de Master},
+		pdfkeywords={answer set programming, programacion logica, representacion del conocimiento, resolucion de problemas logicos, generacion de poligonos industriales por ordenador, unity, cities: skylines},
+		pdfproducer={LaTeX},
+		pdfcreator={pdflatex}]{hyperref}
+
+% ---- Configuration ----
+
+\renewcommand{\baselinestretch}{1.5}
+\selectlanguage{spanish}
+\geometry{a4paper, top=3cm, bottom=3cm, left=3.5cm, right=3.5cm}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\lstlistingname}{Listado}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\fancyfoot[C]{\thepage}
+\lstset{ %
+	%  language=Octave,                % the language of the code
+	basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+	frame=none,                   % adds a frame around the code
+	breaklines=true,                % sets automatic line breaking
+	breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+	escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+	extendedchars=true,
+}
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+	\hbox{}
+	\vspace*{\fill}
+	\begin{center}
+		\thepage
+	\end{center}
+	\thispagestyle{empty}
+	\newpage
+	\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+\newcommand{\asp}{Answer Set Programing\xspace}
+\newcommand{\cities}{`Cities: Skylines\textcopyright'\xspace}
+\newcommand{\industrylp}{IndustryLP\xspace}
+
+% ---- Variables ----
+
+\def \subject   {Trabajo fin de máster \\ Máster Universitario en Ingeniería Informática}
+\def \title     {\industrylp: Generador de polígonos industriales para el videojuego \cities mediante Programación Lógica}
+\def \authors   {Rafael Alcalde Azpiazu}
+\def \directors {José Pedro Cabalar Fernández}
+\def \keywords  {Answer Set Programming, Programación Lógica, Representación del Conocimiento, Resolución de problemas lógicos, Generación de polígonos industriales, \cities, .NET Framework, Plataforma Steam, Mod de Videojuego}
+
+% ---- Document ----
+
+\begin{document}
+	% ---- Title ----
+	\pagenumbering{gobble}
+	\input{tex/titlepage}
+	\cleardoublepage
+	
+	% ---- Information ----
+	\pagenumbering{roman}
+	\input{tex/info}
+	\cleardoublepage
+	
+	% ---- Certified ----
+	\input{tex/certify}
+	\cleardoublepage
+	
+	% ---- Dedication ----
+	\input{tex/dedication}
+	\cleardoublepage
+	
+	% ---- Gratitudes ----
+	\def\baselinestretch{1}\selectfont
+	\input{tex/gratitudes}
+	\def\baselinestretch{1.5}\selectfont
+	\cleardoublepage
+	
+	% ---- Sumary ----
+	\input{tex/sumary}
+	\cleardoublepage
+	
+	% ---- Keywords ----
+	\input{tex/keywords}
+	\cleardoublepage
+	
+	% ---- TOC ----
+	\tableofcontents
+	\cleardoublepage
+	
+	% ------- Content -------
+	\pagenumbering{arabic}
+	\pagestyle{fancy}
+	\renewcommand{\chaptermark}[1]{\markboth{
+			{\thechapter.\ #1}}{}}
+	\renewcommand{\sectionmark}[1]{\markright{
+			{\thesection\  #1}}{}}
+	
+	\hypertarget{introduccion}{\chapter{Introducción}}
+	\label{introduction}
+	\input{tex/introduction}
+	\cleardoublepage
+	
+	\hypertarget{background}{\chapter{Contexto}}
+	\label{background}
+	\input{tex/background}
+	\cleardoublepage
+
+	\hypertarget{mainwork}{\chapter{Trabajo desarrollado}}
+	\label{mainwork}
+	\input{tex/mainwork}
+	\cleardoublepage
+	
+	%\chapter{Evaluación}
+	%\label{evaluation}
+	%\input{tex/evaluation}
+	%\cleardoublepage
+	
+	\hypertarget{conclusions}{\chapter{Conclusiones}}
+	\label{conclusions}
+	\input{tex/conclusions}
+	\cleardoublepage
+	
+	\listoftables
+	\cleardoublepage
+	
+	\listoffigures
+	\cleardoublepage
+	
+	\clearpage
+	
+	% ------- Appendices -------
+	\appendix
+	\addcontentsline{toc}{chapter}{Apéndices}
+	\label{appendices}
+	
+	%\chapter{Diagramas}
+	%\label{diagrams}
+	%\input{tex/diagrams}
+	%\cleardoublepage
+	
+	\hypertarget{manual}{\chapter{Manual de uso}}
+	\label{manual}
+	\input{tex/manual}
+	\cleardoublepage
+	
+	%\chapter{Información de Lua}
+	%\label{lua}
+	%\input{tex/lua}
+	%\cleardoublepage
+	
+	\clearpage
+	
+	% ------- Biliography -------
+	\bibliographystyle{IEEEtran-spanish}
+	\bibliography{bib/references}
+	\addcontentsline{toc}{chapter}{B. Bibliografía}
+	\label{bibliography}
+\end{document}

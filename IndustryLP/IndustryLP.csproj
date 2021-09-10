@@ -90,6 +90,7 @@
     <Compile Include="UI\Panels\UICategoryOptionPanel.cs" />
     <Compile Include="UI\Panels\UIBuildingsOptionPanel.cs" />
     <Compile Include="UI\Panels\UIDistributionOptionPanel.cs" />
+    <Compile Include="UI\Panels\UIGenerationDialog.cs" />
     <Compile Include="UI\Panels\UIGeneratorOptionPanel.cs" />
     <Compile Include="UI\Panels\UIGroupPanel.cs" />
     <Compile Include="UI\Panels\UIOptionPanel.cs" />
