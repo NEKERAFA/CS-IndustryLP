@@ -10,8 +10,14 @@
 
 sell_parcel(X, Y) :- row(X), column(Y), str_parcel(S), parcel(X, Y, S).
 
+distance(S1, S2, |X1-X2|+|Y1-Y2|) :- parcel(X1, Y1, S1), parcel(X2, Y2, S2), X1 != X2, Y1 != Y2.
+
+neighbour(S1, S2) :- distance(S1, S2, 1).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Restricciones
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- parcel(X, Y, S1), parcel(X, Y, S2), str_parcel(S1), str_parcel(S2), row(X), column(Y), S1 != S2.
 
 :- row(X), column(Y), not sell_parcel(X, Y).

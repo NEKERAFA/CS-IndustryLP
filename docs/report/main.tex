@@ -10,6 +10,7 @@
 \usepackage{geometry}
 \usepackage{graphics}
 \usepackage{tabularx}
+\usepackage{enumitem}
 \usepackage{svg}
 \usepackage{adjustbox}
 \usepackage{threeparttable}
@@ -19,6 +20,7 @@
 \usepackage{amsmath}
 \usepackage{pdfpages}
 \usepackage{xspace}
+\usepackage{makecell}
 \usepackage{fancyhdr}
 \usepackage[hidelinks,pdftex,
 		pdfauthor={Rafael Alcalde Azpiazu},
@@ -64,15 +66,16 @@
 \makeatother
 
 \newcommand{\asp}{Answer Set Programing\xspace}
-\newcommand{\cities}{Cities: Skylines\textcopyright\xspace}
+\newcommand{\cities}{`Cities: Skylines\textcopyright'\xspace}
+\newcommand{\industrylp}{IndustryLP\xspace}
 
 % ---- Variables ----
 
 \def \subject   {Trabajo fin de máster \\ Máster Universitario en Ingeniería Informática}
-\def \title     {IndustryLP: Generador de polígonos industriales para el videojuego \cities mediante Programación Lógica}
+\def \title     {\industrylp: Generador de polígonos industriales para el videojuego \cities mediante Programación Lógica}
 \def \authors   {Rafael Alcalde Azpiazu}
 \def \directors {José Pedro Cabalar Fernández}
-\def \keywords  {Answer Set Programming, Programación Lógica, Representación del Conocimiento, Resolución de problemas lógicos, Generación de polígonos industriales, \cities, .NET Framework, Steam, Mod}
+\def \keywords  {Answer Set Programming, Programación Lógica, Representación del Conocimiento, Resolución de problemas lógicos, Generación de polígonos industriales, \cities, .NET Framework, Plataforma Steam, Mod de Videojuego}
 
 % ---- Document ----
 
@@ -120,27 +123,28 @@
 			{\thechapter.\ #1}}{}}
 	\renewcommand{\sectionmark}[1]{\markright{
 			{\thesection\  #1}}{}}
-	\chapter{Introducción}
+	
+	\hypertarget{introduccion}{\chapter{Introducción}}
 	\label{introduction}
 	\input{tex/introduction}
 	\cleardoublepage
 	
-	\chapter{Contexto}
+	\hypertarget{background}{\chapter{Contexto}}
 	\label{background}
 	\input{tex/background}
 	\cleardoublepage
 
-	\chapter{Trabajo desarrollado}
+	\hypertarget{mainwork}{\chapter{Trabajo desarrollado}}
 	\label{mainwork}
 	\input{tex/mainwork}
 	\cleardoublepage
 	
-	\chapter{Evaluación}
-	\label{evaluation}
-	\input{tex/evaluation}
-	\cleardoublepage
+	%\chapter{Evaluación}
+	%\label{evaluation}
+	%\input{tex/evaluation}
+	%\cleardoublepage
 	
-	\chapter{Conclusiones}
+	\hypertarget{conclusions}{\chapter{Conclusiones}}
 	\label{conclusions}
 	\input{tex/conclusions}
 	\cleardoublepage
@@ -163,10 +167,10 @@
 	%\input{tex/diagrams}
 	%\cleardoublepage
 	
-	%\chapter{Manual de uso}
-	%\label{manual}
-	%\input{tex/manual}
-	%\cleardoublepage
+	\hypertarget{manual}{\chapter{Manual de uso}}
+	\label{manual}
+	\input{tex/manual}
+	\cleardoublepage
 	
 	%\chapter{Información de Lua}
 	%\label{lua}
@@ -178,6 +182,6 @@
 	% ------- Biliography -------
 	\bibliographystyle{IEEEtran-spanish}
 	\bibliography{bib/references}
-	\addcontentsline{toc}{chapter}{A. Bibliografía}
+	\addcontentsline{toc}{chapter}{B. Bibliografía}
 	\label{bibliography}
 \end{document}
