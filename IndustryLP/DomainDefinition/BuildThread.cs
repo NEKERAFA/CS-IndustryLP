@@ -4,6 +4,7 @@ using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -82,8 +83,12 @@ namespace IndustryLP.DomainDefinition
 
                 LoggerUtils.Log("Loading definition files");
 
-                m_program.Load(ClingoConstants.ItemDefinitionFile);
-                m_program.Load(ClingoConstants.IndustryGeneratorFile);
+                var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
+
+                foreach (var file in files)
+                {
+                    m_program.Load(file);
+                }
             }
             catch (Exception ex)
             {
@@ -222,7 +227,7 @@ namespace IndustryLP.DomainDefinition
         /// <param name="maxSolutions">The number of solutions that clingo will find. <c>0</c> for no limit</param>
         /// <param name="rows">The number of rows in the parcel</param>
         /// <param name="cols">The number of cols in the parcel</param>
-        public void StartProgram(int maxSolutions, int rows, int cols, List<BuildingAtom> preferences, List<BuildingAtom> restrictions)
+        public void StartProgram(int maxSolutions, int rows, int cols, List<BuildingAtom> preferences, List<BuildingAtom> restrictions, string program = null)
         {
             try
             {
@@ -239,6 +244,7 @@ namespace IndustryLP.DomainDefinition
                 
                 if (preferences.Any()) LoadPreferences(preferences);
                 if (restrictions.Any()) LoadRestrictions(restrictions);
+                if (!string.IsNullOrEmpty(program.Trim())) m_program.Add("base", new List<string>(), program);
 
                 SolveProgram();
 

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework.Math;
 using IndustryLP.DistributionDefinition;
+using IndustryLP.DomainDefinition;
 using IndustryLP.Entities;
 using System.Collections.Generic;
 using UnityEngine;
@@ -58,5 +59,22 @@ namespace IndustryLP
         /// <param name="gridId">The id in the grid</param>
         /// <param name="building">The building that defines the preference</param>
         void AddPreference(ushort gridId, BuildingInfo building);
+
+        /// <summary>
+        /// Ads a new restriction to the grid
+        /// </summary>
+        /// <param name="gridId"></param>
+        /// <param name="building"></param>
+        void AddRestriction(ushort gridId, BuildingInfo building);
+
+        /// <summary>
+        /// Build a solution and closes the tool
+        /// </summary>
+        void BuildGeneration(Region solution);
+
+        /// <summary>
+        /// Cancel the current solution
+        /// </summary>
+        void CancelGeneration();
     }
 }

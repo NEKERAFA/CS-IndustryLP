@@ -62,22 +62,25 @@ namespace IndustryLP.DistributionDefinition
         private List<Bezier3> GenerateRoad(Vector3 start, Vector3 end)
         {
             var length = (end - start).magnitude;
-            var subdivisionsCount = Mathf.Ceil(length / 80f);
-            var subdivisionsLength = length / subdivisionsCount;
+            var subdivisionsCount = Mathf.Floor(length / 80f);
             var subdivisions = new List<Bezier3>() { };
             var startDir = (end - start).normalized;
             var endDir = (start - end).normalized;
 
             var position = start;
-            for (int i = 0; i < subdivisionsCount; i++)
+            for (int i = 1; i < subdivisionsCount; i++)
             {
-                var next = Vector3.MoveTowards(position, end, subdivisionsLength);
+                var next = Vector3.Lerp(start, end, Convert.ToSingle(i) / Convert.ToSingle(subdivisionsCount));
                 var segment = GenerateSegment(position, startDir, next, endDir);
                 subdivisions.Add(segment);
                 position = next;
             }
 
-            subdivisions.Add(GenerateSegment(position, startDir, end, endDir));
+            if ((end - position).magnitude > 0.1)
+            {
+                var segment = GenerateSegment(position, startDir, end, endDir);
+                subdivisions.Add(segment);
+            }
 
             return subdivisions;
         }
@@ -110,10 +113,10 @@ namespace IndustryLP.DistributionDefinition
         {
             var parcels = new List<ParcelWrapper>();
 
-            var a1 = Vector3.Lerp(plot.a, plot.b, 2f/8f) - plot.a;
-            var b1 = Vector3.Lerp(plot.a, plot.b, 6f/8f) - plot.a;
-            var c1 = Vector3.Lerp(plot.a, plot.d, 2f/8f) - plot.a;
-            var d1 = Vector3.Lerp(plot.a, plot.d, 6f/8f) - plot.a;
+            var a1 = Vector3.Lerp(plot.a, plot.b, 1f/4f) - plot.a;
+            var b1 = Vector3.Lerp(plot.a, plot.b, 3f/4f) - plot.a;
+            var c1 = Vector3.Lerp(plot.a, plot.d, 1f/4f) - plot.a;
+            var d1 = Vector3.Lerp(plot.a, plot.d, 3f/4f) - plot.a;
 
             LoggerUtils.Log(offsetX, offsetY, columns);
 
@@ -149,15 +152,87 @@ namespace IndustryLP.DistributionDefinition
             return parcels;
         }
 
-        /*private List<Bezier3> GenerateBranch(Quad3 selection, Vector3 start)
+        private struct BranchWapper
         {
+            public List<Bezier3> BranchRoad { get; }
+            public List<Bezier3> Roads { get; }
+            public List<ParcelWrapper> Parcels { get; }
 
+            public BranchWapper(List<Bezier3> branchRoad, List<Bezier3> roads, List<ParcelWrapper> parcels)
+            {
+                BranchRoad = branchRoad;
+                Roads = roads;
+                Parcels = parcels;
+            }
         }
 
-        private List<Bezier3> GenerateBranches(Quad3 selection, List<Bezier3> avenue)
+        private BranchWapper GenerateLeftBranch(Quad3 selection, Vector3 start, int branch, List<Bezier3> lastBranchRoad)
         {
+            var left = (selection.a - selection.b).normalized;
+            var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
 
-        }*/
+            var roads = new List<Bezier3>();
+            var parcels = new List<ParcelWrapper>();
+
+            // Generate the main road
+            var branchRoad = GenerateRoad(start + left * roadLength, start);
+            if (lastBranchRoad != null)
+            {
+                for (var cell = 0; cell < lastBranchRoad.Count; cell++)
+                {
+                    var startPos = lastBranchRoad[cell].a;
+                    var endPos = branchRoad[cell].a;
+                    var startDir = (endPos - startPos).normalized;
+                    // Generate perpendicular segments
+                    roads.Add(GenerateSegment(startPos, startDir, endPos, -startDir));
+
+                    var startNextPos = lastBranchRoad[cell].d;
+                    var endNextPos = lastBranchRoad[cell].d;
+                    var columns = lastBranchRoad.Count * 4;
+
+                    // Generate parcels
+                    var localParcels = GenerateParcels(new Quad3(startPos, startNextPos, endNextPos, endPos), cell * 2, (branch - 1) * 2, columns);
+                    parcels.AddRange(localParcels);
+                }
+            }
+
+            return new BranchWapper(branchRoad, roads, parcels);
+        }
+
+        private BranchWapper GenerateRightBranch(Quad3 selection, Vector3 start, int branch, List<Bezier3> lastBranchRoad)
+        {
+            var right = (selection.b - selection.a).normalized;
+            var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
+
+            var roads = new List<Bezier3>();
+            var parcels = new List<ParcelWrapper>();
+
+            // Generate the main road
+            var branchRoad = GenerateRoad(start, start + right * roadLength);
+            if (lastBranchRoad != null)
+            {
+                Vector3 startPos, endPos, startDir;
+
+                for (var cell = 0; cell < lastBranchRoad.Count; cell++)
+                {
+                    startPos = lastBranchRoad[cell].d;
+                    endPos = branchRoad[cell].d;
+                    startDir = (endPos - startPos).normalized;
+                    // Generate perpendicular segments
+                    roads.Add(GenerateSegment(startPos, startDir, endPos, -startDir));
+
+                    var startLastPos = lastBranchRoad[cell].a;
+                    var endLastPos = branchRoad[cell].a;
+                    var columns = lastBranchRoad.Count * 4;
+
+                    // Generate parcels
+                    var localParcels = GenerateParcels(new Quad3(startLastPos, startPos, endPos, endLastPos), cell * 2 + Mathf.FloorToInt(columns / 2), (branch - 1) * 2, columns);
+                    parcels.AddRange(localParcels);
+                }
+            }
+
+            return new BranchWapper(branchRoad, roads, parcels);
+        }
 
         public override DistributionInfo Generate(Quad3 selection)
         {
@@ -167,9 +242,6 @@ namespace IndustryLP.DistributionDefinition
                 Parcels = new List<ParcelWrapper>(),
                 Road = new List<Bezier3>(),
             };
-
-            var down = (selection.d - selection.a).normalized;
-            var right = (selection.b - selection.a).normalized;
 
             // Generate distribution roads
             var distributionRoads = GenerateDistributionRoads(selection);
@@ -185,151 +257,39 @@ namespace IndustryLP.DistributionDefinition
             // Generate secondary roads
             List<Bezier3> lastLeftRoadBranch = null, lastRightRoadBranch = null;
 
-            var left = (selection.a - selection.b).normalized;
-            var roadLength = Vector3.Distance(selection.a, selection.b) / 2;
-
-            for (var posY = 0; posY < upRoad.Count - 1; posY++) // columns
+            for (var branch = 0; branch < upRoad.Count; branch++) // columns
             {
-                var position = upRoad[posY];
+                var position = upRoad[branch];
 
-                var leftRoadBranch = GenerateRoad(position.d + left * roadLength, position.d);
-                info.Road.AddRange(leftRoadBranch);
-
-                if (posY == 0) info.Columns = (leftRoadBranch.Count - 1) * 4;
-
-                if (lastLeftRoadBranch != null)
+                // Generate left branch
+                var leftBranch = GenerateLeftBranch(selection, position.d, branch, lastLeftRoadBranch);
+                info.Road.AddRange(leftBranch.BranchRoad);
+                if (branch == 0)
                 {
-                    for (int posX = 0; posX < lastLeftRoadBranch.Count - 1; posX++) // rows
-                    {
-                        //LoggerUtils.Log("Line: ", posX);
-
-                        // Gets the vertices of the plot
-                        var startPos = lastLeftRoadBranch[posX].a;
-                        
-                        Vector3? endPos = null;
-                        if (posX < leftRoadBranch.Count)
-                        {
-                            endPos = leftRoadBranch[posX].a;
-                        }
-
-                        if (endPos.HasValue)
-                        {
-                            var startDir = (endPos.Value - startPos).normalized;
-                            var endDir = (startPos - endPos.Value).normalized;
-                            var columns = (lastLeftRoadBranch.Count - 1) * 4;
-
-                            // Initialize all parcels
-                            /*if (pos == 0)
-                            {
-                                for (var i = 0; i < row; i++)
-                                {
-                                    info.Cells.Add(null);
-                                }
-                            }*/
-
-                            Vector3? startNextPos = null;
-                            if (posX + 1 < lastLeftRoadBranch.Count)
-                            {
-                                startNextPos = lastLeftRoadBranch[posX + 1].a;
-                            }
-
-                            Vector3? endNextPos = null;
-                            if (posX + 1 < leftRoadBranch.Count)
-                            {
-                                endNextPos = leftRoadBranch[posX + 1].a;
-                            }
-
-                            // Gets interpolation points
-                            if (startNextPos.HasValue && endNextPos.HasValue)
-                            {
-                                /*
-                                var a1 = Vector3.Lerp(startPos, startNextPos.Value, 0.333333333333f) - startPos;
-                                var b1 = Vector3.Lerp(startPos, startNextPos.Value, 0.666666666666f) - startPos;
-                                var c1 = Vector3.Lerp(startPos, endPos.Value, 0.333333333333f) - startPos;
-                                var d1 = Vector3.Lerp(startPos, endPos.Value, 0.666666666666f) - startPos;
-
-                                // Generate the cells
-                                info.Cells.Add(new ParcelWrapper
-                                {
-                                    GridId = id++,
-                                    Position = a1 + c1 + startPos,
-                                    Rotation = Vector3Extension.SignedAngle((startPos - startNextPos.Value).normalized, Vector3.forward, Vector3.up) * Mathf.Deg2Rad
-                                });
-
-                                info.Cells.Add(new ParcelWrapper
-                                {
-                                    GridId = id++,
-                                    Position = b1 + c1 + startPos,
-                                    Rotation = Vector3Extension.SignedAngle((startNextPos.Value - startPos).normalized, Vector3.forward, Vector3.up) * Mathf.Deg2Rad
-                                });
-
-                                info.Cells.Add(new ParcelWrapper
-                                {
-                                    GridId = id++,
-                                    Position = a1 + d1 + startPos,
-                                    Rotation = Vector3Extension.SignedAngle((startPos - startNextPos.Value).normalized, Vector3.forward, Vector3.up) * Mathf.Deg2Rad
-                                });
-
-                                info.Cells.Add(new ParcelWrapper
-                                {
-                                    GridId = id++,
-                                    Position = b1 + d1 + startPos,
-                                    Rotation = Vector3Extension.SignedAngle((startNextPos.Value - startPos).normalized, Vector3.forward, Vector3.up) * Mathf.Deg2Rad
-                                });
-                                */
-
-                                var parcels = GenerateParcels(new Quad3(startPos, startNextPos.Value, endNextPos.Value, endPos.Value), posX * 2, (posY - 1) * 2, columns);
-                                info.Parcels.AddRange(parcels);
-
-                                foreach (var parcel in parcels)
-                                {
-                                    LoggerUtils.Log("Parcel: ", posX * 2, posY * 2, parcel.GridId);
-                                }
-                            }
-
-                            // Generate the road
-                            info.Road.Add(GenerateSegment(startPos, startDir, endPos.Value, endDir));
-                        }
-                    }
+                    info.Columns = leftBranch.BranchRoad.Count * 4;
                 }
-
-                lastLeftRoadBranch = leftRoadBranch;
-
-                var rightRoadBranch = GenerateRoad(position.d, position.d + right * roadLength);
-                info.Road.AddRange(rightRoadBranch);
-
-                if (lastRightRoadBranch != null)
+                if (leftBranch.Roads.Count > 0)
                 {
-                    for (int posX = 1; posX < rightRoadBranch.Count; posX++)
-                    {
-                        var startPos = lastRightRoadBranch[posX].a;
-
-                        Vector3? endPos = null;
-                        if (posX < rightRoadBranch.Count)
-                        {
-                            endPos = rightRoadBranch[posX].a;
-                        }
-
-                        if (endPos.HasValue)
-                        {
-                            var startDir = (endPos.Value - startPos).normalized;
-                            var endDir = (startPos - endPos.Value).normalized;
-
-                            info.Road.Add(GenerateSegment(startPos, startDir, endPos.Value, endDir));
-
-                            var columns = (lastRightRoadBranch.Count - 1) * 4;
-
-                            var startLastPos = lastRightRoadBranch[posX - 1].a;
-                            var endLastPos = rightRoadBranch[posX - 1].a;
-
-                            // Gets interpolation points
-                            var parcels = GenerateParcels(new Quad3(startLastPos, startPos, endPos.Value, endLastPos), (posX - 1) * 2 + Mathf.FloorToInt(columns / 2), (posY - 1) * 2, columns);
-                            info.Parcels.AddRange(parcels);
-                        }  
-                    }
+                    info.Road.AddRange(leftBranch.Roads);
                 }
+                if (leftBranch.Parcels.Count > 0)
+                {
+                    info.Parcels.AddRange(leftBranch.Parcels);
+                }
+                lastLeftRoadBranch = leftBranch.BranchRoad;
 
-                lastRightRoadBranch = rightRoadBranch;
+                // Generate right branch
+                var rightBranch = GenerateRightBranch(selection, position.d, branch, lastRightRoadBranch);
+                info.Road.AddRange(rightBranch.BranchRoad);
+                if (rightBranch.Roads.Count > 0)
+                {
+                    info.Road.AddRange(rightBranch.Roads);
+                }
+                if (rightBranch.Parcels.Count > 0)
+                {
+                    info.Parcels.AddRange(rightBranch.Parcels);
+                }
+                lastRightRoadBranch = rightBranch.BranchRoad;
             }
 
             return info;

@@ -12,13 +12,13 @@ namespace IndustryLP
         /// <summary>
         /// Current version of the mod
         /// </summary>
-        private static string Version => "1.0.0";
+        private static string Version => "1.0.1";
 
         /// <summary>
         /// Current git branch
         /// </summary>
 #if DEBUG
-        private static string Branch => "us55";
+        private static string Branch => "beta1";
 #else
         private static string Branch => null;
 #endif

@@ -1,6 +1,6 @@
 ﻿namespace IndustryLP.DomainDefinition
 {
-    internal class Region
+    public class Region
     {
         public int Rows { get; set; }
         public int Columns { get; set; }
