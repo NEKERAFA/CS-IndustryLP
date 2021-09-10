@@ -51,7 +51,7 @@ namespace IndustryLP.DistributionDefinition
 
         public override ushort GetId(int row, int column)
         {
-            return Convert.ToUInt16(row + column * Columns);
+            return Convert.ToUInt16(column + row * Columns);
         }
     }
 }

@@ -68,9 +68,6 @@ namespace IndustryLP
         private ToolAction m_action = null;
 
         private Vector3? m_mouseTerrainPosition = null;
-        private bool m_mouseHoverToolbar = false;
-        private bool m_mouseHoverOptionPanel = false;
-        private bool m_mouseHoverScrollablePanel = false;
         private float m_defaultXPos;
 
 #if DEBUG
@@ -265,6 +262,19 @@ namespace IndustryLP
                 m_action = m_zoningAction;
                 m_action.OnEnterController();
             }
+
+#if DEBUG
+            if (lblParcels.Any())
+            {
+                foreach (var lbl in lblParcels.Values)
+                {
+                    lbl.Hide();
+                    DestroyImmediate(lbl);
+                }
+
+                lblParcels.Clear();
+            }
+#endif
         }
 
         /// <summary>
@@ -538,6 +548,7 @@ namespace IndustryLP
                 {
                     foreach (var lbl in lblParcels.Values)
                     {
+                        lbl.Hide();
                         DestroyImmediate(lbl.gameObject);
                     }
                 }
@@ -651,7 +662,7 @@ namespace IndustryLP
                 for (var column = 0; column < solution.Columns; column++)
                 {
                     var building = solution.Parcels[row, column];
-                    if (string.IsNullOrEmpty(building?.Trim()))
+                    if (!string.IsNullOrEmpty(building?.Trim()))
                     {
                         var prefab = PrefabCollection<BuildingInfo>.FindLoaded(building);
                         if (prefab == null)
@@ -662,22 +673,32 @@ namespace IndustryLP
                         {
                             var gridId = Distribution.GetId(row, column);
                             var parcel = Distribution.FindById(gridId);
-                            if (parcel != null)
+                            if (parcel == null)
                             {
-                                // Gets default randomizer
-                                var randomizer = SimulationUtils.GetRandomizer();
+                                LoggerUtils.Warning("Parcel not found", gridId);
+                            }
+                            else
+                            {
+                                var simulationManager = Singleton<SimulationManager>.instance;
 
-                                if (!Singleton<BuildingManager>.instance.CreateBuilding(out ushort buildingId, ref randomizer, prefab, parcel.Position, parcel.Rotation, prefab.GetLength(), SimulationUtils.GetNewBuildIndex()))
+                                LoggerUtils.Log("Creating building");
+
+                                var buildingManager = Singleton<BuildingManager>.instance;
+
+                                if (!buildingManager.CreateBuilding(out ushort buildingId, ref simulationManager.m_randomizer, prefab, parcel.Position, parcel.Rotation, 0, simulationManager.m_currentBuildIndex))
                                 {
                                     throw new Exception($"Cannot create building {building}");
                                 }
+
+                                buildingManager.UpdateBuildingRenderer(buildingId, true);
+                                prefab.m_buildingAI.SetHistorical(buildingId, ref buildingManager.m_buildings.m_buffer[buildingId], true);
                             }
                         }
                     }
                 }
             }
 
-            enabled = false;
+            
         }
 
         #endregion
@@ -691,9 +712,6 @@ namespace IndustryLP
         {
             // Gets the main toolbar
             var mainToolbar = ToolsModifierControl.mainToolbar.component as UITabstrip;
-
-            mainToolbar.eventMouseEnter += OnMouseEnterToolbar;
-            mainToolbar.eventMouseLeave += OnMouseLeaveToolbar;
 
             // Gets the templates
             var mainButtonGameObject = UITemplateManager.GetAsGameObject("MainToolbarButtonTemplate");
@@ -748,7 +766,7 @@ namespace IndustryLP
             };
             if (!locale.Exists(key))
             {
-                locale.AddLocalizedString(key, "Work in progress...");
+                locale.AddLocalizedString(key, "Welcome to IndustryLP. This mod is a tool to declaratively generate an industrial polygon that is part of my master's dissertation.\nFor usage information, visit the mod page on Steam Workshop or GitHub.\n\nGitHub: https://github.com/NEKERAFA/CS-IndustryLP");
             }
         }
 
@@ -761,8 +779,6 @@ namespace IndustryLP
             m_optionPanel.relativePosition = new Vector2(474 - m_optionPanel.width, 949);
             m_optionPanel.selectedIndex = 0;
             m_optionPanel.eventSelectedIndexChanged += OnChangeSelectedIndex;
-            m_optionPanel.eventMouseEnter += OnMouseEnterOptionPanel;
-            m_optionPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
         }
 
         /// <summary>
@@ -793,8 +809,6 @@ namespace IndustryLP
             m_scrollablePanel = UIDistributionOptionPanel.Create(oldPanel);
             m_scrollablePanel.Disable();
             m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-            m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-            m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
             m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
 
             // Sets the main tabs
@@ -803,8 +817,6 @@ namespace IndustryLP
             m_categoryPanel.selectedIndex = 0;
             m_categoryPanel.Hide();
             m_categoryPanel.eventSelectedIndexChanged += OnChangeTabIndex;
-            m_categoryPanel.eventMouseEnter += OnMouseEnterOptionPanel;
-            m_categoryPanel.eventMouseLeave += OnMouseLeaveOptionPanel;
 
         }
 
@@ -882,66 +894,6 @@ namespace IndustryLP
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Invoked when the mouse is hover the toolbar
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterToolbar(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverToolbar = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the toolbar
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveToolbar(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverToolbar = false;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse is hover the panel options
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverOptionPanel = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the panel options
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveOptionPanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverOptionPanel = false;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse is hover the scrollable panel
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseEnterScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverScrollablePanel = true;
-        }
-
-        /// <summary>
-        /// Invoked when the mouse leaves the scrollable panel
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="eventParam"></param>
-        private void OnMouseLeaveScrollablePanel(UIComponent component, UIMouseEventParameter eventParam)
-        {
-            m_mouseHoverScrollablePanel = false;
         }
 
         /// <summary>
@@ -1085,22 +1037,16 @@ namespace IndustryLP
                 case 0:
                     m_scrollablePanel = UIDistributionOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedDistributionPanel;
                     break;
                 case 1:
                     m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedPreferenceBuildingPanel;
                     break;
                 case 2:
                     m_scrollablePanel = UIBuildingsOptionPanel.Create(m_scrollablePanel);
                     m_scrollablePanel.eventVisibilityChanged += OnChangeVisibilityPanel;
-                    m_scrollablePanel.eventMouseEnter += OnMouseEnterScrollablePanel;
-                    m_scrollablePanel.eventMouseLeave += OnMouseLeaveScrollablePanel;
                     m_scrollablePanel.eventClicked += OnItemClickedRestrictionBuildingPanel;
                     break;
             }
@@ -1110,11 +1056,13 @@ namespace IndustryLP
 
         private bool IsPointerOverUIView()
         {
+            var mainView = UIView.GetAView();
             var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
 
-            return m_mouseHoverOptionPanel || 
-                m_mouseHoverScrollablePanel || 
-                m_mouseHoverToolbar || 
+            LoggerUtils.Log(mainView.ScreenPointToGUI(Input.mousePosition).y);
+
+            return (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
+                (m_scrollablePanel != null && m_scrollablePanel.isVisible && m_scrollablePanel.containsMouse) || 
                 (dialogPanel != null && dialogPanel.isVisible && dialogPanel.containsMouse);
         }
 

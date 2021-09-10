@@ -62,7 +62,7 @@ namespace IndustryLP.DistributionDefinition
         private List<Bezier3> GenerateRoad(Vector3 start, Vector3 end)
         {
             var length = (end - start).magnitude;
-            var subdivisionsCount = Mathf.Ceil(length / 80f);
+            var subdivisionsCount = Mathf.Floor(length / 80f);
             var subdivisions = new List<Bezier3>() { };
             var startDir = (end - start).normalized;
             var endDir = (start - end).normalized;
@@ -113,10 +113,10 @@ namespace IndustryLP.DistributionDefinition
         {
             var parcels = new List<ParcelWrapper>();
 
-            var a1 = Vector3.Lerp(plot.a, plot.b, 2f/8f) - plot.a;
-            var b1 = Vector3.Lerp(plot.a, plot.b, 6f/8f) - plot.a;
-            var c1 = Vector3.Lerp(plot.a, plot.d, 2f/8f) - plot.a;
-            var d1 = Vector3.Lerp(plot.a, plot.d, 6f/8f) - plot.a;
+            var a1 = Vector3.Lerp(plot.a, plot.b, 1f/4f) - plot.a;
+            var b1 = Vector3.Lerp(plot.a, plot.b, 3f/4f) - plot.a;
+            var c1 = Vector3.Lerp(plot.a, plot.d, 1f/4f) - plot.a;
+            var d1 = Vector3.Lerp(plot.a, plot.d, 3f/4f) - plot.a;
 
             LoggerUtils.Log(offsetX, offsetY, columns);
 
