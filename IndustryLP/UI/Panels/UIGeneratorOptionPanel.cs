@@ -168,7 +168,7 @@ namespace IndustryLP.UI.Panels
         {
             if (Solutions == 0 && solutions > 0)
             {
-                m_prevButton.Enable();
+                m_nextButton.Enable();
                 m_buildSolutionButton.Enable();
                 Solution = 1;
             }
@@ -209,14 +209,14 @@ namespace IndustryLP.UI.Panels
             {
                 if (Solution == Solutions)
                 {
-                    m_prevButton.Enable();
+                    m_nextButton.Enable();
                 }
 
                 SetSolution(Solution - 1);
 
                 if (Solution == 1)
                 {
-                    m_nextButton.Disable();
+                    m_prevButton.Disable();
                 }
 
                 OnClickPrevSolution(component, eventParam);
@@ -229,14 +229,14 @@ namespace IndustryLP.UI.Panels
             {
                 if (Solution == 1)
                 {
-                    m_nextButton.Enable();
+                    m_prevButton.Enable();
                 }
 
                 SetSolution(Solution + 1);
 
                 if (Solution == Solutions)
                 {
-                    m_prevButton.Disable();
+                    m_nextButton.Disable();
                 }
 
                 OnClickNextSolution(component, eventParam);
