@@ -145,8 +145,8 @@
     <None Include="DomainDefinition\logic_program\item_definition.lp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Icons\SolutionOptionDown.png" />
-    <EmbeddedResource Include="Resources\Icons\SolutionOptionUp.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionNext.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionPrevious.png" />
     <EmbeddedResource Include="Resources\Icons\ToolbarIconDisabled.png" />
     <EmbeddedResource Include="Resources\Icons\ToolbarIconFocused.png" />
     <EmbeddedResource Include="Resources\Icons\ToolbarIconHovered.png" />
@@ -191,6 +191,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\Build.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\BuildDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionNextDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\SolutionOptionPreviousDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\ZoningOptionBuildDisabled.png" />
+    <EmbeddedResource Include="Resources\Icons\ZoningOptionMoveDisabled.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -35,7 +35,7 @@ namespace IndustryLP.Utils
             // Gets default randomizer
             var randomizer = SimulationUtils.GetRandomizer();
 
-            LoggerUtils.Log("Creating node");
+            LoggerUtils.Debug("Creating node");
 
             // Create Node
             return netManager.CreateNode(out nodeId, ref randomizer, netPrefab, position, SimulationUtils.GetNewBuildIndex());
@@ -96,7 +96,7 @@ namespace IndustryLP.Utils
             // Gets default randomizer
             var randomizer = SimulationUtils.GetRandomizer();
 
-            LoggerUtils.Log("Creating net");
+            LoggerUtils.Debug("Creating net");
 
             var buildIndex = SimulationUtils.GetNewBuildIndex();
 

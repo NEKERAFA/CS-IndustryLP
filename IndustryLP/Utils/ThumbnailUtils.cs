@@ -151,8 +151,7 @@ namespace IndustryLP.Utils
             catch (Exception e)
             {
                 // Don't let a single thumnbail exception stop UI processing.
-                LoggerUtils.Log("thumbnail failed");
-                LoggerUtils.Error(e);
+                LoggerUtils.Error("thumbnail failed", e);
             }
         }
 

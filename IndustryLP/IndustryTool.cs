@@ -111,10 +111,14 @@ namespace IndustryLP
                         ResourceConstants.ToolbarFocused,
                         ResourceConstants.ToolbarPressed,
                         ResourceConstants.ToolbarDisabled,
-                        ResourceConstants.SolutionUp,
-                        ResourceConstants.SolutionDown,
+                        ResourceConstants.SolutionPrevious,
+                        ResourceConstants.SolutionPreviousDisabled,
+                        ResourceConstants.SolutionNext,
+                        ResourceConstants.SolutionNextDisabled,
                         ResourceConstants.OptionBuild,
+                        ResourceConstants.OptionBuildDisabled,
                         ResourceConstants.OptionMove,
+                        ResourceConstants.OptionMoveDisabled,
                         ResourceConstants.SubBarPreferenceNormal,
                         ResourceConstants.SubBarPreferenceFocused,
                         ResourceConstants.SubBarPreferenceHovered,
@@ -125,7 +129,8 @@ namespace IndustryLP
                         ResourceConstants.SubBarRestrictionHovered,
                         ResourceConstants.SubBarRestrictionPressed,
                         ResourceConstants.SubBarRestrictionDisabled,
-                        ResourceConstants.BuildNow
+                        ResourceConstants.BuildNow,
+                        ResourceConstants.BuildNowDisabled,
                     };
 
                     m_iconAtlas = ResourceLoader.CreateTextureAtlas(ResourceConstants.IconAtlasName, iconsNames, ResourceConstants.IconsPath);
@@ -268,7 +273,7 @@ namespace IndustryLP
             {
                 foreach (var lbl in lblParcels.Values)
                 {
-                    lbl.Hide();
+                    lbl.Disable();
                     DestroyImmediate(lbl);
                 }
 
@@ -622,7 +627,7 @@ namespace IndustryLP
             var cell = Utils.MathUtils.FindNeighbour(Preferences, mousePosition, 20);
             if (cell != null)
             {
-                LoggerUtils.Log("Removed", Preferences.Remove(cell));
+                LoggerUtils.Debug("Removed", Preferences.Remove(cell));
             }
         }
 
@@ -654,8 +659,6 @@ namespace IndustryLP
 
                 NetUtils.CreateSegment(startNode, endNode, road, netPrefab);
             }
-
-            LoggerUtils.Log(solution.Rows, solution.Columns);
 
             for (var row = 0; row < solution.Rows; row++)
             {
@@ -936,7 +939,7 @@ namespace IndustryLP
             if (item != null)
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
-                LoggerUtils.Log($"Clicked on {prefab.name} preference");
+                LoggerUtils.Debug($"Clicked on {prefab.name} preference");
 
                 m_optionPanel.selectedIndex = -1;
                 m_action?.OnLeftController();
@@ -959,7 +962,7 @@ namespace IndustryLP
             if (item != null)
             {
                 PrefabInfo prefab = item.objectUserData as PrefabInfo;
-                LoggerUtils.Log($"Clicked on {prefab.name} restriction");
+                LoggerUtils.Debug($"Clicked on {prefab.name} restriction");
 
                 m_optionPanel.selectedIndex = -1;
                 m_action?.OnLeftController();
@@ -1058,12 +1061,13 @@ namespace IndustryLP
         {
             var mainView = UIView.GetAView();
             var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
+            var generatorOptionPanel = (m_buildingAction as BuildingAction).GeneratorOptionPanel;
 
-            LoggerUtils.Log(mainView.ScreenPointToGUI(Input.mousePosition).y);
-
-            return (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
+            return (mainView.ScreenPointToGUI(Input.mousePosition).y < 76f) || (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
+                (m_categoryPanel != null && m_categoryPanel.isVisible && m_categoryPanel.containsMouse) ||
                 (m_scrollablePanel != null && m_scrollablePanel.isVisible && m_scrollablePanel.containsMouse) || 
-                (dialogPanel != null && dialogPanel.isVisible && dialogPanel.containsMouse);
+                (dialogPanel != null && dialogPanel.isVisible && dialogPanel.containsMouse) ||
+                (generatorOptionPanel != null && generatorOptionPanel.isVisible && generatorOptionPanel.containsMouse);
         }
 
     #endregion

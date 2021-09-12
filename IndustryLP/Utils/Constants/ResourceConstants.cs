@@ -68,14 +68,24 @@
         public static string ToolbarFgDisabled => "ToolbarIconGroup1Disabled";
 
         /// <summary>
-        /// The arrow to change down the solution
+        /// The arrow to change next solution
         /// </summary>
-        public static string SolutionDown => "SolutionOptionDown";
+        public static string SolutionNext => "SolutionOptionNext";
 
         /// <summary>
-        /// The arrow to change up the solution
+        /// The arrow to change next solution when is disabled
         /// </summary>
-        public static string SolutionUp => "SolutionOptionUp";
+        public static string SolutionNextDisabled => "SolutionOptionNextDisabled";
+
+        /// <summary>
+        /// The arrow to change previous solution
+        /// </summary>
+        public static string SolutionPrevious => "SolutionOptionPrev";
+
+        /// <summary>
+        /// The arrow to change previous solution when is disabled
+        /// </summary>
+        public static string SolutionPreviousDisabled => "SolutionOptionPrevDisabled";
 
         /// <summary>
         /// The icon to build the solution
@@ -83,9 +93,19 @@
         public static string OptionBuild => "ZoningOptionBuild";
 
         /// <summary>
+        /// The icon to build the solution when is disabled
+        /// </summary>
+        public static string OptionBuildDisabled => "ZoningOptionBuildDisabled";
+
+        /// <summary>
         /// The icon to move the zoning
         /// </summary>
         public static string OptionMove => "ZoningOptionMove";
+
+        /// <summary>
+        /// The icon to move the zoning when is disabled
+        /// </summary>
+        public static string OptionMoveDisabled => "ZoningOptionMoveDisabled";
 
         /// <summary>
         /// The icon to create the zoning
@@ -287,7 +307,15 @@
         /// </summary>
         public static string SubBarBackgroundPressed => "SubBarButtonBasePressed";
 
+        /// <summary>
+        /// The build solution icon
+        /// </summary>
         public static string BuildNow => "Build";
+
+        /// <summary>
+        /// The build solution icon when is disabled
+        /// </summary>
+        public static string BuildNowDisabled => "BuildDisabled";
 
         public static string Loading => "loading_icon";
 

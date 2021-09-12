@@ -44,7 +44,7 @@ namespace IndustryLP.DomainDefinition
         /// <summary>
         /// The current number of solutions
         /// </summary>
-        public int Count => m_results.Count;
+        public int Count => m_results != null ? m_results.Count : 0;
 
         /// <summary>
         /// <c>true</c> if the generator is running, <c>false</c> otherwise.
@@ -55,6 +55,8 @@ namespace IndustryLP.DomainDefinition
         /// <c>true</c> if the generator finish the search of solutions.
         /// </summary>
         public bool IsFinished { get; private set; }
+
+        public bool IsSatisfiable { get; private set; }
 
         #endregion
 
@@ -149,7 +151,7 @@ namespace IndustryLP.DomainDefinition
 
             var atoms = model.GetSymbols(shown: true);
 
-            LoggerUtils.Log($"Atoms count: {atoms.Count}");
+            LoggerUtils.Debug($"Atoms count: {atoms.Count}");
 
             foreach (var symbol in atoms)
             {
@@ -161,7 +163,7 @@ namespace IndustryLP.DomainDefinition
                         var row = arguments[0].Number;
                         var column = arguments[1].Number;
                         var parcel = arguments[2].String;
-                        LoggerUtils.Log($"{symbol} - ({row}, {column}, {parcel})");
+                        LoggerUtils.Debug($"{symbol} - ({row}, {column}, {parcel})");
                         region.Parcels[row, column] = parcel;
                     }
                     else
@@ -188,7 +190,7 @@ namespace IndustryLP.DomainDefinition
                 }
             }
 
-            LoggerUtils.Log("Parcels", parcels.ToString().Replace("\n", "\\n"));
+            LoggerUtils.Debug("Parcels", parcels.ToString().Replace("\n", "\\n"));
 
             m_program.Add("base", new List<string>(), parcels.ToString());
         }
@@ -242,14 +244,14 @@ namespace IndustryLP.DomainDefinition
 
                 LoadStringParcels();
                 
-                if (preferences.Any()) LoadPreferences(preferences);
-                if (restrictions.Any()) LoadRestrictions(restrictions);
+                if (preferences != null && preferences.Any()) LoadPreferences(preferences);
+                if (restrictions != null && restrictions.Any()) LoadRestrictions(restrictions);
                 if (!string.IsNullOrEmpty(program.Trim())) m_program.Add("base", new List<string>(), program);
 
                 SolveProgram();
 
                 m_modelHandle = m_solver.GetEnumerator() as ModelEnumerator;
-
+                
                 m_results = new List<Region>();
 
                 IsAlive = true;
@@ -294,18 +296,20 @@ namespace IndustryLP.DomainDefinition
         {
             if (IsAlive && !IsFinished)
             {
-                //LoggerUtils.Log("Getting new model");
+                LoggerUtils.Log("Getting new model");
 
                 Model model = NewSolution();
 
                 if (model != null)
                 {
-                    LoggerUtils.Log($"Saving model: {model}");
+                    LoggerUtils.Debug($"Saving model: {model}");
                     m_results.Add(GetSolution(model));
                 }
                 else
                 {
-                    //LoggerUtils.Log("Finished!");
+                    LoggerUtils.Log("No new models!");
+                    var result = m_solver.Get();
+                    IsSatisfiable = result.IsSatisfiable.GetValueOrDefault();
                     IsFinished = true;
                 }
             }

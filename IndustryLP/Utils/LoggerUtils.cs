@@ -56,6 +56,12 @@ namespace IndustryLP.Utils
 
             return msg.ToString();
         }
+        public static  void Debug(params object[] values)
+        {
+#if DEBUG
+            Log(values);
+#endif
+        }
 
         /// <summary>
         /// Prints a debug message onto the output file

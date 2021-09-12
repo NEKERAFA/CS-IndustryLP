@@ -1,4 +1,5 @@
 ﻿using ICities;
+using System.Reflection;
 
 namespace IndustryLP
 {
@@ -12,13 +13,20 @@ namespace IndustryLP
         /// <summary>
         /// Current version of the mod
         /// </summary>
-        private static string Version => "1.0.1";
+        private static string Version
+        {
+            get
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return $"{version.Major}.{version.Minor}.{version.Build}";
+            }
+        }
 
         /// <summary>
         /// Current git branch
         /// </summary>
 #if DEBUG
-        private static string Branch => "beta1";
+        private static string Branch => "beta";
 #else
         private static string Branch => null;
 #endif

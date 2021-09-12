@@ -16,6 +16,7 @@ namespace IndustryLP.UI.Buttons
         {
             base.Awake();
             normalFgSprite = ResourceConstants.OptionBuild;
+            disabledFgSprite = ResourceConstants.OptionBuildDisabled;
             name = Name;
         }
 

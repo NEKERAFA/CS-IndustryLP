@@ -21,6 +21,7 @@ namespace IndustryLP.UI.Buttons
             base.Awake();
             name = ObjectName;
             normalFgSprite = ResourceConstants.BuildNow;
+            disabledFgSprite = ResourceConstants.BuildNowDisabled;
         }
 
         #endregion

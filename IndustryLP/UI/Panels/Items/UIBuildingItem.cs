@@ -74,7 +74,7 @@ namespace IndustryLP.UI.Panels.Items
             {
                 if (data == null)
                 {
-                    LoggerUtils.Log("Data null");
+                    LoggerUtils.Debug("Data null");
                     return;
                 }
 
@@ -89,7 +89,7 @@ namespace IndustryLP.UI.Panels.Items
                 PrefabInfo prefab = data.Prefab;
                 if (prefab == null)
                 {
-                    LoggerUtils.Log("Couldn't display item. Prefab is null");
+                    LoggerUtils.Warning("Couldn't display item. Prefab is null");
                     return;
                 }
 
@@ -162,13 +162,12 @@ namespace IndustryLP.UI.Panels.Items
             {
                 if (m_currentData != null)
                 {
-                    LoggerUtils.Log($"Select failed : {m_currentData.Name}");
+                    LoggerUtils.Error($"Select failed : {m_currentData.Name}", e);
                 }
                 else
                 {
-                    LoggerUtils.Log("Select failed");
+                    LoggerUtils.Error("Select failed", e);
                 }
-                LoggerUtils.Error(e);
             }
         }
 
@@ -183,13 +182,12 @@ namespace IndustryLP.UI.Panels.Items
             {
                 if (m_currentData != null)
                 {
-                    LoggerUtils.Log("Deselect failed : " + m_currentData.Name);
+                    LoggerUtils.Error("Deselect failed : " + m_currentData.Name, e);
                 }
                 else
                 {
-                    LoggerUtils.Log("Deselect failed");
+                    LoggerUtils.Error("Deselect failed", e);
                 }
-                LoggerUtils.Error(e);
             }
         }
 

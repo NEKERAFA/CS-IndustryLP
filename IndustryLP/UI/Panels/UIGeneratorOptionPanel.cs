@@ -16,8 +16,8 @@ namespace IndustryLP.UI.Panels
         private UILabel m_solutionLbl = null;
         private UILabel m_solutionsLbl = null;
         private UISprite m_spinner = null;
-        private UIArrowBuildPanelButton m_upButton = null;
-        private UIArrowBuildPanelButton m_downButton = null;
+        private UIArrowBuildPanelButton m_prevButton = null;
+        private UIArrowBuildPanelButton m_nextButton = null;
         private UIBuildSolutionButton m_buildSolutionButton = null;
         private bool m_isLoading = true;
 
@@ -31,9 +31,9 @@ namespace IndustryLP.UI.Panels
 
         public int Solution { get; private set; }
 
-        public MouseEventHandler OnClickNextSolution { get; set; }
+        public MouseEventHandler OnClickPrevSolution { get; set; }
 
-        public MouseEventHandler OnClickPreviousSolution { get; set; }
+        public MouseEventHandler OnClickNextSolution { get; set; }
 
         public MouseEventHandler OnClickBuildSolution { get; set; }
 
@@ -56,12 +56,12 @@ namespace IndustryLP.UI.Panels
             m_solutionsLbl = GUIUtils.CreateLabel(this, "0/0");
             m_solutionsLbl.relativePosition = new Vector2(166 - m_solutionsLbl.width, 16f - (m_solutionLbl.height / 2f));
             m_spinner = SetupSpinner();
-            m_upButton = SetupUpButton();
-            m_upButton.Disable();
-            m_upButton.eventClicked += OnUpClick;
-            m_downButton = SetupDownButton();
-            m_downButton.Disable();
-            m_downButton.eventClicked += OnDownClick;
+            m_prevButton = SetupPreviousButton();
+            m_prevButton.Disable();
+            m_prevButton.eventClicked += OnPrevButtonClick;
+            m_nextButton = SetupNextButton();
+            m_nextButton.Disable();
+            m_nextButton.eventClicked += OnNextButtonClick;
             m_buildSolutionButton = SetupBuildSolutionButton();
             m_buildSolutionButton.Disable();
             m_buildSolutionButton.eventClicked += OnBuildClick;
@@ -74,8 +74,8 @@ namespace IndustryLP.UI.Panels
             if (m_solutionLbl != null) Destroy(m_solutionLbl.gameObject);
             if (m_solutionsLbl != null) Destroy(m_solutionsLbl.gameObject);
             if (m_spinner != null) Destroy(m_spinner.gameObject);
-            if (m_upButton != null) Destroy(m_upButton.gameObject);
-            if (m_downButton != null) Destroy(m_downButton.gameObject);
+            if (m_prevButton != null) Destroy(m_prevButton.gameObject);
+            if (m_nextButton != null) Destroy(m_nextButton.gameObject);
         }
 
         public override void Update()
@@ -106,26 +106,26 @@ namespace IndustryLP.UI.Panels
             return spinner;
         }
 
-        public UIArrowBuildPanelButton SetupUpButton()
+        public UIArrowBuildPanelButton SetupPreviousButton()
         {
-            var upArrowButton = AddUIComponent<UIArrowBuildPanelButton>();
-            upArrowButton.transform.parent = transform;
-            upArrowButton.transform.localPosition = Vector2.zero;
-            upArrowButton.size = new Vector2(32, 32);
-            upArrowButton.relativePosition = new Vector2(200, 0);
-            upArrowButton.Initialize(UIArrowBuildPanelButton.Direction.Up);
-            return upArrowButton;
+            var prevArrowButton = AddUIComponent<UIArrowBuildPanelButton>();
+            prevArrowButton.transform.parent = transform;
+            prevArrowButton.transform.localPosition = Vector2.zero;
+            prevArrowButton.size = new Vector2(32, 32);
+            prevArrowButton.relativePosition = new Vector2(200, 0);
+            prevArrowButton.Initialize(UIArrowBuildPanelButton.ButtonType.Previous);
+            return prevArrowButton;
         }
 
-        public UIArrowBuildPanelButton SetupDownButton()
+        public UIArrowBuildPanelButton SetupNextButton()
         {
-            var downArrowButton = AddUIComponent<UIArrowBuildPanelButton>();
-            downArrowButton.transform.parent = transform;
-            downArrowButton.transform.localPosition = Vector2.zero;
-            downArrowButton.size = new Vector2(32, 32);
-            downArrowButton.relativePosition = new Vector2(232, 0);
-            downArrowButton.Initialize(UIArrowBuildPanelButton.Direction.Down);
-            return downArrowButton;
+            var nextArrowButton = AddUIComponent<UIArrowBuildPanelButton>();
+            nextArrowButton.transform.parent = transform;
+            nextArrowButton.transform.localPosition = Vector2.zero;
+            nextArrowButton.size = new Vector2(32, 32);
+            nextArrowButton.relativePosition = new Vector2(232, 0);
+            nextArrowButton.Initialize(UIArrowBuildPanelButton.ButtonType.Next);
+            return nextArrowButton;
         }
 
         public UIBuildSolutionButton SetupBuildSolutionButton()
@@ -142,11 +142,16 @@ namespace IndustryLP.UI.Panels
 
         #region Update state
 
-        private void UpdateLabel()
+        private void UpdateLabel(string lbl)
         {
-            m_solutionsLbl.text = $"{Solution}/{Solutions}";
+            m_solutionsLbl.text = lbl;
             var offset = m_isLoading ? 29f : 0f;
             m_solutionsLbl.relativePosition = new Vector2(195 - offset - m_solutionsLbl.width, 16f - (m_solutionLbl.height / 2f));
+        }
+
+        private void UpdateLabel()
+        {
+            UpdateLabel($"{Solution}/{Solutions}");
         }
 
         private void SetSolution(int currentSolution)
@@ -163,7 +168,7 @@ namespace IndustryLP.UI.Panels
         {
             if (Solutions == 0 && solutions > 0)
             {
-                m_upButton.Enable();
+                m_prevButton.Enable();
                 m_buildSolutionButton.Enable();
                 Solution = 1;
             }
@@ -183,40 +188,55 @@ namespace IndustryLP.UI.Panels
             UpdateLabel();
         }
 
-        private void OnUpClick(UIComponent component, UIMouseEventParameter eventParam)
+        /// <summary>
+        /// Tells to option panel that the current logic program is unsatisfiable
+        /// </summary>
+        public void SetUnsatisfiable()
         {
-            if (Solution < Solutions)
-            {
-                if (Solution == 1)
-                {
-                    m_downButton.Enable();
-                }
-
-                SetSolution(Solution + 1);
-
-                if (Solution == Solutions)
-                {
-                    m_upButton.Disable();
-                }
-
-                OnClickPreviousSolution(component, eventParam);
-            }
+            m_isLoading = false;
+            m_spinner.Hide();
+            UpdateLabel("UNSAT");
+            m_solutionLbl.textColor = ColorConstants.SelectionColor;
+            m_solutionsLbl.textColor = ColorConstants.SelectionColor;
+            m_nextButton.Disable();
+            m_prevButton.Disable();
+            m_buildSolutionButton.Disable();
         }
 
-        private void OnDownClick(UIComponent component, UIMouseEventParameter eventParam)
+        private void OnPrevButtonClick(UIComponent component, UIMouseEventParameter eventParam)
         {
             if (Solution > 1)
             {
                 if (Solution == Solutions)
                 {
-                    m_upButton.Enable();
+                    m_prevButton.Enable();
                 }
 
                 SetSolution(Solution - 1);
 
                 if (Solution == 1)
                 {
-                    m_downButton.Disable();
+                    m_nextButton.Disable();
+                }
+
+                OnClickPrevSolution(component, eventParam);
+            }
+        }
+
+        private void OnNextButtonClick(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            if (Solution < Solutions)
+            {
+                if (Solution == 1)
+                {
+                    m_nextButton.Enable();
+                }
+
+                SetSolution(Solution + 1);
+
+                if (Solution == Solutions)
+                {
+                    m_prevButton.Disable();
                 }
 
                 OnClickNextSolution(component, eventParam);

@@ -29,6 +29,8 @@ namespace IndustryLP.Actions
 
         public UIPanel DialogPanel => m_dialog;
 
+        public UIPanel GeneratorOptionPanel => m_panel;
+
         #endregion
 
         #region Action Behaviour methods
@@ -65,7 +67,6 @@ namespace IndustryLP.Actions
         {
             base.OnUpdate(mousePosition);
 
-            LoggerUtils.Log(CurrentState);
             if (CurrentState == GenerationState.GeneratingSolutions)
             {
                 if (m_panel == null)
@@ -84,7 +85,14 @@ namespace IndustryLP.Actions
                 else if (m_generator.IsFinished)
                 {
                     CurrentState = GenerationState.GeneratedSolutions;
-                    m_panel.StopLoading();
+                    if (m_generator.IsSatisfiable) 
+                    {
+                        m_panel.StopLoading();
+                    }
+                    else
+                    {
+                        m_panel.SetUnsatisfiable();
+                    }
                 }
             }
         }
@@ -147,8 +155,8 @@ namespace IndustryLP.Actions
         {
             var panel = GameObjectUtils.AddUIComponent<UIGeneratorOptionPanel>();
             panel.relativePosition = new Vector3(791, 847); 
-            panel.OnClickPreviousSolution += OnChangeSolution;
             panel.OnClickNextSolution += OnChangeSolution;
+            panel.OnClickPrevSolution += OnChangeSolution;
             panel.OnClickBuildSolution += OnBuildSolution;
             return panel;
         }
@@ -179,7 +187,7 @@ namespace IndustryLP.Actions
 
         private void OnChangeSolution(UIComponent component, UIMouseEventParameter eventParameter)
         {
-            LoggerUtils.Log($"Solution {m_panel.Solution}: ");
+            LoggerUtils.Debug($"Solution {m_panel.Solution}: ");
             var solution = m_generator.GetSolution(m_panel.Solution - 1);
 
             for (int i = 0; i < m_rows; i++)
@@ -187,7 +195,7 @@ namespace IndustryLP.Actions
                 for (int j = 0; j < m_columns; j++)
                 {
                     string buildingName = solution.Parcels[i, j];
-                    LoggerUtils.Log($"[{i}, {j}] = {buildingName}");
+                    LoggerUtils.Debug($"[{i}, {j}] = {buildingName}");
                 }
             }
         }

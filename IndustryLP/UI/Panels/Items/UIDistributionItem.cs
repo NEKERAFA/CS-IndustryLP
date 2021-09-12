@@ -57,7 +57,7 @@ namespace IndustryLP.UI.Panels.Items
             {
                 if (data == null)
                 {
-                    LoggerUtils.Log("Data null");
+                    LoggerUtils.Debug("Data null");
                 }
 
                 if (component == null || data?.Name == null)

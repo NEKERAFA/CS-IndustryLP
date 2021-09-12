@@ -118,8 +118,6 @@ namespace IndustryLP.DistributionDefinition
             var c1 = Vector3.Lerp(plot.a, plot.d, 1f/4f) - plot.a;
             var d1 = Vector3.Lerp(plot.a, plot.d, 3f/4f) - plot.a;
 
-            LoggerUtils.Log(offsetX, offsetY, columns);
-
             // Generate the cells
             parcels.Add(new ParcelWrapper
             {
@@ -183,6 +181,7 @@ namespace IndustryLP.DistributionDefinition
                     var startPos = lastBranchRoad[cell].a;
                     var endPos = branchRoad[cell].a;
                     var startDir = (endPos - startPos).normalized;
+
                     // Generate perpendicular segments
                     roads.Add(GenerateSegment(startPos, startDir, endPos, -startDir));
 
