@@ -80,12 +80,12 @@
         /// <summary>
         /// The arrow to change previous solution
         /// </summary>
-        public static string SolutionPrevious => "SolutionOptionPrev";
+        public static string SolutionPrevious => "SolutionOptionPrevious";
 
         /// <summary>
         /// The arrow to change previous solution when is disabled
         /// </summary>
-        public static string SolutionPreviousDisabled => "SolutionOptionPrevDisabled";
+        public static string SolutionPreviousDisabled => "SolutionOptionPreviousDisabled";
 
         /// <summary>
         /// The icon to build the solution
