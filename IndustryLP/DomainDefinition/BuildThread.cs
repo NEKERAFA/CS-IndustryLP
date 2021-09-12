@@ -184,7 +184,12 @@ namespace IndustryLP.DomainDefinition
             {
                 var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
 
-                if (prefab != null && prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric)
+                if (prefab != null &&
+                    (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
+                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
+                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
+                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
+                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
                 {
                     parcels.AppendLine($"str_parcel(\"{prefab.name}\").");
                 }
