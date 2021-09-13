@@ -10,6 +10,7 @@
 \usepackage{geometry}
 \usepackage{graphics}
 \usepackage{tabularx}
+\usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{svg}
 \usepackage{adjustbox}
@@ -21,6 +22,7 @@
 \usepackage{pdfpages}
 \usepackage{xspace}
 \usepackage{makecell}
+\usepackage{soul}
 \usepackage{fancyhdr}
 \usepackage[hidelinks,pdftex,
 		pdfauthor={Rafael Alcalde Azpiazu},
@@ -65,9 +67,10 @@
 	\if@twocolumn\hbox{}\newpage\fi\fi\fi}
 \makeatother
 
-\newcommand{\asp}{Answer Set Programing\xspace}
+\newcommand{\asp}{`Answer Set Programing'\xspace}
 \newcommand{\cities}{`Cities: Skylines\textcopyright'\xspace}
-\newcommand{\industrylp}{IndustryLP\xspace}
+\newcommand{\industrylp}{`IndustryLP'\xspace}
+\newcommand{\clingo}{\texttt{clingo}\xspace}
 
 % ---- Variables ----
 
@@ -75,7 +78,7 @@
 \def \title     {\industrylp: Generador de polígonos industriales para el videojuego \cities mediante Programación Lógica}
 \def \authors   {Rafael Alcalde Azpiazu}
 \def \directors {José Pedro Cabalar Fernández}
-\def \keywords  {Answer Set Programming, Programación Lógica, Representación del Conocimiento, Resolución de problemas lógicos, Generación de polígonos industriales, \cities, .NET Framework, Plataforma Steam, Mod de Videojuego}
+\def \keywords  {\asp, Programación Lógica, Representación del Conocimiento, Resolución de problemas lógicos, Generación de polígonos industriales, \cities, .NET Framework, Steam, Mod de Videojuego}
 
 % ---- Document ----
 
@@ -95,13 +98,11 @@
 	\cleardoublepage
 	
 	% ---- Dedication ----
-	\input{tex/dedication}
-	\cleardoublepage
+	%\input{tex/dedication}
+	%\cleardoublepage
 	
 	% ---- Gratitudes ----
-	\def\baselinestretch{1}\selectfont
 	\input{tex/gratitudes}
-	\def\baselinestretch{1.5}\selectfont
 	\cleardoublepage
 	
 	% ---- Sumary ----
@@ -172,16 +173,16 @@
 	\input{tex/manual}
 	\cleardoublepage
 	
-	%\chapter{Información de Lua}
-	%\label{lua}
-	%\input{tex/lua}
-	%\cleardoublepage
+	\hypertarget{asp}{\chapter{Programa lógico}}
+	\label{asp}
+	\input{tex/asp}
+	\cleardoublepage
 	
 	\clearpage
 	
 	% ------- Biliography -------
 	\bibliographystyle{IEEEtran-spanish}
 	\bibliography{bib/references}
-	\addcontentsline{toc}{chapter}{B. Bibliografía}
+	\addcontentsline{toc}{chapter}{C. Bibliografía}
 	\label{bibliography}
 \end{document}

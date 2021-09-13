@@ -1,0 +1,65 @@
+Este apéndice sirve como documentación y referencia de cada uno de los distintos ficheros con extensión \texttt{.lp} que forman en conjunto el programa lógico de IndustryLP. Debido a la naturaleza de la herramienta, estos ficheros se pueden modificar en caliente para modificar y/o restringir el espacio de búsqueda de modelos estables. Además se pueden añadir nuevos ficheros \texttt{.lp} que completen el programa lógico añadiéndolos a la carpeta detallada en la sección \ref{subsec:logic-files} del Apéndice \ref{manual}.
+
+\subsubsection{\large\texttt{item\_definition.lp}}
+
+En este fichero se definen las constantes que conformar nuestro sistema lógico.
+
+\begin{lstlisting}[basicstyle=\ttfamily, numberstyle={\color[rgb]{0.25, 0.25, 0.25}\ttfamily}, numbers=left]
+#const rows = 2.
+#const columns = 2.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Definimos los ambitos de las parcelas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Fila de la cuadricula
+row(0 .. (rows-1)).
+% Columna de la cuadricula
+column(0 .. (columns-1)).
+\end{lstlisting}
+
+\subsubsection{\large\texttt{generator.lp}}
+
+En este fichero se especifican las reglas que permiten generar cada una de las distintas soluciones a nuestro problema.
+
+\begin{lstlisting}[basicstyle=\ttfamily, numberstyle={\color[rgb]{0.25, 0.25, 0.25}\ttfamily}, numbers=left]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Se generan las parcelas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+0 { parcel(X, Y, S) : str_parcel(S) } 1 :- row(X), column(Y).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Comprobaciones
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+sell_parcel(X, Y) :- row(X), column(Y), str_parcel(S), parcel(X, Y, S).
+
+distance(S1, S2, |X1-X2|+|Y1-Y2|) :- parcel(X1, Y1, S1), parcel(X2, Y2, S2), X1 != X2, Y1 != Y2.
+
+neighbour(S1, S2) :- distance(S1, S2, 1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Restricciones
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- parcel(X, Y, S1), parcel(X, Y, S2), str_parcel(S1), str_parcel(S2), row(X), column(Y), S1 != S2.
+
+:- row(X), column(Y), not sell_parcel(X, Y).
+\end{lstlisting}
+
+\section{Reglas dinámicas}
+
+Existen varias reglas que son añadidas al programa lógico en tiempo de ejecución. A continuación se especifica cada una de estas reglas.
+
+\subsubsection{\large\texttt{str\_parcel(building\_name).}}
+
+Antes de llamar al \textit{grounder} de Clingo, se obtienen los nombres de los \textit{prefabs} que corresponden con los edificios \textit{growables} que están cargados en \cities en ese momento y que son de tipo Industrial.
+
+\subsubsection{\large\texttt{parcel(row, column, building\_name).}}
+
+Cuando en la interfaz añadidos un edificio como preferencia, esto se traduce a un hecho lógico dentro del programa que se añade antes de ejecutar el \textit{ground} del programa lógico.
+
+\subsubsection{\large\texttt{:- parcel(row, column, building\_name).}}
+
+Si se añade un edificio como restricción, este se transformará en una prohibición dentro del programa lógico. Esto hará que no se busque soluciones en donde ese edificio aparezca en esa parcela.

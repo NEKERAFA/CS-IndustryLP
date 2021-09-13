@@ -78,6 +78,7 @@ Cuando tengamos una selección hecha, se nos habilitará en el panel de opciones
 \end{figure}
 
 \subsection{Añadir preferencias / restricciones}
+\label{subsec:pref}
 
 Con la distribución de caminos generada, se nos habilitará las pestañas de \textit{Preferencias} y \textit{Restricciones}, tal y como se muestra en la Figura \ref{fig:preferences}. En ellas, podremos seleccionar un edificio de industria que viene incluido en \cities y, o indicar su posición en el caso de una preferencia, o indicar a IndustryLP que no genere ese edificio en una posición dada. \\
 
@@ -85,14 +86,14 @@ Con la distribución de caminos generada, se nos habilitará las pestañas de \t
 	\centering
 	\includegraphics[width=\textwidth]{images/preferences}
 	\caption{Varias preferencias de edificios posicionadas en la selección hecha.}
-	\label{fig:distributions-panel}
+	\label{fig:preferences}
 \end{figure}
 
 Una vez seleccionado un edificio, IndustryLP pasará a la acción de añadir preferencia/restricción, y junto a la distribución de carreteras nos saldrán puntos verdes en donde fijar la posición del edificio. Cuando estemos modificando preferencias, los edificios ya establecidos se nos mostrarán junto con el área edificable en color azul. En el caso de que estemos modificando restricciones, nos aparecerán solo los edificios indicados como restricción. \\
 
 Si por un casual queremos borrar una selección, tendremos que pulsar el botón derecho del ratón cerca de una posición dada. \\
 
-Una cosa a tener en cuenta es que, si pusieramos un mismo edificio como restricción y preferencia, el programa no generaría ninguna solución. Esto es debido a que el sistema lógico no encuentra una solución que satifaga las dos reglas a la vez.
+Una cosa a tener en cuenta es que, si pusiéramos un mismo edificio como restricción y preferencia, el programa no generaría ninguna solución. Esto es debido a que el sistema lógico no encuentra una solución que satisfaga las dos reglas a la vez.
 
 \subsection{Generación de industrias}
 
@@ -100,14 +101,14 @@ Cuando tengamos una distribución generada, y opcionalmente marcadas las prefere
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.5\textwidth]{images/dialog}
+	\includegraphics[width=0.4\textwidth]{images/dialog}
 	\caption{Opciones de la generación.}
 	\label{fig:dialog}
 \end{figure}
 
 \begin{enumerate}
     \item \textbf{Soluciones:} número de soluciones que el sistema deberá generar. 0 para generar todas las posibles.
-    \item \textbf{Edición avanzada:} Nos permitirá incorporar reglas en el formato \textit{ASP Core 2}, que es el formato con el que trabaja la herramienta Clingo.
+    \item \textbf{Edición avanzada:} Nos permitirá incorporar reglas en el formato \textit{ASP Core 2}, que es el formato con el que trabaja la herramienta \clingo.
     
     Existen algunas reglas predefinidas de distancia y vecinos con las que podemos trabajar de forma inmediata. Otro tipo de reglas las deberemos escribir en este campo o crear un archivo de programa lógico, tal y como se expone en la Sección \ref{subsec:logic-files}.
 \end{enumerate}
@@ -116,7 +117,7 @@ Si pulsamos en el botón \textbf{Generate}, el panel de opciones se nos modifica
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=\textwidth]{images/solutions}
+	\includegraphics[width=0.6\textwidth]{images/solutions}
 	\caption{Menú de selección de solución.}
 	\label{fig:solutions}
 \end{figure}
@@ -127,11 +128,22 @@ Si pulsamos en el botón \textbf{Generate}, el panel de opciones se nos modifica
     \item Construir solución.
 \end{enumerate}
 
-El resultado de la generación de la solución actual se mostrará en la selección actualmente hecha. Cuando estemos convencidos con una solución, podemos pulsar el botón de construir solución y todo se construirá dentro de \cities.
+El resultado de la generación de la solución actual se mostrará en la selección actualmente hecha. Cuando estemos convencidos con una solución, podemos pulsar el botón de construir solución y todo se construirá dentro de \cities. \\
+
+En el caso de que el problema sea insatisfactible, ya sea al indicar reglas incompatibles de la forma en la que se comenta al final de la Sección \ref{subsec:pref}, o al añadir reglas en la edición avanzada; se nos mostrará la interfaz de la misma forma que en la figura \ref{fig:unsat-solution}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.4\textwidth]{images/unsat-solution}
+	\caption{Ejemplo de programa insatisfactible.}
+	\label{fig:unsat-solution}
+\end{figure}
 
 \subsection{Edición avanzada}
 \label{subsec:logic-files}
 
 Otra opción para hacer una edición avanzada, y además de poder modificar la generación de IndustryLP con nuevas reglas es modificar los archivos con los programas lógicos que IndustryLP carga en cada generación. Si el mod ha sido instalado mediante Steam, estos archivos se localizarán en la ruta \texttt{Program Files (x86) / Steam / SteamApps / WorkShop / Content / 255710 / 2597556943 / logic\_program }. \\
 
-Cualquier archivo que se cree en esta carpeta con la extensión \texttt{.lp} será cargado dentro del proceso de Clingo, por lo que el usuario puede crear archivos con programas lógicos a voluntad sin tener que recompilar el mod, y pudiendo persistir estos programas entre generación y generación.
+Cualquier archivo que se cree en esta carpeta con la extensión \texttt{.lp} será cargado dentro del proceso de Clingo, por lo que el usuario puede crear archivos con programas lógicos a voluntad sin tener que recompilar el mod, y pudiendo persistir estos programas entre generación y generación. \\
+
+En el Apéndice \ref{asp} se explica de forma detallada el contenido de los distintos archivos creados por defecto y que sirven de documentación para la ampliación de reglas.
