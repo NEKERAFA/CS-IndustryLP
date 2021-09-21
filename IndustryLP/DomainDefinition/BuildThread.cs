@@ -1,4 +1,5 @@
 ﻿using ClingoSharp;
+using ClingoSharp.Exceptions;
 using IndustryLP.Entities;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
@@ -63,6 +64,8 @@ namespace IndustryLP.DomainDefinition
 
         public bool IsSatisfiable { get; private set; }
 
+        public bool HasErrors { get; private set; }
+
         #endregion
 
         #region Instance Methods
@@ -84,22 +87,15 @@ namespace IndustryLP.DomainDefinition
 
         private void LoadProgram()
         {
-            try
+            m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"columns={m_cols}" });
+
+            LoggerUtils.Log("Loading definition files");
+
+            var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
+
+            foreach (var file in files)
             {
-                m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"columns={m_cols}" });
-
-                LoggerUtils.Log("Loading definition files");
-
-                var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
-
-                foreach (var file in files)
-                {
-                    m_program.Load(file);
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggerUtils.Error(ex, "cannot load logic program: ");
+                m_program.Load(file);
             }
         }
 
@@ -274,7 +270,7 @@ namespace IndustryLP.DomainDefinition
                 LoadProgram();
 
                 LoadStringParcels();
-                
+
                 if (preferences != null && preferences.Any()) LoadPreferences(preferences);
                 if (restrictions != null && restrictions.Any()) LoadRestrictions(restrictions);
                 if (!string.IsNullOrEmpty(program.Trim())) m_program.Add("base", new List<string>(), program);
@@ -292,6 +288,8 @@ namespace IndustryLP.DomainDefinition
             }
             catch (Exception ex)
             {
+                IsAlive = false;
+                IsFinished = false;
                 LoggerUtils.Error(ex);
             }
         }

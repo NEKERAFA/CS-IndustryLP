@@ -70,7 +70,10 @@ namespace IndustryLP
         private Vector3? m_mouseTerrainPosition = null;
         private float m_defaultXPos;
 
-        private List<BuildingInfo> prefabs;
+        private List<BuildingInfo> m_prefabs;
+
+        private int m_solutions = 64;
+        private string m_logicProgram = ":- parcel(R, C, \"cargoyard\").";
 
 //#if DEBUG
 //        private Dictionary<ParcelWrapper, GUIUtils.UITextDebug> lblParcels = new Dictionary<ParcelWrapper, GUIUtils.UITextDebug>();
@@ -81,7 +84,7 @@ namespace IndustryLP
 
         private ToolAction m_zoningAction;
         private ToolAction m_movingZoneAction;
-        private ToolAction m_buildingAction;
+        private BuildingAction m_buildingAction;
 
         #endregion
 
@@ -227,38 +230,50 @@ namespace IndustryLP
         {
             get
             {
-                if (prefabs == null)
+                if (m_prefabs == null)
                 {
-                    prefabs = new List<BuildingInfo>();
+                    m_prefabs = new List<BuildingInfo>();
 
-#if DEBUG
-                    var buildings = new List<BuildingInfo>();
-#endif
-                    for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
-                    {
-                        var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
+                    var prefab = PrefabCollection<BuildingInfo>.FindLoaded("cargoyard");
+                    if (prefab != null) m_prefabs.Add(prefab);
 
-                        if (prefab != null &&
-                            (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
-                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
-                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
-                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
-                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
-                        {
-#if DEBUG
-                            buildings.Add(prefab);
-#else
-                            prefabs.Add(prefab);
-#endif
-                        }
-                    }
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Farming 4x4 Farm");
+                    if (prefab != null) m_prefabs.Add(prefab);
 
-#if DEBUG
-                    prefabs = buildings.GetRandom(24);
-#endif
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Forestry 4x4 Forest");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Oil 4x2 Processing03");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    //#if DEBUG
+                    //                    var buildings = new List<BuildingInfo>();
+                    //#endif
+                    //                    for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                    //                    {
+                    //                        var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
+
+                    //                        if (prefab != null &&
+                    //                            (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
+                    //                        {
+                    //#if DEBUG
+                    //                            buildings.Add(prefab);
+                    //#else
+                    //                            prefabs.Add(prefab);
+                    //#endif
+                    //                        }
+                    //                    }
+
+                    //#if DEBUG
+                    //                    prefabs = buildings.GetRandom(24);
+                    //#endif
                 }
 
-                return prefabs;
+                return m_prefabs;
             }
         }
 
@@ -704,6 +719,12 @@ namespace IndustryLP
             m_optionPanel.selectedIndex = 1;
         }
 
+        public void AcceptGeneration(int solutions, string logicProgram)
+        {
+            m_solutions = solutions;
+            m_logicProgram = logicProgram;
+        }
+
         public void BuildGeneration(Region solution)
         {
             var netPrefab = PrefabCollection<NetInfo>.FindLoaded("Basic Road");
@@ -1086,6 +1107,8 @@ namespace IndustryLP
                     break;
                 case 2:
                     m_action = m_buildingAction;
+                    m_buildingAction.MaxSolutions = m_solutions;
+                    m_buildingAction.LogicProgram = m_logicProgram;
                     break;
                 default:
                     m_action = null;
@@ -1128,8 +1151,8 @@ namespace IndustryLP
         private bool IsPointerOverUIView()
         {
             var mainView = UIView.GetAView();
-            var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
-            var generatorOptionPanel = (m_buildingAction as BuildingAction).GeneratorOptionPanel;
+            var dialogPanel = m_buildingAction.DialogPanel;
+            var generatorOptionPanel = m_buildingAction.GeneratorOptionPanel;
 
             return (mainView.ScreenPointToGUI(Input.mousePosition).y < 76f) || (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
                 (m_categoryPanel != null && m_categoryPanel.isVisible && m_categoryPanel.containsMouse) ||

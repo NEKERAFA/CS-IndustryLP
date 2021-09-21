@@ -77,5 +77,7 @@ namespace IndustryLP
         /// Cancel the current solution
         /// </summary>
         void CancelGeneration();
+
+        void AcceptGeneration(int solutions, string program);
     }
 }
