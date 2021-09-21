@@ -108,37 +108,37 @@ namespace IndustryLP.Actions
             {
                 Color buildingColor = BuildingUtils.GetColor(0, building.Building);
                 BuildingUtils.RenderBuildingGeometry(cameraInfo, ref matrixTRS, center, building.Position, building.Rotation, building.Building, buildingColor);
-#if DEBUG
-                DrawForwardDirection(building);
-#endif
+//#if DEBUG
+//                DrawForwardDirection(building);
+//#endif
             }
         }
 
-#if DEBUG
-        private void DrawForwardDirection(Parcel building)
-        {
-            var start = building.Position + Vector3.up * 10;
-            var dir = new Vector3(0, 0, 40);
-            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
-            var end = rotate * dir + building.Position + Vector3.up * 10;
-            DrawLine(start, end, new Color32(255, 0, 0, 255));
-        }
+//#if DEBUG
+//        private void DrawForwardDirection(Parcel building)
+//        {
+//            var start = building.Position + Vector3.up * 10;
+//            var dir = new Vector3(0, 0, 40);
+//            var rotate = Quaternion.AngleAxis(building.Rotation * Mathf.Rad2Deg, Vector3.down);
+//            var end = rotate * dir + building.Position + Vector3.up * 10;
+//            DrawLine(start, end, new Color32(255, 0, 0, 255));
+//        }
 
-        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
-        {
-            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
-            lr.transform.position = start;
-            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
-            lr.hideFlags = HideFlags.HideAndDontSave;
-            lr.startColor = color;
-            lr.startWidth = 2;
-            lr.SetPosition(0, start);
-            lr.endColor = color;
-            lr.endWidth = 2;
-            lr.SetPosition(1, end);
-            Object.Destroy(lr.gameObject, duration);
-        }
-#endif
+//        private void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 1f / 30f)
+//        {
+//            var lr = GameObjectUtils.AddObjectWithComponent<LineRenderer>();
+//            lr.transform.position = start;
+//            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
+//            lr.hideFlags = HideFlags.HideAndDontSave;
+//            lr.startColor = color;
+//            lr.startWidth = 2;
+//            lr.SetPosition(0, start);
+//            lr.endColor = color;
+//            lr.endWidth = 2;
+//            lr.SetPosition(1, end);
+//            Object.Destroy(lr.gameObject, duration);
+//        }
+//#endif
 
         #endregion
     }

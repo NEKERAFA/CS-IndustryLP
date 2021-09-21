@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace IndustryLP.Utils
 {
-    public class MathUtils
+    public static class MathUtils
     {
         public abstract class EntityPosition
         {
@@ -19,7 +19,7 @@ namespace IndustryLP.Utils
             {
                 if (entity != null)
                 {
-                    var distance = Vector3.Distance(position, entity.Position);
+                    var distance = Vector2.Distance(new Vector2(position.x, position.z), new Vector3(entity.Position.x, entity.Position.z));
 
                     if ((minDistance == null) || (minDistance != null && distance <= minDistance))
                     {
@@ -33,6 +33,28 @@ namespace IndustryLP.Utils
             }
 
             return selectedEntity;
+        }
+
+        public static List<T> GetRandom<T>(this List<T> list, int range = -1)
+        {
+            var chosen = new List<T>();
+            var current = new List<T>(list);
+            var rnd = new System.Random();
+
+            if (range < 0 || range > list.Count)
+            {
+                range = list.Count;
+            }
+
+            for (int items = 0; items < range; items++)
+            {
+                int index = rnd.Next(current.Count);
+                var item = current[index];
+                current.RemoveAt(index);
+                chosen.Add(item);
+            }
+
+            return chosen;
         }
     }
 }

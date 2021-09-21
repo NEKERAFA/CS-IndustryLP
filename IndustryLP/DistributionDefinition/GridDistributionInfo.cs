@@ -43,8 +43,8 @@ namespace IndustryLP.DistributionDefinition
 
         public override Tuple<int> GetGridPosition(ushort gridId)
         {
-            int row = gridId % Columns;
-            int column = Convert.ToInt32(Mathf.Floor(Convert.ToSingle(gridId) / Convert.ToSingle(Columns)));
+            int row = Convert.ToInt32(Mathf.Floor(Convert.ToSingle(gridId) / Convert.ToSingle(Columns))); 
+            int column = gridId % Columns;
 
             return new Tuple<int>(row, column);
         }

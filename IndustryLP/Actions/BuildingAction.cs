@@ -53,12 +53,21 @@ namespace IndustryLP.Actions
         public override void OnLeftController()
         {
             base.OnLeftController();
-            if (m_dialog != null) Object.DestroyImmediate(m_dialog);
-            if (m_panel != null) Object.DestroyImmediate(m_panel);
+            if (m_dialog != null)
+            {
+                Object.DestroyImmediate(m_dialog);
+                m_dialog = null;
+            }
+            if (m_panel != null)
+            {
+                Object.DestroyImmediate(m_panel);
+                m_panel = null;
+            }
             if (m_generator != null)
             {
                 m_generator.Stop();
                 Object.DestroyImmediate(m_generator);
+                m_generator = null;
             }
             CurrentState = GenerationState.None;
         }

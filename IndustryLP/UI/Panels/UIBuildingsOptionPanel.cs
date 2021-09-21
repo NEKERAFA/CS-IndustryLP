@@ -76,28 +76,18 @@ namespace IndustryLP.UI.Panels
             {
                 itemsData.Clear();
 
-                for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                foreach (var prefab in IndustryTool.instance.IndustryPrefabs)
                 {
-                    var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-
-                    if (prefab != null && 
-                        (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
-                         prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
-                         prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
-                         prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
-                         prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
+                    var data = new UIBuildingItem.ItemData
                     {
-                        var data = new UIBuildingItem.ItemData
-                        {
-                            Name = LocaleUtils.GetLocalizedTitle(prefab),
-                            Prefab = prefab,
-                            Tooltip = LocaleUtils.GetLocalizedTooltip(prefab),
-                            Panel = this
-                        };
-                        data.TooltipBox = GeneratedPanel.GetTooltipBox(TooltipHelper.GetHashCode(data.Tooltip));
+                        Name = LocaleUtils.GetLocalizedTitle(prefab),
+                        Prefab = prefab,
+                        Tooltip = LocaleUtils.GetLocalizedTooltip(prefab),
+                        Panel = this
+                    };
+                    data.TooltipBox = GeneratedPanel.GetTooltipBox(TooltipHelper.GetHashCode(data.Tooltip));
 
-                        itemsData.Add(data);
-                    }
+                    itemsData.Add(data);
                 }
 
                 DisplayAt(0);
