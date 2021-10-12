@@ -24,12 +24,12 @@ namespace IndustryLP.Actions
 
         GUIUtils.UITextDebug showSize = null;
 
-#if DEBUG
-        GUIUtils.UITextDebug debug_m_showPositionA = null;
-        GUIUtils.UITextDebug debug_m_showPositionB = null;
-        GUIUtils.UITextDebug debug_m_showPositionC = null;
-        GUIUtils.UITextDebug debug_m_showPositionD = null;
-#endif
+//#if DEBUG
+//        GUIUtils.UITextDebug debug_m_showPositionA = null;
+//        GUIUtils.UITextDebug debug_m_showPositionB = null;
+//        GUIUtils.UITextDebug debug_m_showPositionC = null;
+//        GUIUtils.UITextDebug debug_m_showPositionD = null;
+//#endif
 
         #endregion
 
@@ -113,16 +113,16 @@ namespace IndustryLP.Actions
             showSize = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
             showSize.Hide();
 
-#if DEBUG
-            debug_m_showPositionA = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            debug_m_showPositionA.Hide();
-            debug_m_showPositionB = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            debug_m_showPositionB.Hide();
-            debug_m_showPositionC = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            debug_m_showPositionC.Hide();
-            debug_m_showPositionD = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-            debug_m_showPositionD.Hide();
-#endif
+//#if DEBUG
+//            debug_m_showPositionA = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//            debug_m_showPositionA.Hide();
+//            debug_m_showPositionB = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//            debug_m_showPositionB.Hide();
+//            debug_m_showPositionC = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//            debug_m_showPositionC.Hide();
+//            debug_m_showPositionD = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//            debug_m_showPositionD.Hide();
+//#endif
         }
 
         public override void OnEnterController()
@@ -136,12 +136,12 @@ namespace IndustryLP.Actions
         public override void OnLeftController()
         {
             showSize.Hide();
-#if DEBUG
-            debug_m_showPositionA.Hide();
-            debug_m_showPositionB.Hide();
-            debug_m_showPositionC.Hide();
-            debug_m_showPositionD.Hide();
-#endif
+//#if DEBUG
+//            debug_m_showPositionA.Hide();
+//            debug_m_showPositionB.Hide();
+//            debug_m_showPositionC.Hide();
+//            debug_m_showPositionD.Hide();
+//#endif
         }
 
         public override void OnLeftMouseIsDown(Vector3 mousePosition)
@@ -252,31 +252,31 @@ namespace IndustryLP.Actions
                     var newPosition = Camera.main.WorldToScreenPoint(midPoint) / mainView.inputScale;
                     showSize.relativePosition = mainView.ScreenPointToGUI(newPosition) - new Vector2(showSize.width / 2f, showSize.height / 2f);
 
-#if DEBUG
-                    if (!debug_m_showPositionA.isVisible) debug_m_showPositionA.Show();
-                    if (!debug_m_showPositionB.isVisible) debug_m_showPositionB.Show();
-                    if (!debug_m_showPositionC.isVisible) debug_m_showPositionC.Show();
-                    if (!debug_m_showPositionD.isVisible) debug_m_showPositionD.Show();
+//#if DEBUG
+//                    if (!debug_m_showPositionA.isVisible) debug_m_showPositionA.Show();
+//                    if (!debug_m_showPositionB.isVisible) debug_m_showPositionB.Show();
+//                    if (!debug_m_showPositionC.isVisible) debug_m_showPositionC.Show();
+//                    if (!debug_m_showPositionD.isVisible) debug_m_showPositionD.Show();
 
-                    quad = Selection;
+//                    quad = Selection;
 
-                    debug_m_showPositionA.SetText(string.Format("A ({0:0.##}, {1:0.##}, {2:0.##})", quad.a.x, quad.a.y, quad.a.z));
-                    debug_m_showPositionB.SetText(string.Format("B ({0:0.##}, {1:0.##}, {2:0.##})", quad.b.x, quad.b.y, quad.b.z));
-                    debug_m_showPositionC.SetText(string.Format("C ({0:0.##}, {1:0.##}, {2:0.##})", quad.c.x, quad.c.y, quad.c.z));
-                    debug_m_showPositionD.SetText(string.Format("D ({0:0.##}, {1:0.##}, {2:0.##})", quad.d.x, quad.d.y, quad.d.z));
+//                    debug_m_showPositionA.SetText(string.Format("A ({0:0.##}, {1:0.##}, {2:0.##})", quad.a.x, quad.a.y, quad.a.z));
+//                    debug_m_showPositionB.SetText(string.Format("B ({0:0.##}, {1:0.##}, {2:0.##})", quad.b.x, quad.b.y, quad.b.z));
+//                    debug_m_showPositionC.SetText(string.Format("C ({0:0.##}, {1:0.##}, {2:0.##})", quad.c.x, quad.c.y, quad.c.z));
+//                    debug_m_showPositionD.SetText(string.Format("D ({0:0.##}, {1:0.##}, {2:0.##})", quad.d.x, quad.d.y, quad.d.z));
 
-                    var newPositionA = Camera.main.WorldToScreenPoint(quad.a) / mainView.inputScale;
-                    debug_m_showPositionA.relativePosition = mainView.ScreenPointToGUI(newPositionA) - new Vector2(debug_m_showPositionA.width / 2f, debug_m_showPositionA.height / 2f);
+//                    var newPositionA = Camera.main.WorldToScreenPoint(quad.a) / mainView.inputScale;
+//                    debug_m_showPositionA.relativePosition = mainView.ScreenPointToGUI(newPositionA) - new Vector2(debug_m_showPositionA.width / 2f, debug_m_showPositionA.height / 2f);
 
-                    var newPositionB = Camera.main.WorldToScreenPoint(quad.b) / mainView.inputScale;
-                    debug_m_showPositionB.relativePosition = mainView.ScreenPointToGUI(newPositionB) - new Vector2(debug_m_showPositionB.width / 2f, debug_m_showPositionB.height / 2f);
+//                    var newPositionB = Camera.main.WorldToScreenPoint(quad.b) / mainView.inputScale;
+//                    debug_m_showPositionB.relativePosition = mainView.ScreenPointToGUI(newPositionB) - new Vector2(debug_m_showPositionB.width / 2f, debug_m_showPositionB.height / 2f);
 
-                    var newPositionC = Camera.main.WorldToScreenPoint(quad.c) / mainView.inputScale;
-                    debug_m_showPositionC.relativePosition = mainView.ScreenPointToGUI(newPositionC) - new Vector2(debug_m_showPositionC.width / 2f, debug_m_showPositionC.height / 2f);
+//                    var newPositionC = Camera.main.WorldToScreenPoint(quad.c) / mainView.inputScale;
+//                    debug_m_showPositionC.relativePosition = mainView.ScreenPointToGUI(newPositionC) - new Vector2(debug_m_showPositionC.width / 2f, debug_m_showPositionC.height / 2f);
 
-                    var newPositionD = Camera.main.WorldToScreenPoint(quad.d) / mainView.inputScale;
-                    debug_m_showPositionD.relativePosition = mainView.ScreenPointToGUI(newPositionD) - new Vector2(debug_m_showPositionD.width / 2f, debug_m_showPositionD.height / 2f);
-#endif
+//                    var newPositionD = Camera.main.WorldToScreenPoint(quad.d) / mainView.inputScale;
+//                    debug_m_showPositionD.relativePosition = mainView.ScreenPointToGUI(newPositionD) - new Vector2(debug_m_showPositionD.width / 2f, debug_m_showPositionD.height / 2f);
+//#endif
                 }
             }
             else
@@ -295,12 +295,12 @@ namespace IndustryLP.Actions
                 RenderManager.instance.OverlayEffect.DrawQuad(cameraInfo, ColorConstants.PointerColor, quad, -1f, 1280f, false, false);
 
                 if (showSize.isVisible) showSize.Hide();
-#if DEBUG
-                if (debug_m_showPositionA.isVisible) debug_m_showPositionA.Hide();
-                if (debug_m_showPositionB.isVisible) debug_m_showPositionB.Hide();
-                if (debug_m_showPositionC.isVisible) debug_m_showPositionC.Hide();
-                if (debug_m_showPositionD.isVisible) debug_m_showPositionD.Hide();
-#endif
+//#if DEBUG
+//                if (debug_m_showPositionA.isVisible) debug_m_showPositionA.Hide();
+//                if (debug_m_showPositionB.isVisible) debug_m_showPositionB.Hide();
+//                if (debug_m_showPositionC.isVisible) debug_m_showPositionC.Hide();
+//                if (debug_m_showPositionD.isVisible) debug_m_showPositionD.Hide();
+//#endif
             }
         }
 

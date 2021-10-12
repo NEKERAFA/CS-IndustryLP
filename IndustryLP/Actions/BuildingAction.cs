@@ -1,4 +1,5 @@
-﻿using ColossalFramework.UI;
+﻿using ClingoSharp.Exceptions;
+using ColossalFramework.UI;
 using IndustryLP.DomainDefinition;
 using IndustryLP.Entities;
 using IndustryLP.UI.Panels;
@@ -31,6 +32,10 @@ namespace IndustryLP.Actions
 
         public UIPanel GeneratorOptionPanel => m_panel;
 
+        public int MaxSolutions { get; set; }
+
+        public string LogicProgram { get; set; }
+
         #endregion
 
         #region Action Behaviour methods
@@ -53,12 +58,21 @@ namespace IndustryLP.Actions
         public override void OnLeftController()
         {
             base.OnLeftController();
-            if (m_dialog != null) Object.DestroyImmediate(m_dialog);
-            if (m_panel != null) Object.DestroyImmediate(m_panel);
+            if (m_dialog != null)
+            {
+                Object.DestroyImmediate(m_dialog);
+                m_dialog = null;
+            }
+            if (m_panel != null)
+            {
+                Object.DestroyImmediate(m_panel);
+                m_panel = null;
+            }
             if (m_generator != null)
             {
                 m_generator.Stop();
                 Object.DestroyImmediate(m_generator);
+                m_generator = null;
             }
             CurrentState = GenerationState.None;
         }
@@ -77,21 +91,33 @@ namespace IndustryLP.Actions
                 {
                     m_panel.SetSolutions(m_generator.Count);
                 }
-                
+
                 if (m_generator == null)
                 {
                     m_generator = SetupBuildThread();
                 }
-                else if (m_generator.IsFinished)
+                else
                 {
-                    CurrentState = GenerationState.GeneratedSolutions;
-                    if (m_generator.IsSatisfiable) 
+                    if (m_generator.HasErrors)
                     {
-                        m_panel.StopLoading();
+                        CurrentState = GenerationState.None;
+                        Object.DestroyImmediate(m_panel);
+                        m_generator.Stop();
+                        Object.DestroyImmediate(m_generator);
+                        m_dialog.Show();
                     }
-                    else
+
+                    if (m_generator.IsFinished)
                     {
-                        m_panel.SetUnsatisfiable();
+                        CurrentState = GenerationState.GeneratedSolutions;
+                        if (m_generator.IsSatisfiable)
+                        {
+                            m_panel.StopLoading();
+                        }
+                        else
+                        {
+                            m_panel.SetUnsatisfiable();
+                        }
                     }
                 }
             }
@@ -146,6 +172,8 @@ namespace IndustryLP.Actions
             var dialog = GameObjectUtils.AddUIComponent<UIGenerationDialog>();
             var screen = UIView.GetAView().GetScreenResolution();
             dialog.relativePosition = new Vector2((screen.x / 2f) - 150f, (screen.y / 2f) - 150f);
+            dialog.Solutions = MaxSolutions;
+            dialog.AdvancedEdition = LogicProgram;
             dialog.OnCloseDialog += OnCloseDialog;
             dialog.OnClickAcceptButton += OnAcceptDialog;
             return dialog;
@@ -179,6 +207,7 @@ namespace IndustryLP.Actions
 
         private void OnAcceptDialog(UIComponent component, UIMouseEventParameter eventParameter)
         {
+            m_mainTool.AcceptGeneration(m_dialog.Solutions, m_dialog.AdvancedEdition);
             CurrentState = GenerationState.GeneratingSolutions;
             m_dialog.Hide();
         }

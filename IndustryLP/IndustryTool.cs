@@ -70,16 +70,21 @@ namespace IndustryLP
         private Vector3? m_mouseTerrainPosition = null;
         private float m_defaultXPos;
 
-#if DEBUG
-        private Dictionary<ParcelWrapper, GUIUtils.UITextDebug> lblParcels = new Dictionary<ParcelWrapper, GUIUtils.UITextDebug>();
-#endif
+        private List<BuildingInfo> m_prefabs;
+
+        private int m_solutions = 64;
+        private string m_logicProgram = ":- parcel(R, C, \"cargoyard\").";
+
+//#if DEBUG
+//        private Dictionary<ParcelWrapper, GUIUtils.UITextDebug> lblParcels = new Dictionary<ParcelWrapper, GUIUtils.UITextDebug>();
+//#endif
 
 
         #region Actions
 
         private ToolAction m_zoningAction;
         private ToolAction m_movingZoneAction;
-        private ToolAction m_buildingAction;
+        private BuildingAction m_buildingAction;
 
         #endregion
 
@@ -221,9 +226,60 @@ namespace IndustryLP
 
         public List<Parcel> Restrictions { get; set; } = new List<Parcel>();
 
-        #endregion
+        public List<BuildingInfo> IndustryPrefabs
+        {
+            get
+            {
+                if (m_prefabs == null)
+                {
+                    m_prefabs = new List<BuildingInfo>();
 
-        #region Unity Behaviour methods
+                    var prefab = PrefabCollection<BuildingInfo>.FindLoaded("cargoyard");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Farming 4x4 Farm");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Forestry 4x4 Forest");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    prefab = PrefabCollection<BuildingInfo>.FindLoaded("Oil 4x2 Processing03");
+                    if (prefab != null) m_prefabs.Add(prefab);
+
+                    //#if DEBUG
+                    //                    var buildings = new List<BuildingInfo>();
+                    //#endif
+                    //                    for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                    //                    {
+                    //                        var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
+
+                    //                        if (prefab != null &&
+                    //                            (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
+                    //                             prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
+                    //                        {
+                    //#if DEBUG
+                    //                            buildings.Add(prefab);
+                    //#else
+                    //                            prefabs.Add(prefab);
+                    //#endif
+                    //                        }
+                    //                    }
+
+                    //#if DEBUG
+                    //                    prefabs = buildings.GetRandom(24);
+                    //#endif
+                }
+
+                return m_prefabs;
+            }
+        }
+
+#endregion
+
+#region Unity Behaviour methods
 
         /// <summary>
         /// Invoked when the tool is created
@@ -262,24 +318,28 @@ namespace IndustryLP
                 m_optionPanel.Show();
             }
 
-            if (m_optionPanel != null)
+            if (m_action != null)
             {
-                m_action = m_zoningAction;
-                m_action.OnEnterController();
+                m_action.OnLeftController();
+                m_action = null;
             }
+            
+            m_action = m_zoningAction;
+            m_action.OnEnterController();
 
-#if DEBUG
-            if (lblParcels.Any())
-            {
-                foreach (var lbl in lblParcels.Values)
-                {
-                    lbl.Disable();
-                    DestroyImmediate(lbl);
-                }
+            CancelZoning();
+//#if DEBUG
+//            if (lblParcels.Any())
+//            {
+//                foreach (var lbl in lblParcels.Values)
+//                {
+//                    lbl.Disable();
+//                    DestroyImmediate(lbl);
+//                }
 
-                lblParcels.Clear();
-            }
-#endif
+//                lblParcels.Clear();
+//            }
+//#endif
         }
 
         /// <summary>
@@ -303,6 +363,20 @@ namespace IndustryLP
 
             Preferences.Clear();
             Restrictions.Clear();
+
+
+//#if DEBUG
+//            if (lblParcels.Any())
+//            {
+//                foreach (var lbl in lblParcels.Values)
+//                {
+//                    lbl.Disable();
+//                    DestroyImmediate(lbl);
+//                }
+
+//                lblParcels.Clear();
+//            }
+//#endif
         }
 
         /// <summary>
@@ -421,23 +495,23 @@ namespace IndustryLP
 
                 foreach (var restriction in Restrictions)
                 {
-                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, ColorConstants.PreferenceColor);
+                    BuildingUtils.RenderBuildingOverlay(cameraInfo, ref matrixTRS, midPoint, restriction.Position, restriction.Rotation, restriction.Building, ColorConstants.RestrictionColor);
                 }
             }
 
-#if DEBUG
-            if (lblParcels.Any())
-            {
-                var mainView = UIView.GetAView();
+//#if DEBUG
+//            if (lblParcels.Any())
+//            {
+//                var mainView = UIView.GetAView();
 
-                foreach (var lbl in lblParcels)
-                {
-                    if (!lbl.Value.isVisible) lbl.Value.Show();
-                    var pos = Camera.main.WorldToScreenPoint(lbl.Key.Position) / mainView.inputScale;
-                    lbl.Value.relativePosition = mainView.ScreenPointToGUI(pos) - new Vector2(lbl.Value.width / 2f, lbl.Value.height / 2f);
-                }
-            }
-#endif
+//                foreach (var lbl in lblParcels)
+//                {
+//                    if (!lbl.Value.isVisible) lbl.Value.Show();
+//                    var pos = Camera.main.WorldToScreenPoint(lbl.Key.Position) / mainView.inputScale;
+//                    lbl.Value.relativePosition = mainView.ScreenPointToGUI(pos) - new Vector2(lbl.Value.width / 2f, lbl.Value.height / 2f);
+//                }
+//            }
+//#endif
         }
 
         /// <summary>
@@ -451,9 +525,9 @@ namespace IndustryLP
                 m_action?.OnSimulationStep(m_mouseTerrainPosition.Value);
         }
 
-        #endregion
+#endregion
 
-        #region Public methods
+#region Public methods
 
         /// <inheritdoc/>
         public void CancelZoning()
@@ -462,21 +536,24 @@ namespace IndustryLP
             {
                 Distribution = null;
 
-#if DEBUG
-                foreach (var lbl in lblParcels.Values)
-                {
-                    DestroyImmediate(lbl);
-                }
+//#if DEBUG
+//                foreach (var lbl in lblParcels.Values)
+//                {
+//                    DestroyImmediate(lbl);
+//                }
 
-                lblParcels.Clear();
-#endif
+//                lblParcels.Clear();
+//#endif
             }
 
+            m_optionPanel.selectedIndex = 0;
             m_optionPanel.DisableTab(1);
             m_optionPanel.DisableTab(2);
+            m_categoryPanel.selectedIndex = 0;
             m_categoryPanel.DisableTab(0);
             m_categoryPanel.DisableTab(1);
             m_categoryPanel.DisableTab(2);
+            m_categoryPanel.selectedIndex = 0;
             m_scrollablePanel.Disable();
             Preferences.Clear();
             Restrictions.Clear();
@@ -502,22 +579,22 @@ namespace IndustryLP
                     m_categoryPanel.EnableTab(1);
                     m_categoryPanel.EnableTab(2);
 
-#if DEBUG
-                    foreach (var lbl in lblParcels.Values)
-                    {
-                        DestroyImmediate(lbl);
-                    }
+//#if DEBUG
+//                    foreach (var lbl in lblParcels.Values)
+//                    {
+//                        DestroyImmediate(lbl);
+//                    }
 
-                    lblParcels.Clear();
+//                    lblParcels.Clear();
 
-                    foreach (var parcel in Distribution.Parcels)
-                    {
-                        var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-                        lbl.Hide();
-                        lbl.SetText(Convert.ToString((int)parcel.GridId));
-                        lblParcels[parcel] = lbl;
-                    }
-#endif
+//                    foreach (var parcel in Distribution.Parcels)
+//                    {
+//                        var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//                        lbl.Hide();
+//                        lbl.SetText(Convert.ToString((int)parcel.GridId));
+//                        lblParcels[parcel] = lbl;
+//                    }
+//#endif
                  }
             }
             else
@@ -548,28 +625,28 @@ namespace IndustryLP
         {
             if (Selection.HasValue && SelectionAngle.HasValue)
             {
-#if DEBUG
-                if (lblParcels.Any())
-                {
-                    foreach (var lbl in lblParcels.Values)
-                    {
-                        lbl.Hide();
-                        DestroyImmediate(lbl.gameObject);
-                    }
-                }
-#endif
+//#if DEBUG
+//                if (lblParcels.Any())
+//                {
+//                    foreach (var lbl in lblParcels.Values)
+//                    {
+//                        lbl.Hide();
+//                        DestroyImmediate(lbl.gameObject);
+//                    }
+//                }
+//#endif
 
                 Distribution = gridDistribution.Generate(Selection.Value);
 
-#if DEBUG
-                foreach (var parcel in Distribution.Parcels)
-                {
-                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
-                    lbl.Hide();
-                    lbl.SetText(Convert.ToString((int)parcel.GridId));
-                    lblParcels[parcel] = lbl;
-                }
-#endif
+//#if DEBUG
+//                foreach (var parcel in Distribution.Parcels)
+//                {
+//                    var lbl = GameObjectUtils.AddUIComponent<GUIUtils.UITextDebug>();
+//                    lbl.Hide();
+//                    lbl.SetText(Convert.ToString((int)parcel.GridId));
+//                    lblParcels[parcel] = lbl;
+//                }
+//#endif
 
                 m_optionPanel.EnableTab(2);
             }
@@ -629,11 +706,23 @@ namespace IndustryLP
             {
                 LoggerUtils.Debug("Removed", Preferences.Remove(cell));
             }
+
+            cell = Utils.MathUtils.FindNeighbour(Restrictions, mousePosition, 20);
+            if (cell != null)
+            {
+                LoggerUtils.Debug("Removed", Restrictions.Remove(cell));
+            }
         }
 
         public void CancelGeneration()
         {
             m_optionPanel.selectedIndex = 1;
+        }
+
+        public void AcceptGeneration(int solutions, string logicProgram)
+        {
+            m_solutions = solutions;
+            m_logicProgram = logicProgram;
         }
 
         public void BuildGeneration(Region solution)
@@ -704,9 +793,9 @@ namespace IndustryLP
             
         }
 
-        #endregion
+#endregion
 
-        #region Private methods
+#region Private methods
 
         /// <summary>
         /// Creates the main toolbar button
@@ -1018,6 +1107,8 @@ namespace IndustryLP
                     break;
                 case 2:
                     m_action = m_buildingAction;
+                    m_buildingAction.MaxSolutions = m_solutions;
+                    m_buildingAction.LogicProgram = m_logicProgram;
                     break;
                 default:
                     m_action = null;
@@ -1060,8 +1151,8 @@ namespace IndustryLP
         private bool IsPointerOverUIView()
         {
             var mainView = UIView.GetAView();
-            var dialogPanel = (m_buildingAction as BuildingAction).DialogPanel;
-            var generatorOptionPanel = (m_buildingAction as BuildingAction).GeneratorOptionPanel;
+            var dialogPanel = m_buildingAction.DialogPanel;
+            var generatorOptionPanel = m_buildingAction.GeneratorOptionPanel;
 
             return (mainView.ScreenPointToGUI(Input.mousePosition).y < 76f) || (mainView.ScreenPointToGUI(Input.mousePosition).y > 948f) ||
                 (m_categoryPanel != null && m_categoryPanel.isVisible && m_categoryPanel.containsMouse) ||
@@ -1070,6 +1161,6 @@ namespace IndustryLP
                 (generatorOptionPanel != null && generatorOptionPanel.isVisible && generatorOptionPanel.containsMouse);
         }
 
-    #endregion
+#endregion
     }
 }

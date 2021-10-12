@@ -17,6 +17,7 @@ namespace IndustryLP
         DistributionInfo Distribution { get; }
         List<Parcel> Preferences { get; }
         List<Parcel> Restrictions { get; }
+        List<BuildingInfo> IndustryPrefabs { get; }
 
         /// <summary>
         /// Intersects a ray with the terrain
@@ -76,5 +77,7 @@ namespace IndustryLP
         /// Cancel the current solution
         /// </summary>
         void CancelGeneration();
+
+        void AcceptGeneration(int solutions, string program);
     }
 }

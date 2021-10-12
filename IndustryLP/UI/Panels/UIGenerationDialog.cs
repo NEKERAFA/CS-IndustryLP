@@ -16,6 +16,8 @@ namespace IndustryLP.UI.Panels
         private UILabel m_advancedLbl;
         private UITextField m_advancedInput;
         private UIButton m_generateBtn;
+        private int m_solutions;
+        private string m_logicProgram;
 
         #endregion
 
@@ -37,11 +39,21 @@ namespace IndustryLP.UI.Panels
         {
             get
             {
-                return Convert.ToInt32(m_solutionsInput.text);
+                if (m_solutionsInput != null)
+                {
+                    m_solutions = Convert.ToInt32(m_solutionsInput.text);
+                }
+
+                return m_solutions;
             }
-            private set
+            set
             {
-                m_solutionsInput.text = value.ToString();
+                m_solutions = value;
+
+                if (m_solutionsInput != null)
+                {
+                    m_solutionsInput.text = m_solutions.ToString();
+                }
             }
         }
 
@@ -49,11 +61,21 @@ namespace IndustryLP.UI.Panels
         {
             get
             {
-                return m_advancedInput.text;
+                if (m_advancedInput != null)
+                {
+                    m_logicProgram = m_advancedInput.text;
+                }
+                return m_logicProgram;
             }
-            private set
+            set
             {
-                m_advancedInput.text = value;
+
+                m_logicProgram = value;
+                
+                if (m_advancedInput != null)
+                {
+                    m_advancedInput.text = m_logicProgram;
+                }
             }
         }
 
@@ -118,7 +140,7 @@ namespace IndustryLP.UI.Panels
             m_solutionsLbl.relativePosition = new Vector2(10, 40);
 
             // Input Solution
-            m_solutionsInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.UnsignedInteger, "64");
+            m_solutionsInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.UnsignedInteger, m_solutions.ToString());
             m_solutionsInput.relativePosition = new Vector2(290 - m_solutionsInput.width, 40);
 
             // Advanced Edition
@@ -126,7 +148,7 @@ namespace IndustryLP.UI.Panels
             m_advancedLbl.relativePosition = new Vector2(10, 63);
 
             // Input Advanced Edition
-            m_advancedInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.String, ":- parcel(X, Y, \"Cargoyard\").");
+            m_advancedInput = GUIUtils.CreateTextField(this, GUIUtils.TextFieldType.String, m_logicProgram);
             m_advancedInput.multiline = true;
             m_advancedInput.relativePosition = new Vector2(10, 84);
             m_advancedInput.size = new Vector2(280, 176);

@@ -1,9 +1,11 @@
 ﻿using ClingoSharp;
+using ClingoSharp.Exceptions;
 using IndustryLP.Entities;
 using IndustryLP.Utils;
 using IndustryLP.Utils.Constants;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,6 +29,10 @@ namespace IndustryLP.DomainDefinition
         private SolveHandle m_solver;
         private ModelEnumerator m_modelHandle;
         private List<Region> m_results;
+        private Stopwatch loadingProgramTimer;
+        private Stopwatch solveProgramTimer;
+        private Stopwatch retrieveModelTimer;
+        private Stopwatch timeBetweenModelsTimer;
 
         #endregion
 
@@ -58,6 +64,8 @@ namespace IndustryLP.DomainDefinition
 
         public bool IsSatisfiable { get; private set; }
 
+        public bool HasErrors { get; private set; }
+
         #endregion
 
         #region Instance Methods
@@ -79,22 +87,15 @@ namespace IndustryLP.DomainDefinition
 
         private void LoadProgram()
         {
-            try
+            m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"columns={m_cols}" });
+
+            LoggerUtils.Log("Loading definition files");
+
+            var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
+
+            foreach (var file in files)
             {
-                m_program = new Control(args: new List<string>() { m_maxSolutions.ToString(), "--const", $"rows={m_rows}", "--const", $"columns={m_cols}" });
-
-                LoggerUtils.Log("Loading definition files");
-
-                var files = Directory.GetFiles(ClingoConstants.LogicProgramPath, "*.lp");
-
-                foreach (var file in files)
-                {
-                    m_program.Load(file);
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggerUtils.Error(ex, "cannot load logic program: ");
+                m_program.Load(file);
             }
         }
 
@@ -147,6 +148,8 @@ namespace IndustryLP.DomainDefinition
                 Columns = m_program.GetConst("columns").Number,
             };
 
+            LoggerUtils.Debug($"Rows: {region.Rows}, Columns: {region.Columns}");
+
             region.Parcels = new string[region.Rows, region.Columns];
 
             var atoms = model.GetSymbols(shown: true);
@@ -178,26 +181,34 @@ namespace IndustryLP.DomainDefinition
 
         private void LoadStringParcels()
         {
-            var parcels = new StringBuilder();
+            var parcelsAtoms = new StringBuilder();
 
-            for (var i = 0u; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+            foreach (var prefab in IndustryTool.instance.IndustryPrefabs)
             {
-                var prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-
-                if (prefab != null &&
-                    (prefab.m_class.m_subService == ItemClass.SubService.IndustrialGeneric ||
-                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialFarming ||
-                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialForestry ||
-                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialOil ||
-                     prefab.m_class.m_subService == ItemClass.SubService.IndustrialOre))
+                parcelsAtoms.AppendLine($"str_parcel(\"{prefab.name}\").");
+                switch (prefab.m_class.m_subService)
                 {
-                    parcels.AppendLine($"str_parcel(\"{prefab.name}\").");
+                    case ItemClass.SubService.IndustrialGeneric:
+                        parcelsAtoms.AppendLine($"generic(\"{prefab.name}\").");
+                        break;
+                    case ItemClass.SubService.IndustrialFarming:
+                        parcelsAtoms.AppendLine($"farming(\"{prefab.name}\").");
+                        break;
+                    case ItemClass.SubService.IndustrialForestry:
+                        parcelsAtoms.AppendLine($"forestry(\"{prefab.name}\").");
+                        break;
+                    case ItemClass.SubService.IndustrialOil:
+                        parcelsAtoms.AppendLine($"oil(\"{prefab.name}\").");
+                        break;
+                    case ItemClass.SubService.IndustrialOre:
+                        parcelsAtoms.AppendLine($"ore(\"{prefab.name}\").");
+                        break;
                 }
             }
 
-            LoggerUtils.Debug("Parcels", parcels.ToString().Replace("\n", "\\n"));
+            LoggerUtils.Debug("Parcels", parcelsAtoms.ToString());
 
-            m_program.Add("base", new List<string>(), parcels.ToString());
+            m_program.Add("base", new List<string>(), parcelsAtoms.ToString());
         }
 
         private void LoadPreferences(List<BuildingAtom> preferences)
@@ -208,6 +219,8 @@ namespace IndustryLP.DomainDefinition
             {
                 strPreferences.AppendLine($"parcel({preference.Row}, {preference.Column}, \"{preference.Name}\").");
             }
+
+            LoggerUtils.Debug("Preferences", strPreferences.ToString());
 
             m_program.Add("base", new List<string>(), strPreferences.ToString());
         }
@@ -220,6 +233,8 @@ namespace IndustryLP.DomainDefinition
             {
                 strRestrictions.AppendLine($":- parcel({restriction.Row}, {restriction.Column}, \"{restriction.Name}\").");
             }
+
+            LoggerUtils.Debug("Restrictions", strRestrictions.ToString());
 
             m_program.Add("base", new List<string>(), strRestrictions.ToString());
         }
@@ -245,18 +260,27 @@ namespace IndustryLP.DomainDefinition
                 m_rows = rows;
                 m_cols = cols;
 
+#if DEBUG
+                loadingProgramTimer = new Stopwatch();
+                solveProgramTimer = new Stopwatch();
+
+                loadingProgramTimer.Start();
+#endif
+
                 LoadProgram();
 
                 LoadStringParcels();
-                
+
                 if (preferences != null && preferences.Any()) LoadPreferences(preferences);
                 if (restrictions != null && restrictions.Any()) LoadRestrictions(restrictions);
                 if (!string.IsNullOrEmpty(program.Trim())) m_program.Add("base", new List<string>(), program);
 
-                SolveProgram();
+#if DEBUG
+                loadingProgramTimer.Stop();
 
-                m_modelHandle = m_solver.GetEnumerator() as ModelEnumerator;
-                
+                LoggerUtils.Log("Loading program time", loadingProgramTimer.Elapsed);
+#endif
+
                 m_results = new List<Region>();
 
                 IsAlive = true;
@@ -264,6 +288,8 @@ namespace IndustryLP.DomainDefinition
             }
             catch (Exception ex)
             {
+                IsAlive = false;
+                IsFinished = false;
                 LoggerUtils.Error(ex);
             }
         }
@@ -286,11 +312,11 @@ namespace IndustryLP.DomainDefinition
             IsAlive = false;
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
-        #region Unity Behaviour
+#region Unity Behaviour
 
         public void Awake()
         {
@@ -299,31 +325,79 @@ namespace IndustryLP.DomainDefinition
 
         public void Update()
         {
-            if (IsAlive && !IsFinished)
+            try
             {
-                LoggerUtils.Log("Getting new model");
-
-                Model model = NewSolution();
-
-                if (model != null)
+                if (m_solver == null)
                 {
-                    LoggerUtils.Debug($"Saving model: {model}");
-                    m_results.Add(GetSolution(model));
+#if DEBUG
+                    solveProgramTimer.Start();
+#endif
+                    SolveProgram();
+#if DEBUG
+                    solveProgramTimer.Stop();
+                    LoggerUtils.Log("Solver time", solveProgramTimer.Elapsed);
+#endif
+                    m_modelHandle = m_solver.GetEnumerator() as ModelEnumerator;
+                    return;
                 }
-                else
+
+                if (IsAlive && !IsFinished)
                 {
-                    LoggerUtils.Log("No new models!");
-                    var result = m_solver.Get();
-                    IsSatisfiable = result.IsSatisfiable.GetValueOrDefault();
-                    IsFinished = true;
+                    LoggerUtils.Log("Getting new model");
+
+#if DEBUG
+                    if (retrieveModelTimer == null)
+                    {
+                        retrieveModelTimer = new Stopwatch();
+                        retrieveModelTimer.Start();
+                    }
+                    else if (timeBetweenModelsTimer == null)
+                    {
+                        timeBetweenModelsTimer = new Stopwatch();
+                        timeBetweenModelsTimer.Start();
+                    }
+#endif
+
+                    Model model = NewSolution();
+
+#if DEBUG
+                    if (retrieveModelTimer.IsRunning)
+                    {
+                        retrieveModelTimer.Stop();
+                        LoggerUtils.Log("Get new model time", retrieveModelTimer.Elapsed);
+                    }
+
+                    if (timeBetweenModelsTimer != null && timeBetweenModelsTimer.IsRunning)
+                    {
+                        timeBetweenModelsTimer.Stop();
+                        LoggerUtils.Log("Get another model time", timeBetweenModelsTimer.Elapsed);
+                    }
+#endif
+
+                    if (model != null)
+                    {
+                        LoggerUtils.Debug($"Saving model: {model}");
+                        m_results.Add(GetSolution(model));
+                    }
+                    else
+                    {
+                        LoggerUtils.Log("No new models!");
+                        var result = m_solver.Get();
+                        IsSatisfiable = result.IsSatisfiable.GetValueOrDefault();
+                        IsFinished = true;
+                    }
+                }
+                else if (!IsAlive)
+                {
+                    m_program.Dispose();
                 }
             }
-            else if (!IsAlive)
+            catch (Exception e)
             {
-                m_program.Dispose();
+                LoggerUtils.Error("An error was ocurred", e);
             }
         }
 
-        #endregion
+#endregion
     }
 }

@@ -71,6 +71,11 @@ namespace IndustryLP.Utils
             UnityEngine.Debug.Log($"{GetHeader()}: {GetParamsAsString(values)}");
         }
 
+        public static void Log(string title, TimeSpan time, params object[] values)
+        {
+            UnityEngine.Debug.Log($"{GetHeader()}: {title}: {time.TotalSeconds}, {GetParamsAsString(values)}");
+        }
+
         /// <summary>
         /// Prints a warning message onto the output file
         /// </summary>
