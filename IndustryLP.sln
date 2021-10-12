@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configurat
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\IndustryLP.CI.yml = .github\workflows\IndustryLP.CI.yml
 		install.ps1 = install.ps1
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
